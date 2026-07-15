@@ -1,0 +1,11 @@
+# Files DVC should never hash or track.
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# executed-notebook copies and chart artefacts: reproducible, large, worthless to version
+output/executed_notebooks/
+output/notebook_artifacts/
+*_preview.csv
+*.html
