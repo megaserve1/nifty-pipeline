@@ -116,7 +116,11 @@ def enqueue_all(dataset_id: str, version: str, models: list) -> dict:
         params.update({
             "Args/model_type": mtype,
             "Args/dataset_id": dataset_id,
-            "Args/dataset_version": version,
+            # STRIP THE LEADING 'v'. the task NAME above is "train_{m} v{stripped}" = "train_ v3".
+            # select_champion rebuilds that name as f"train_{m} v{dataset_version}" -- so if we
+            # shipped "v3" here it would look for "train_ vv3" (double v), find nothing, and die
+            # with a false deadlock after 10 min. same value in both places -> the names match.
+            "Args/dataset_version": str(version).lstrip("v"),
         })
         run.set_parameters(params)
         Task.enqueue(run, queue_name=C.TRAIN_QUEUE)
@@ -147,7 +151,9 @@ def enqueue_champion(dataset_id: str, version: str, models: list):
     run = Task.clone(source_task=base, name=f"select_champion v{str(version).lstrip(chr(118))}")
     run.set_parameters({
         "Args/dataset_id": dataset_id,
-        "Args/dataset_version": version,
+        # stripped, same as enqueue_all -- select_champion rebuilds the trainer task names as
+        # f"train_{m} v{dataset_version}", so this MUST be "3" not "v3" or it looks for "vv3".
+        "Args/dataset_version": str(version).lstrip("v"),
         # WHO to wait for, by name. a bare count made a subset publish (--models xgboost)
         # unable to crown: the champion polled ALL model types and the never-created ones
         # read as 'still running' for ever.

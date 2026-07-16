@@ -219,6 +219,12 @@ def main():
         expected = list(C.MODEL_TYPES)[:int(raw)] or list(C.MODEL_TYPES)
     else:
         expected = [m.strip() for m in raw.split(",") if m.strip()]
+    if not expected:                     # empty/whitespace -> wait for all, never "found nothing"
+        expected = list(C.MODEL_TYPES)
+    # normalise the version the SAME way enqueue_all named the tasks ("train_{m} v{stripped}"),
+    # so clearml_probe's f"train_{m} v{version}" matches. belt-and-suspenders on top of the
+    # enqueue-side strip -- an old clone that still ships "v3" cannot resurrect the vv3 bug.
+    version = str(version).lstrip("v")
     print(f"[1/4] waiting for {len(expected)} model(s) trained on v{version}: {expected}")
     print(f"      (this task was queued alongside them, so it must wait -- otherwise it would")
     print(f"       start on the first free agent and find nothing finished)")

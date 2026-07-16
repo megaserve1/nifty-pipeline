@@ -246,34 +246,40 @@ def test_too_few_rows_raises_instead_of_quietly_guessing_1min():
 # =============================================================================
 # BUG 4 -- the max_depth default. THE CRIPPLED FOREST.
 # =============================================================================
-def test_the_max_depth_DEFAULT_is_zero_and_it_lives_in_the_YAML():
-    """THE BUG, AND WHY THE OLD TEST MISSED IT.
+def test_the_forest_gets_a_DEEP_tree_and_the_booster_a_SHALLOW_one():
+    """THE BUG THIS GUARDS, AND WHY THE OLD TEST MISSED IT.
 
-    there was already a test called
-        test_max_depth_zero_means_fully_grown_for_the_forest_and_six_for_the_boosters
-    whose docstring said, in as many words, "the fix is one character: the argparse DEFAULT goes
-    from 6 to 0". IT PASSED WITH THE BUG LIVE. it asserted build_model({"max_depth": 0}) gives
-    the forest max_depth=None -- which was always true. it never asserted the DEFAULT that
-    actually reaches build_model in production.
+    the original bug: ONE argparse default (6) was shared by all three models, so RandomForest
+    was silently built at depth 6 -- a BOOSTING depth. a forest wants DEEP trees (averaging
+    cancels the noise); a booster wants SHALLOW ones (they correct each other). the crippling was
+    that the forest got the booster's number.
 
-    a test that makes a bug look covered is worse than no test. so this one reads the number
-    that is actually used -- which now lives in configs/hyperparams.yaml, not in code.
+    an earlier test asserted RF max_depth default == 0 (fully grown). the defaults now come from
+    the proposed-hyperparameter PDF (1-min column): RF is a deep 22, xgboost a shallow 4. Both
+    still satisfy the real invariant -- the forest is DEEP, the booster is SHALLOW, and they are
+    NOT the same number. This test pins that invariant, not one specific value, so re-tuning the
+    numbers cannot resurrect the crippled-forest bug.
     """
     from trainer import train as T
     from trainer import hyperparams
 
-    assert hyperparams.defaults("random_forest")["max_depth"] == 0, (
-        "the FOREST's max_depth default is not 0.\n"
-        "  0 = no limit = fully grown, which is what a forest wants. it used to be 6 -- a\n"
-        "  BOOSTING depth -- shared with the two boosters by ONE argparse default, which\n"
-        "  silently built a crippled depth-6 forest.")
-    assert hyperparams.defaults("xgboost")["max_depth"] == 6, "6 is right FOR A BOOSTER"
+    rf_depth = hyperparams.defaults("random_forest")["max_depth"]
+    xgb_depth = hyperparams.defaults("xgboost")["max_depth"]
+
+    # a forest must be DEEP (0 = unlimited, or a large cap). NEVER a boosting depth of ~6.
+    assert rf_depth == 0 or rf_depth >= 12, (
+        f"the FOREST's max_depth default is {rf_depth} -- too shallow. a forest wants deep trees "
+        f"(0=unlimited, or >=12). ~6 is a BOOSTING depth and cripples it.")
+    # a booster must be SHALLOW (deep boosters memorise noise).
+    assert 1 <= xgb_depth <= 8, f"xgboost depth {xgb_depth} is not a shallow boosting depth"
+    # and the crux of the original bug: they must NOT be the same number.
+    assert rf_depth != xgb_depth, "forest and booster must not share one depth (the original bug)"
 
     rf = T.build_model("random_forest", 7, hyperparams.defaults("random_forest"))
-    assert rf.max_depth is None, "0 must mean FULLY GROWN for the forest"
+    assert rf.max_depth is None or rf.max_depth >= 12, "the forest must build a DEEP tree"
 
     xgb = T.build_model("xgboost", 7, hyperparams.defaults("xgboost"))
-    assert xgb.max_depth == 6
+    assert 1 <= xgb.max_depth <= 8, "the booster must build a SHALLOW tree"
 
 
 def test_no_hyperparameter_is_hardcoded_in_python_any_more():
