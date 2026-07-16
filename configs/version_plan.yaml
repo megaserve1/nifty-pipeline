@@ -1,0 +1,32 @@
+# VERSION PLAN -- ask for many variations at once.
+#
+#   python core/make_version.py --from-plan
+#
+# WHAT THIS IS FOR: the ABLATION.
+#   "make one version per feature, each with that feature dropped, so I can see which one
+#    actually matters."
+#   By hand that is one command per feature. Here it is one file and one command -- and it is
+#   reviewable in git BEFORE any compute happens.
+#
+# WHAT COMES OUT:
+#   a MINOR version per line.  parent v2  ->  v2.1, v2.2, v2.3 ...
+#   Same major = a FAIR comparison (only one feature changed).
+#
+# THIS FILE IS AN INPUT, NEVER A RECORD.
+#   versions/dataset_vN.yaml is always the truth about what a version IS.
+#   This file only ASKS for versions. It never describes an existing one.
+#
+# Each line takes:  parent  (required)   drop: [...]   add: [...]
+# Names must match the menu:  python bridge/register.py --list
+
+versions:
+  # --- the ablation: drop one feature at a time, all off the same parent -----------
+  # - {parent: v1, drop: [gap_final_features]}
+  # - {parent: v1, drop: [stress_signal]}
+  # - {parent: v1, drop: [momentum_state]}
+
+  # --- try adding something new to a proven base ------------------------------------
+  # - {parent: v1, add: [new_feature]}
+
+  # --- swap one for another ----------------------------------------------------------
+  # - {parent: v1, drop: [old_feature], add: [new_feature]}

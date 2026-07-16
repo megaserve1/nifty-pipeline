@@ -1,0 +1,67 @@
+# virtualenv
+final_venv/
+.venv/
+venv/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+
+# editor / operating-system noise
+.idea/
+.vscode/
+.DS_Store
+
+# SECRETS -- never commit
+clearml.conf
+*-key.json
+*credentials*.json
+.gcp/
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# DVC manages these; git only ever sees the small .dvc pointer files.
+#
+# THE OLD RULES HAD A HOLE. `/data/*.parquet` only matches parquets sitting DIRECTLY in data/.
+# The feature team's files live in data/features/, one level down -- so merged_raw_1min.parquet
+# (190 MB) was not ignored at all, and the first `git push` would have been rejected by GitHub,
+# which refuses any file over 100 MB. Match at ANY depth.
+*.parquet
+*.pkl
+*.joblib
+# the labels are DVC-tracked too. 20 MB, and they are the ground truth.
+# (an inline '#' is NOT a comment in .gitignore -- it becomes part of the pattern. that mistake
+#  silently un-ignored this line and the 20 MB csv would have gone straight into git.)
+/data/labels/*.csv
+
+# ...but git MUST see the DVC pointers, or the other machine has no way to pull the data
+!*.dvc
+!/data/**/*.dvc
+!/datasets/**/*.dvc
+
+# noisy build artefacts
+/output/
+run_log.txt
+model.json
+best_params_*.json
+nohup.out
+*.bak
+
+# generated review export; the maintained documentation lives in README.md and docs/
+/PIPELINE_CODE_REVIEW_GUIDE.html
+
+# superseded local experiments. v3 is the first clean, published dataset lineage.
+/datasets/v1/
+/datasets/v2/
+/versions/dataset_v1.yaml
+/versions/dataset_v2.yaml
+/versions/_notebook_era/
+
+# the ballot is a scratch pad; the FROZEN recipe in versions/ is the record
+selection_sheet.yaml

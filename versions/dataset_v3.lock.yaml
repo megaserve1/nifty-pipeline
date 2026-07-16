@@ -1,0 +1,1763 @@
+# LOCK -- written by core/publish_version.py after a successful publish.
+# This is what makes 'which exact data did model X train on?' answerable.
+version: v3
+clearml_dataset_id: 8365f42248ac4e62bee38509f7e0b13b
+clearml_version: '3.0'
+gcs_url: null
+git_sha: ba37d706a75f6c4ee6020e4b9ed7a1b02ca46648
+parquet_sha256: 657c38c393ecb8a1e1e70938056c58595aa7cd704161a0902ceabe8767d10509
+recipe_sha256: 698658ebd443c73e10506e63c2358a6e4623ed7a30a96cb223256350a90292f0
+labels_sha256: fd16eb191c3c31fe6d66a143eba5159b647f33889189e2d7e8b8ff09900ec472
+rows: 513611
+n_features: 282
+per_feature:
+- name: adiii_merged_ml
+  file: adiii_merged_ml.parquet
+  column_clocks:
+    adiii_merged_ml__src_open: 5
+    adiii_merged_ml__src_high: 5
+    adiii_merged_ml__src_low: 5
+    adiii_merged_ml__src_close: 5
+    adiii_merged_ml__src_volume: 5
+    adiii_merged_ml__pbsev_open: 5
+    adiii_merged_ml__pbsev_high: 5
+    adiii_merged_ml__pbsev_low: 5
+    adiii_merged_ml__pbsev_close: 5
+    adiii_merged_ml__pbsev_state: 5
+    adiii_merged_ml__pbsev_locked: 5
+    adiii_merged_ml__pbsev_ema: 5
+    adiii_merged_ml__pbsev_atr: 5
+    adiii_merged_ml__pbsev_body_ratio: 5
+    adiii_merged_ml__pbsev_above_ema: 5
+    adiii_merged_ml__pbsev_bull_run_count: 5
+    adiii_merged_ml__pbsev_sustained_run: 5
+    adiii_merged_ml__pbsev_has_clearance: 5
+    adiii_merged_ml__pbsev_clearance_count: 5
+    adiii_merged_ml__pbsev_clearance_ok: 5
+    adiii_merged_ml__pbsev_body_ok: 5
+    adiii_merged_ml__pbsev_is_trend: 5
+    adiii_merged_ml__pat_is_green: 5
+    adiii_merged_ml__pat_body_size: 5
+    adiii_merged_ml__pat_total_range: 5
+    adiii_merged_ml__pat_body_perc: 5
+    adiii_merged_ml__pat_upper_wick: 5
+    adiii_merged_ml__pat_lower_wick: 5
+    adiii_merged_ml__pat_upper_wick_perc: 5
+    adiii_merged_ml__pat_lower_wick_perc: 5
+    adiii_merged_ml__pat_atr_14: 5
+    adiii_merged_ml__pat_ema_5: 5
+    adiii_merged_ml__pat_ema_20: 5
+    adiii_merged_ml__pat_ema_diff: 5
+    adiii_merged_ml__pat_vwap: 5
+    adiii_merged_ml__pat_vwap_slope: 5
+    adiii_merged_ml__pat_rsi_14: 5
+    adiii_merged_ml__pat_vote_ema: 5
+    adiii_merged_ml__pat_vote_vwap: 5
+    adiii_merged_ml__pat_vote_rsi: 5
+    adiii_merged_ml__pat_vote_sum: 5
+    adiii_merged_ml__pat_label_1min: 5
+    adiii_merged_ml__pat_label_streak: 5
+    adiii_merged_ml__pat_is_uptrend: 5
+    adiii_merged_ml__pat_is_downtrend: 5
+    adiii_merged_ml__pat_bullish_engulfing: 5
+    adiii_merged_ml__pat_morning_star: 5
+    adiii_merged_ml__pat_abandoned_baby_bull: 5
+    adiii_merged_ml__pat_piercing_line: 5
+    adiii_merged_ml__pat_three_white_soldiers: 5
+    adiii_merged_ml__pat_marubozu_green: 5
+    adiii_merged_ml__pat_kicker_bullish: 5
+    adiii_merged_ml__pat_hammer: 5
+    adiii_merged_ml__pat_inverted_hammer: 5
+    adiii_merged_ml__pat_bullish_harami: 5
+    adiii_merged_ml__pat_confirmed_dragonfly: 5
+    adiii_merged_ml__pat_tweezer_bottom: 5
+    adiii_merged_ml__pat_confirmed_bullish_doji: 5
+    adiii_merged_ml__pat_confirmed_bullish_spinning_top: 5
+    adiii_merged_ml__pat_bearish_engulfing: 5
+    adiii_merged_ml__pat_evening_star: 5
+    adiii_merged_ml__pat_abandoned_baby_bear: 60
+    adiii_merged_ml__pat_dark_cloud_cover: 5
+    adiii_merged_ml__pat_three_black_crows: 5
+    adiii_merged_ml__pat_marubozu_red: 5
+    adiii_merged_ml__pat_shooting_star: 5
+    adiii_merged_ml__pat_hanging_man: 5
+    adiii_merged_ml__pat_bearish_harami: 5
+    adiii_merged_ml__pat_confirmed_gravestone: 5
+    adiii_merged_ml__pat_tweezer_top: 5
+    adiii_merged_ml__pat_confirmed_bearish_doji: 5
+    adiii_merged_ml__pat_confirmed_bearish_spinning_top: 5
+    adiii_merged_ml__pat_bull_strength_raw: 5
+    adiii_merged_ml__pat_bear_strength_raw: 5
+    adiii_merged_ml__pat_bars_since_bull_signal: 5
+    adiii_merged_ml__pat_bars_since_bear_signal: 5
+    adiii_merged_ml__pat_verification_event: 5
+    adiii_merged_ml__pat_n_confirmation_events: 5
+    adiii_merged_ml__pat_n_false_events: 5
+    adiii_merged_ml__pat_n_verifications_active: 5
+    adiii_merged_ml__pat_n_verifications_armed: 5
+    adiii_merged_ml__pat_verification_active: 5
+    adiii_merged_ml__pat_verification_armed: 5
+    adiii_merged_ml__pat_verification_lock_level: 5
+    adiii_merged_ml__pat_verification_arm_thresh: 5
+    adiii_merged_ml__pat_verification_conf_thresh: 5
+    adiii_merged_ml__pat_bars_in_verification: 5
+    adiii_merged_ml__pat_live_label: 5
+    adiii_merged_ml__bc_bar_range: 5
+    adiii_merged_ml__bc_atr_prev: 5
+    adiii_merged_ml__bc_significance: 5
+    adiii_merged_ml__bc_clv: 5
+    adiii_merged_ml__bc_direction: 5
+    adiii_merged_ml__bc_signed_body: 5
+    adiii_merged_ml__bc_f_body: 5
+    adiii_merged_ml__bc_f_range: 5
+    adiii_merged_ml__bc_force_count: 5
+    adiii_merged_ml__bc_conviction_score: 5
+    adiii_merged_ml__bc_label: 5
+    adiii_merged_ml__bc_label_ord: 5
+  clock_minutes: 60
+  clock_source: declared+measured
+  clock_measured:
+    adiii_merged_ml__src_open: 1
+    adiii_merged_ml__src_high: 1
+    adiii_merged_ml__src_low: 1
+    adiii_merged_ml__src_close: 1
+    adiii_merged_ml__src_volume: 1
+    adiii_merged_ml__pbsev_open: 1
+    adiii_merged_ml__pbsev_high: 1
+    adiii_merged_ml__pbsev_low: 1
+    adiii_merged_ml__pbsev_close: 1
+    adiii_merged_ml__pbsev_state: 1
+    adiii_merged_ml__pbsev_locked: 1
+    adiii_merged_ml__pbsev_ema: 1
+    adiii_merged_ml__pbsev_atr: 1
+    adiii_merged_ml__pbsev_body_ratio: 1
+    adiii_merged_ml__pbsev_above_ema: 1
+    adiii_merged_ml__pbsev_bull_run_count: 1
+    adiii_merged_ml__pbsev_sustained_run: 1
+    adiii_merged_ml__pbsev_has_clearance: 1
+    adiii_merged_ml__pbsev_clearance_count: 1
+    adiii_merged_ml__pbsev_clearance_ok: 1
+    adiii_merged_ml__pbsev_body_ok: 1
+    adiii_merged_ml__pbsev_is_trend: 1
+    adiii_merged_ml__pat_is_green: 1
+    adiii_merged_ml__pat_body_size: 1
+    adiii_merged_ml__pat_total_range: 1
+    adiii_merged_ml__pat_body_perc: 1
+    adiii_merged_ml__pat_upper_wick: 1
+    adiii_merged_ml__pat_lower_wick: 1
+    adiii_merged_ml__pat_upper_wick_perc: 1
+    adiii_merged_ml__pat_lower_wick_perc: 1
+    adiii_merged_ml__pat_atr_14: 1
+    adiii_merged_ml__pat_ema_5: 1
+    adiii_merged_ml__pat_ema_20: 1
+    adiii_merged_ml__pat_ema_diff: 1
+    adiii_merged_ml__pat_vwap: 1
+    adiii_merged_ml__pat_vwap_slope: 1
+    adiii_merged_ml__pat_rsi_14: 1
+    adiii_merged_ml__pat_vote_ema: 1
+    adiii_merged_ml__pat_vote_vwap: 1
+    adiii_merged_ml__pat_vote_rsi: 1
+    adiii_merged_ml__pat_vote_sum: 1
+    adiii_merged_ml__pat_label_1min: 1
+    adiii_merged_ml__pat_label_streak: 1
+    adiii_merged_ml__pat_is_uptrend: 1
+    adiii_merged_ml__pat_is_downtrend: 1
+    adiii_merged_ml__pat_bullish_engulfing: 1
+    adiii_merged_ml__pat_morning_star: 1
+    adiii_merged_ml__pat_abandoned_baby_bull: 1
+    adiii_merged_ml__pat_piercing_line: 1
+    adiii_merged_ml__pat_three_white_soldiers: 1
+    adiii_merged_ml__pat_marubozu_green: 1
+    adiii_merged_ml__pat_kicker_bullish: 1
+    adiii_merged_ml__pat_hammer: 1
+    adiii_merged_ml__pat_inverted_hammer: 1
+    adiii_merged_ml__pat_bullish_harami: 1
+    adiii_merged_ml__pat_confirmed_dragonfly: 1
+    adiii_merged_ml__pat_tweezer_bottom: 1
+    adiii_merged_ml__pat_confirmed_bullish_doji: 1
+    adiii_merged_ml__pat_confirmed_bullish_spinning_top: 1
+    adiii_merged_ml__pat_bearish_engulfing: 1
+    adiii_merged_ml__pat_evening_star: 1
+    adiii_merged_ml__pat_abandoned_baby_bear: 60
+    adiii_merged_ml__pat_dark_cloud_cover: 1
+    adiii_merged_ml__pat_three_black_crows: 1
+    adiii_merged_ml__pat_marubozu_red: 1
+    adiii_merged_ml__pat_shooting_star: 1
+    adiii_merged_ml__pat_hanging_man: 1
+    adiii_merged_ml__pat_bearish_harami: 1
+    adiii_merged_ml__pat_confirmed_gravestone: 1
+    adiii_merged_ml__pat_tweezer_top: 1
+    adiii_merged_ml__pat_confirmed_bearish_doji: 1
+    adiii_merged_ml__pat_confirmed_bearish_spinning_top: 1
+    adiii_merged_ml__pat_bull_strength_raw: 1
+    adiii_merged_ml__pat_bear_strength_raw: 1
+    adiii_merged_ml__pat_bars_since_bull_signal: 1
+    adiii_merged_ml__pat_bars_since_bear_signal: 1
+    adiii_merged_ml__pat_verification_event: 1
+    adiii_merged_ml__pat_n_confirmation_events: 1
+    adiii_merged_ml__pat_n_false_events: 1
+    adiii_merged_ml__pat_n_verifications_active: 1
+    adiii_merged_ml__pat_n_verifications_armed: 1
+    adiii_merged_ml__pat_verification_active: 1
+    adiii_merged_ml__pat_verification_armed: 1
+    adiii_merged_ml__pat_verification_lock_level: 1
+    adiii_merged_ml__pat_verification_arm_thresh: 1
+    adiii_merged_ml__pat_verification_conf_thresh: 1
+    adiii_merged_ml__pat_bars_in_verification: 1
+    adiii_merged_ml__pat_live_label: 1
+    adiii_merged_ml__bc_bar_range: 5
+    adiii_merged_ml__bc_atr_prev: 5
+    adiii_merged_ml__bc_significance: 5
+    adiii_merged_ml__bc_clv: 5
+    adiii_merged_ml__bc_direction: 5
+    adiii_merged_ml__bc_signed_body: 5
+    adiii_merged_ml__bc_f_body: 5
+    adiii_merged_ml__bc_f_range: 5
+    adiii_merged_ml__bc_force_count: 5
+    adiii_merged_ml__bc_conviction_score: 5
+    adiii_merged_ml__bc_label: 5
+    adiii_merged_ml__bc_label_ord: 5
+  clock_overrides: {}
+  na_policy: sentinel
+  na_treatment:
+    policy: sentinel
+    for_model: native
+    columns:
+      pbsev_state:
+        filled: MISSING
+        n: 1
+      pat_is_green:
+        filled: MISSING
+        n: 1
+      pat_label_1min:
+        filled: MISSING
+        n: 1
+      pat_is_uptrend:
+        filled: MISSING
+        n: 1
+      pat_is_downtrend:
+        filled: MISSING
+        n: 1
+      pat_bullish_engulfing:
+        filled: MISSING
+        n: 1
+      pat_morning_star:
+        filled: MISSING
+        n: 1
+      pat_abandoned_baby_bull:
+        filled: MISSING
+        n: 1
+      pat_piercing_line:
+        filled: MISSING
+        n: 1
+      pat_three_white_soldiers:
+        filled: MISSING
+        n: 1
+      pat_marubozu_green:
+        filled: MISSING
+        n: 1
+      pat_kicker_bullish:
+        filled: MISSING
+        n: 1
+      pat_hammer:
+        filled: MISSING
+        n: 1
+      pat_inverted_hammer:
+        filled: MISSING
+        n: 1
+      pat_bullish_harami:
+        filled: MISSING
+        n: 1
+      pat_confirmed_dragonfly:
+        filled: MISSING
+        n: 1
+      pat_tweezer_bottom:
+        filled: MISSING
+        n: 1
+      pat_confirmed_bullish_doji:
+        filled: MISSING
+        n: 1
+      pat_confirmed_bullish_spinning_top:
+        filled: MISSING
+        n: 1
+      pat_bearish_engulfing:
+        filled: MISSING
+        n: 1
+      pat_evening_star:
+        filled: MISSING
+        n: 1
+      pat_abandoned_baby_bear:
+        filled: MISSING
+        n: 1
+      pat_dark_cloud_cover:
+        filled: MISSING
+        n: 1
+      pat_three_black_crows:
+        filled: MISSING
+        n: 1
+      pat_marubozu_red:
+        filled: MISSING
+        n: 1
+      pat_shooting_star:
+        filled: MISSING
+        n: 1
+      pat_hanging_man:
+        filled: MISSING
+        n: 1
+      pat_bearish_harami:
+        filled: MISSING
+        n: 1
+      pat_confirmed_gravestone:
+        filled: MISSING
+        n: 1
+      pat_tweezer_top:
+        filled: MISSING
+        n: 1
+      pat_confirmed_bearish_doji:
+        filled: MISSING
+        n: 1
+      pat_confirmed_bearish_spinning_top:
+        filled: MISSING
+        n: 1
+      pat_verification_event:
+        filled: MISSING
+        n: 1
+      pat_verification_active:
+        filled: MISSING
+        n: 1
+      pat_verification_armed:
+        filled: MISSING
+        n: 1
+      pat_live_label:
+        filled: MISSING
+        n: 1
+      bc_label:
+        filled: MISSING
+        n: 5
+      pbsev_open:
+        kept_nan: true
+        n: 1
+      pbsev_high:
+        kept_nan: true
+        n: 1
+      pbsev_low:
+        kept_nan: true
+        n: 1
+      pbsev_close:
+        kept_nan: true
+        n: 1
+      pbsev_locked:
+        kept_nan: true
+        n: 393808
+      pbsev_ema:
+        kept_nan: true
+        n: 1
+      pbsev_atr:
+        kept_nan: true
+        n: 1
+      pbsev_body_ratio:
+        kept_nan: true
+        n: 1
+      pbsev_above_ema:
+        kept_nan: true
+        n: 1
+      pbsev_bull_run_count:
+        kept_nan: true
+        n: 1
+      pbsev_sustained_run:
+        kept_nan: true
+        n: 1
+      pbsev_has_clearance:
+        kept_nan: true
+        n: 1
+      pbsev_clearance_count:
+        kept_nan: true
+        n: 1
+      pbsev_clearance_ok:
+        kept_nan: true
+        n: 1
+      pbsev_body_ok:
+        kept_nan: true
+        n: 1
+      pbsev_is_trend:
+        kept_nan: true
+        n: 1
+      pat_body_size:
+        kept_nan: true
+        n: 1
+      pat_total_range:
+        kept_nan: true
+        n: 1
+      pat_body_perc:
+        kept_nan: true
+        n: 1
+      pat_upper_wick:
+        kept_nan: true
+        n: 1
+      pat_lower_wick:
+        kept_nan: true
+        n: 1
+      pat_upper_wick_perc:
+        kept_nan: true
+        n: 1
+      pat_lower_wick_perc:
+        kept_nan: true
+        n: 1
+      pat_atr_14:
+        kept_nan: true
+        n: 14
+      pat_ema_5:
+        kept_nan: true
+        n: 1
+      pat_ema_20:
+        kept_nan: true
+        n: 1
+      pat_ema_diff:
+        kept_nan: true
+        n: 1
+      pat_vwap:
+        kept_nan: true
+        n: 1
+      pat_vwap_slope:
+        kept_nan: true
+        n: 6861
+      pat_rsi_14:
+        kept_nan: true
+        n: 2
+      pat_vote_ema:
+        kept_nan: true
+        n: 1
+      pat_vote_vwap:
+        kept_nan: true
+        n: 1
+      pat_vote_rsi:
+        kept_nan: true
+        n: 1
+      pat_vote_sum:
+        kept_nan: true
+        n: 1
+      pat_label_streak:
+        kept_nan: true
+        n: 1
+      pat_bull_strength_raw:
+        kept_nan: true
+        n: 1
+      pat_bear_strength_raw:
+        kept_nan: true
+        n: 1
+      pat_bars_since_bull_signal:
+        kept_nan: true
+        n: 1
+      pat_bars_since_bear_signal:
+        kept_nan: true
+        n: 1
+      pat_n_confirmation_events:
+        kept_nan: true
+        n: 1
+      pat_n_false_events:
+        kept_nan: true
+        n: 1
+      pat_n_verifications_active:
+        kept_nan: true
+        n: 1
+      pat_n_verifications_armed:
+        kept_nan: true
+        n: 1
+      pat_verification_lock_level:
+        kept_nan: true
+        n: 263832
+      pat_verification_arm_thresh:
+        kept_nan: true
+        n: 263832
+      pat_verification_conf_thresh:
+        kept_nan: true
+        n: 263832
+      pat_bars_in_verification:
+        kept_nan: true
+        n: 1
+      bc_bar_range:
+        kept_nan: true
+        n: 5
+      bc_atr_prev:
+        kept_nan: true
+        n: 75
+      bc_significance:
+        kept_nan: true
+        n: 75
+      bc_clv:
+        kept_nan: true
+        n: 5
+      bc_direction:
+        kept_nan: true
+        n: 5
+      bc_signed_body:
+        kept_nan: true
+        n: 5
+      bc_f_body:
+        kept_nan: true
+        n: 5
+      bc_f_range:
+        kept_nan: true
+        n: 5
+      bc_force_count:
+        kept_nan: true
+        n: 5
+      bc_conviction_score:
+        kept_nan: true
+        n: 5
+      bc_label_ord:
+        kept_nan: true
+        n: 5
+    na_in_built_output:
+      adiii_merged_ml__src_open: 6870
+      adiii_merged_ml__src_high: 6870
+      adiii_merged_ml__src_low: 6870
+      adiii_merged_ml__src_close: 6870
+      adiii_merged_ml__src_volume: 6870
+      adiii_merged_ml__pbsev_open: 6870
+      adiii_merged_ml__pbsev_high: 6870
+      adiii_merged_ml__pbsev_low: 6870
+      adiii_merged_ml__pbsev_close: 6870
+      adiii_merged_ml__pbsev_state: 6870
+      adiii_merged_ml__pbsev_locked: 396930
+      adiii_merged_ml__pbsev_ema: 6870
+      adiii_merged_ml__pbsev_atr: 6870
+      adiii_merged_ml__pbsev_body_ratio: 6870
+      adiii_merged_ml__pbsev_above_ema: 6870
+      adiii_merged_ml__pbsev_bull_run_count: 6870
+      adiii_merged_ml__pbsev_sustained_run: 6870
+      adiii_merged_ml__pbsev_has_clearance: 6870
+      adiii_merged_ml__pbsev_clearance_count: 6870
+      adiii_merged_ml__pbsev_clearance_ok: 6870
+      adiii_merged_ml__pbsev_body_ok: 6870
+      adiii_merged_ml__pbsev_is_trend: 6870
+      adiii_merged_ml__pat_is_green: 6870
+      adiii_merged_ml__pat_body_size: 6870
+      adiii_merged_ml__pat_total_range: 6870
+      adiii_merged_ml__pat_body_perc: 6870
+      adiii_merged_ml__pat_upper_wick: 6870
+      adiii_merged_ml__pat_lower_wick: 6870
+      adiii_merged_ml__pat_upper_wick_perc: 6870
+      adiii_merged_ml__pat_lower_wick_perc: 6870
+      adiii_merged_ml__pat_atr_14: 6880
+      adiii_merged_ml__pat_ema_5: 6870
+      adiii_merged_ml__pat_ema_20: 6870
+      adiii_merged_ml__pat_ema_diff: 6870
+      adiii_merged_ml__pat_vwap: 6870
+      adiii_merged_ml__pat_vwap_slope: 13730
+      adiii_merged_ml__pat_rsi_14: 6870
+      adiii_merged_ml__pat_vote_ema: 6870
+      adiii_merged_ml__pat_vote_vwap: 6870
+      adiii_merged_ml__pat_vote_rsi: 6870
+      adiii_merged_ml__pat_vote_sum: 6870
+      adiii_merged_ml__pat_label_1min: 6870
+      adiii_merged_ml__pat_label_streak: 6870
+      adiii_merged_ml__pat_is_uptrend: 6870
+      adiii_merged_ml__pat_is_downtrend: 6870
+      adiii_merged_ml__pat_bullish_engulfing: 6870
+      adiii_merged_ml__pat_morning_star: 6870
+      adiii_merged_ml__pat_abandoned_baby_bull: 6870
+      adiii_merged_ml__pat_piercing_line: 6870
+      adiii_merged_ml__pat_three_white_soldiers: 6870
+      adiii_merged_ml__pat_marubozu_green: 6870
+      adiii_merged_ml__pat_kicker_bullish: 6870
+      adiii_merged_ml__pat_hammer: 6870
+      adiii_merged_ml__pat_inverted_hammer: 6870
+      adiii_merged_ml__pat_bullish_harami: 6870
+      adiii_merged_ml__pat_confirmed_dragonfly: 6870
+      adiii_merged_ml__pat_tweezer_bottom: 6870
+      adiii_merged_ml__pat_confirmed_bullish_doji: 6870
+      adiii_merged_ml__pat_confirmed_bullish_spinning_top: 6870
+      adiii_merged_ml__pat_bearish_engulfing: 6870
+      adiii_merged_ml__pat_evening_star: 6870
+      adiii_merged_ml__pat_abandoned_baby_bear: 82284
+      adiii_merged_ml__pat_dark_cloud_cover: 6870
+      adiii_merged_ml__pat_three_black_crows: 6870
+      adiii_merged_ml__pat_marubozu_red: 6870
+      adiii_merged_ml__pat_shooting_star: 6870
+      adiii_merged_ml__pat_hanging_man: 6870
+      adiii_merged_ml__pat_bearish_harami: 6870
+      adiii_merged_ml__pat_confirmed_gravestone: 6870
+      adiii_merged_ml__pat_tweezer_top: 6870
+      adiii_merged_ml__pat_confirmed_bearish_doji: 6870
+      adiii_merged_ml__pat_confirmed_bearish_spinning_top: 6870
+      adiii_merged_ml__pat_bull_strength_raw: 6870
+      adiii_merged_ml__pat_bear_strength_raw: 6870
+      adiii_merged_ml__pat_bars_since_bull_signal: 6870
+      adiii_merged_ml__pat_bars_since_bear_signal: 6870
+      adiii_merged_ml__pat_verification_event: 6870
+      adiii_merged_ml__pat_n_confirmation_events: 6870
+      adiii_merged_ml__pat_n_false_events: 6870
+      adiii_merged_ml__pat_n_verifications_active: 6870
+      adiii_merged_ml__pat_n_verifications_armed: 6870
+      adiii_merged_ml__pat_verification_active: 6870
+      adiii_merged_ml__pat_verification_armed: 6870
+      adiii_merged_ml__pat_verification_lock_level: 267547
+      adiii_merged_ml__pat_verification_arm_thresh: 267547
+      adiii_merged_ml__pat_verification_conf_thresh: 267547
+      adiii_merged_ml__pat_bars_in_verification: 6870
+      adiii_merged_ml__pat_live_label: 6870
+      adiii_merged_ml__bc_bar_range: 6875
+      adiii_merged_ml__bc_atr_prev: 6945
+      adiii_merged_ml__bc_significance: 6945
+      adiii_merged_ml__bc_clv: 6875
+      adiii_merged_ml__bc_direction: 6875
+      adiii_merged_ml__bc_signed_body: 6875
+      adiii_merged_ml__bc_f_body: 6875
+      adiii_merged_ml__bc_f_range: 6875
+      adiii_merged_ml__bc_force_count: 6875
+      adiii_merged_ml__bc_conviction_score: 6875
+      adiii_merged_ml__bc_label: 6870
+      adiii_merged_ml__bc_label_ord: 6875
+  categorical:
+  - adiii_merged_ml__pbsev_state
+  - adiii_merged_ml__pat_is_green
+  - adiii_merged_ml__pat_label_1min
+  - adiii_merged_ml__pat_is_uptrend
+  - adiii_merged_ml__pat_is_downtrend
+  - adiii_merged_ml__pat_bullish_engulfing
+  - adiii_merged_ml__pat_morning_star
+  - adiii_merged_ml__pat_abandoned_baby_bull
+  - adiii_merged_ml__pat_piercing_line
+  - adiii_merged_ml__pat_three_white_soldiers
+  - adiii_merged_ml__pat_marubozu_green
+  - adiii_merged_ml__pat_kicker_bullish
+  - adiii_merged_ml__pat_hammer
+  - adiii_merged_ml__pat_inverted_hammer
+  - adiii_merged_ml__pat_bullish_harami
+  - adiii_merged_ml__pat_confirmed_dragonfly
+  - adiii_merged_ml__pat_tweezer_bottom
+  - adiii_merged_ml__pat_confirmed_bullish_doji
+  - adiii_merged_ml__pat_confirmed_bullish_spinning_top
+  - adiii_merged_ml__pat_bearish_engulfing
+  - adiii_merged_ml__pat_evening_star
+  - adiii_merged_ml__pat_abandoned_baby_bear
+  - adiii_merged_ml__pat_dark_cloud_cover
+  - adiii_merged_ml__pat_three_black_crows
+  - adiii_merged_ml__pat_marubozu_red
+  - adiii_merged_ml__pat_shooting_star
+  - adiii_merged_ml__pat_hanging_man
+  - adiii_merged_ml__pat_bearish_harami
+  - adiii_merged_ml__pat_confirmed_gravestone
+  - adiii_merged_ml__pat_tweezer_top
+  - adiii_merged_ml__pat_confirmed_bearish_doji
+  - adiii_merged_ml__pat_confirmed_bearish_spinning_top
+  - adiii_merged_ml__pat_verification_event
+  - adiii_merged_ml__pat_verification_active
+  - adiii_merged_ml__pat_verification_armed
+  - adiii_merged_ml__pat_live_label
+  - adiii_merged_ml__bc_label
+  parquet_sha256: 65b0f8838135aec0925aa84f7a3e4a862346fa291c73766b05c22260b51f8717
+  columns:
+  - adiii_merged_ml__src_open
+  - adiii_merged_ml__src_high
+  - adiii_merged_ml__src_low
+  - adiii_merged_ml__src_close
+  - adiii_merged_ml__src_volume
+  - adiii_merged_ml__pbsev_open
+  - adiii_merged_ml__pbsev_high
+  - adiii_merged_ml__pbsev_low
+  - adiii_merged_ml__pbsev_close
+  - adiii_merged_ml__pbsev_state
+  - adiii_merged_ml__pbsev_locked
+  - adiii_merged_ml__pbsev_ema
+  - adiii_merged_ml__pbsev_atr
+  - adiii_merged_ml__pbsev_body_ratio
+  - adiii_merged_ml__pbsev_above_ema
+  - adiii_merged_ml__pbsev_bull_run_count
+  - adiii_merged_ml__pbsev_sustained_run
+  - adiii_merged_ml__pbsev_has_clearance
+  - adiii_merged_ml__pbsev_clearance_count
+  - adiii_merged_ml__pbsev_clearance_ok
+  - adiii_merged_ml__pbsev_body_ok
+  - adiii_merged_ml__pbsev_is_trend
+  - adiii_merged_ml__pat_is_green
+  - adiii_merged_ml__pat_body_size
+  - adiii_merged_ml__pat_total_range
+  - adiii_merged_ml__pat_body_perc
+  - adiii_merged_ml__pat_upper_wick
+  - adiii_merged_ml__pat_lower_wick
+  - adiii_merged_ml__pat_upper_wick_perc
+  - adiii_merged_ml__pat_lower_wick_perc
+  - adiii_merged_ml__pat_atr_14
+  - adiii_merged_ml__pat_ema_5
+  - adiii_merged_ml__pat_ema_20
+  - adiii_merged_ml__pat_ema_diff
+  - adiii_merged_ml__pat_vwap
+  - adiii_merged_ml__pat_vwap_slope
+  - adiii_merged_ml__pat_rsi_14
+  - adiii_merged_ml__pat_vote_ema
+  - adiii_merged_ml__pat_vote_vwap
+  - adiii_merged_ml__pat_vote_rsi
+  - adiii_merged_ml__pat_vote_sum
+  - adiii_merged_ml__pat_label_1min
+  - adiii_merged_ml__pat_label_streak
+  - adiii_merged_ml__pat_is_uptrend
+  - adiii_merged_ml__pat_is_downtrend
+  - adiii_merged_ml__pat_bullish_engulfing
+  - adiii_merged_ml__pat_morning_star
+  - adiii_merged_ml__pat_abandoned_baby_bull
+  - adiii_merged_ml__pat_piercing_line
+  - adiii_merged_ml__pat_three_white_soldiers
+  - adiii_merged_ml__pat_marubozu_green
+  - adiii_merged_ml__pat_kicker_bullish
+  - adiii_merged_ml__pat_hammer
+  - adiii_merged_ml__pat_inverted_hammer
+  - adiii_merged_ml__pat_bullish_harami
+  - adiii_merged_ml__pat_confirmed_dragonfly
+  - adiii_merged_ml__pat_tweezer_bottom
+  - adiii_merged_ml__pat_confirmed_bullish_doji
+  - adiii_merged_ml__pat_confirmed_bullish_spinning_top
+  - adiii_merged_ml__pat_bearish_engulfing
+  - adiii_merged_ml__pat_evening_star
+  - adiii_merged_ml__pat_abandoned_baby_bear
+  - adiii_merged_ml__pat_dark_cloud_cover
+  - adiii_merged_ml__pat_three_black_crows
+  - adiii_merged_ml__pat_marubozu_red
+  - adiii_merged_ml__pat_shooting_star
+  - adiii_merged_ml__pat_hanging_man
+  - adiii_merged_ml__pat_bearish_harami
+  - adiii_merged_ml__pat_confirmed_gravestone
+  - adiii_merged_ml__pat_tweezer_top
+  - adiii_merged_ml__pat_confirmed_bearish_doji
+  - adiii_merged_ml__pat_confirmed_bearish_spinning_top
+  - adiii_merged_ml__pat_bull_strength_raw
+  - adiii_merged_ml__pat_bear_strength_raw
+  - adiii_merged_ml__pat_bars_since_bull_signal
+  - adiii_merged_ml__pat_bars_since_bear_signal
+  - adiii_merged_ml__pat_verification_event
+  - adiii_merged_ml__pat_n_confirmation_events
+  - adiii_merged_ml__pat_n_false_events
+  - adiii_merged_ml__pat_n_verifications_active
+  - adiii_merged_ml__pat_n_verifications_armed
+  - adiii_merged_ml__pat_verification_active
+  - adiii_merged_ml__pat_verification_armed
+  - adiii_merged_ml__pat_verification_lock_level
+  - adiii_merged_ml__pat_verification_arm_thresh
+  - adiii_merged_ml__pat_verification_conf_thresh
+  - adiii_merged_ml__pat_bars_in_verification
+  - adiii_merged_ml__pat_live_label
+  - adiii_merged_ml__bc_bar_range
+  - adiii_merged_ml__bc_atr_prev
+  - adiii_merged_ml__bc_significance
+  - adiii_merged_ml__bc_clv
+  - adiii_merged_ml__bc_direction
+  - adiii_merged_ml__bc_signed_body
+  - adiii_merged_ml__bc_f_body
+  - adiii_merged_ml__bc_f_range
+  - adiii_merged_ml__bc_force_count
+  - adiii_merged_ml__bc_conviction_score
+  - adiii_merged_ml__bc_label
+  - adiii_merged_ml__bc_label_ord
+- name: merged_raw_1min
+  file: merged_raw_1min.parquet
+  column_clocks:
+    merged_raw_1min__open: 1
+    merged_raw_1min__high: 1
+    merged_raw_1min__low: 1
+    merged_raw_1min__close: 1
+    merged_raw_1min__volume: 1
+    merged_raw_1min__oi: 1
+    merged_raw_1min__anchored_high: 1
+    merged_raw_1min__anchored_low: 1
+    merged_raw_1min__frozen_high: 5
+    merged_raw_1min__frozen_low: 5
+    merged_raw_1min__same_slot_vol_ratio: 1
+    merged_raw_1min__window_vol_ratio: 1
+    merged_raw_1min__window_rng_ratio: 1
+    merged_raw_1min__window_oi_ratio: 1
+    merged_raw_1min__absorption_score: 1
+    merged_raw_1min__efficiency_ratio: 1
+    merged_raw_1min__inside_share: 1
+    merged_raw_1min__box_width_slot_norm: 1
+    merged_raw_1min__prior_leg_in_atr: 1
+    merged_raw_1min__volatility_regime: 1
+    merged_raw_1min__dyn_vol_thr: 1
+    merged_raw_1min__dyn_rng_thr: 1
+    merged_raw_1min__dyn_box_thr: 1
+    merged_raw_1min__dyn_abs_thr: 1
+    merged_raw_1min__sell_footprints: 1
+    merged_raw_1min__buy_footprints: 1
+    merged_raw_1min__raw_accumulation: 1
+    merged_raw_1min__raw_distribution: 1
+    merged_raw_1min__phase_state_raw: 1
+    merged_raw_1min__phase_age: 1
+    merged_raw_1min__acc_confirmed: 1
+    merged_raw_1min__dist_confirmed: 1
+    merged_raw_1min__acc_resolved_up: 1
+    merged_raw_1min__acc_failed_down: 1
+    merged_raw_1min__dist_resolved_dn: 1
+    merged_raw_1min__dist_failed_up: 1
+    merged_raw_1min__Flow_State: 1
+    merged_raw_1min__Flow_State_Label: 1
+    merged_raw_1min__gap_state: 60
+    merged_raw_1min__gap_fill_ratio: 1
+    merged_raw_1min__gap_up_stack: 1
+    merged_raw_1min__gap_down_stack: 1
+    merged_raw_1min__gap_up_total_unfilled_pts: 1
+    merged_raw_1min__gap_down_total_unfilled_pts: 1
+    merged_raw_1min__spot: 1
+    merged_raw_1min__vix: 1
+    merged_raw_1min__drawdown_big: 1
+    merged_raw_1min__drawdown_fast: 1
+    merged_raw_1min__bars_underwater: 1
+    merged_raw_1min__volatility_scale: 60
+    merged_raw_1min__state_big: 1
+    merged_raw_1min__state_fast: 1
+    merged_raw_1min__state_combined: 1
+    merged_raw_1min__label_combined: 1
+    merged_raw_1min__score: 1
+    merged_raw_1min__riskScore: 1
+    merged_raw_1min__vol_z: 1
+    merged_raw_1min__range_z: 1
+    merged_raw_1min__close_pos: 1
+    merged_raw_1min__close_clean: 1
+    merged_raw_1min__close_rejection: 1
+    merged_raw_1min__close_messy: 1
+    merged_raw_1min__minute_of_day: 1
+    merged_raw_1min__session_phase: 1
+    merged_raw_1min__Volume_Quality: 1
+    merged_raw_1min__minute_of_session: 1
+    merged_raw_1min__zone_id: 1
+    merged_raw_1min__Intraday_Positioning: 1
+    merged_raw_1min__vwap: 5
+    merged_raw_1min__direction_score: 5
+    merged_raw_1min__ema_pressure: 5
+    merged_raw_1min__state_name: 5
+    merged_raw_1min__break_event: 5
+    merged_raw_1min__maturity_code: 5
+    merged_raw_1min__maturity_name: 5
+    merged_raw_1min__maturity_dir: 5
+    merged_raw_1min__exhaustion_event: 5
+    merged_raw_1min__extension_atr: 5
+    merged_raw_1min__peak_ext_atr: 5
+    merged_raw_1min__signed_di_gap: 5
+    merged_raw_1min__mom_fade_frac: 5
+    merged_raw_1min__giveback_atr: 5
+    merged_raw_1min__mature_bars: 5
+    merged_raw_1min__trend_age: 5
+    merged_raw_1min__vwap_dist_atr: 5
+    merged_raw_1min__bars_since_fresh: 5
+    merged_raw_1min__bars_since_mature: 5
+    merged_raw_1min__bars_since_exhausted: 5
+    merged_raw_1min__Nifty_Futures_Volume: 1
+    merged_raw_1min__vwap_microstructure: 5
+    merged_raw_1min__vwap_band_state: 5
+    merged_raw_1min__vwap_excursion_ratio: 5
+    merged_raw_1min__reversion_strength: 5
+    merged_raw_1min__ema_fast: 5
+    merged_raw_1min__ema_slow: 5
+    merged_raw_1min__ema_sep: 5
+    merged_raw_1min__er_mean: 5
+    merged_raw_1min__er_std: 5
+    merged_raw_1min__er_downvol: 5
+    merged_raw_1min__er_thr_dyn: 5
+    merged_raw_1min__er_low: 5
+    merged_raw_1min__reason: 5
+    merged_raw_1min__weak_run: 5
+    merged_raw_1min__trend_direction: 5
+    merged_raw_1min__sma_1m: 5
+    merged_raw_1min__sma_1m_slope: 5
+    merged_raw_1min__speed: 5
+    merged_raw_1min__prev_speed: 5
+    merged_raw_1min__abs_speed: 5
+    merged_raw_1min__abs_prev_spd: 5
+    merged_raw_1min__delta_speed: 5
+    merged_raw_1min__same_dir: 5
+    merged_raw_1min__is_bullish: 5
+    merged_raw_1min__is_bearish: 5
+    merged_raw_1min__range_atr: 5
+    merged_raw_1min__range_atr_sma_prev: 5
+    merged_raw_1min__range_expanding: 5
+    merged_raw_1min__range_contracting: 5
+    merged_raw_1min__fast_er: 5
+    merged_raw_1min__er_falling_fast: 5
+    merged_raw_1min__er_noisy: 5
+    merged_raw_1min__er_supports_accel: 5
+    merged_raw_1min__close_position: 5
+    merged_raw_1min__bull_close_qual: 5
+    merged_raw_1min__bear_close_qual: 5
+    merged_raw_1min__bull_close_weak: 5
+    merged_raw_1min__bear_close_weak: 5
+    merged_raw_1min__bull_sma_support: 5
+    merged_raw_1min__bear_sma_support: 5
+    merged_raw_1min__bull_sma_weak: 5
+    merged_raw_1min__bear_sma_weak: 5
+    merged_raw_1min__bull_score: 5
+    merged_raw_1min__bear_score: 5
+    merged_raw_1min__active_score: 5
+    merged_raw_1min__active_c1: 5
+    merged_raw_1min__active_c2: 5
+    merged_raw_1min__active_c3: 5
+    merged_raw_1min__active_c4: 5
+    merged_raw_1min__active_c5: 5
+    merged_raw_1min__speed_dropping_fast: 5
+    merged_raw_1min__accel_score_weak: 5
+    merged_raw_1min__range_weak: 5
+    merged_raw_1min__close_weak: 5
+    merged_raw_1min__sma_weak: 5
+    merged_raw_1min__decel_score: 5
+    merged_raw_1min__immediate_decel: 5
+    merged_raw_1min__raw_state: 5
+    merged_raw_1min__pending_state: 5
+    merged_raw_1min__pending_count: 5
+    merged_raw_1min__bars_in_state: 5
+    merged_raw_1min__accel_memory: 5
+    merged_raw_1min__weak_accel_bars: 5
+    merged_raw_1min__allowed_raw_state: 5
+    merged_raw_1min__is_accel: 5
+    merged_raw_1min__is_decel: 5
+    merged_raw_1min__is_steady: 5
+    merged_raw_1min__state_dir: 5
+    merged_raw_1min__Nifty_Futures_Close: 1
+    merged_raw_1min__Nifty_Futures_High: 1
+    merged_raw_1min__Nifty_Futures_Low: 1
+    merged_raw_1min__Nifty_Futures_Open: 1
+    merged_raw_1min__atr__trend: 5
+    merged_raw_1min__atr__mom: 5
+    merged_raw_1min__close__ema: 5
+    merged_raw_1min__close__mom: 5
+    merged_raw_1min__er__trend: 5
+    merged_raw_1min__er__ema: 5
+    merged_raw_1min__er__mom: 5
+    merged_raw_1min__high__ema: 5
+    merged_raw_1min__high__mom: 5
+    merged_raw_1min__low__ema: 5
+    merged_raw_1min__low__mom: 5
+    merged_raw_1min__open__ema: 5
+    merged_raw_1min__open__mom: 5
+    merged_raw_1min__state__trend: 5
+    merged_raw_1min__state__mom: 5
+    merged_raw_1min__structural_position_120m: 1
+    merged_raw_1min__structural_position_1d: 1
+    merged_raw_1min__structural_position_60m: 1
+    merged_raw_1min__volume__ema: 5
+    merged_raw_1min__volume__mom: 5
+  clock_minutes: 60
+  clock_source: measured
+  clock_measured:
+    merged_raw_1min__open: 1
+    merged_raw_1min__high: 1
+    merged_raw_1min__low: 1
+    merged_raw_1min__close: 1
+    merged_raw_1min__volume: 1
+    merged_raw_1min__oi: 1
+    merged_raw_1min__anchored_high: 1
+    merged_raw_1min__anchored_low: 1
+    merged_raw_1min__frozen_high: 5
+    merged_raw_1min__frozen_low: 5
+    merged_raw_1min__same_slot_vol_ratio: 1
+    merged_raw_1min__window_vol_ratio: 1
+    merged_raw_1min__window_rng_ratio: 1
+    merged_raw_1min__window_oi_ratio: 1
+    merged_raw_1min__absorption_score: 1
+    merged_raw_1min__efficiency_ratio: 1
+    merged_raw_1min__inside_share: 1
+    merged_raw_1min__box_width_slot_norm: 1
+    merged_raw_1min__prior_leg_in_atr: 1
+    merged_raw_1min__volatility_regime: 1
+    merged_raw_1min__dyn_vol_thr: 1
+    merged_raw_1min__dyn_rng_thr: 1
+    merged_raw_1min__dyn_box_thr: 1
+    merged_raw_1min__dyn_abs_thr: 1
+    merged_raw_1min__sell_footprints: 1
+    merged_raw_1min__buy_footprints: 1
+    merged_raw_1min__raw_accumulation: 1
+    merged_raw_1min__raw_distribution: 1
+    merged_raw_1min__phase_state_raw: 1
+    merged_raw_1min__phase_age: 1
+    merged_raw_1min__acc_confirmed: 1
+    merged_raw_1min__dist_confirmed: 1
+    merged_raw_1min__acc_resolved_up: 1
+    merged_raw_1min__acc_failed_down: 1
+    merged_raw_1min__dist_resolved_dn: 1
+    merged_raw_1min__dist_failed_up: 1
+    merged_raw_1min__Flow_State: 1
+    merged_raw_1min__Flow_State_Label: 1
+    merged_raw_1min__gap_state: 60
+    merged_raw_1min__gap_fill_ratio: 1
+    merged_raw_1min__gap_up_stack: 1
+    merged_raw_1min__gap_down_stack: 1
+    merged_raw_1min__gap_up_total_unfilled_pts: 1
+    merged_raw_1min__gap_down_total_unfilled_pts: 1
+    merged_raw_1min__spot: 1
+    merged_raw_1min__vix: 1
+    merged_raw_1min__drawdown_big: 1
+    merged_raw_1min__drawdown_fast: 1
+    merged_raw_1min__bars_underwater: 1
+    merged_raw_1min__volatility_scale: 60
+    merged_raw_1min__state_big: 1
+    merged_raw_1min__state_fast: 1
+    merged_raw_1min__state_combined: 1
+    merged_raw_1min__label_combined: 1
+    merged_raw_1min__score: 1
+    merged_raw_1min__riskScore: 1
+    merged_raw_1min__vol_z: 1
+    merged_raw_1min__range_z: 1
+    merged_raw_1min__close_pos: 1
+    merged_raw_1min__close_clean: 1
+    merged_raw_1min__close_rejection: 1
+    merged_raw_1min__close_messy: 1
+    merged_raw_1min__minute_of_day: 1
+    merged_raw_1min__session_phase: 1
+    merged_raw_1min__Volume_Quality: 1
+    merged_raw_1min__minute_of_session: 1
+    merged_raw_1min__zone_id: 1
+    merged_raw_1min__Intraday_Positioning: 1
+    merged_raw_1min__vwap: 5
+    merged_raw_1min__direction_score: 5
+    merged_raw_1min__ema_pressure: 5
+    merged_raw_1min__state_name: 5
+    merged_raw_1min__break_event: 5
+    merged_raw_1min__maturity_code: 5
+    merged_raw_1min__maturity_name: 5
+    merged_raw_1min__maturity_dir: 5
+    merged_raw_1min__exhaustion_event: 5
+    merged_raw_1min__extension_atr: 5
+    merged_raw_1min__peak_ext_atr: 5
+    merged_raw_1min__signed_di_gap: 5
+    merged_raw_1min__mom_fade_frac: 5
+    merged_raw_1min__giveback_atr: 5
+    merged_raw_1min__mature_bars: 5
+    merged_raw_1min__trend_age: 5
+    merged_raw_1min__vwap_dist_atr: 5
+    merged_raw_1min__bars_since_fresh: 5
+    merged_raw_1min__bars_since_mature: 5
+    merged_raw_1min__bars_since_exhausted: 5
+    merged_raw_1min__Nifty_Futures_Volume: 1
+    merged_raw_1min__vwap_microstructure: 5
+    merged_raw_1min__vwap_band_state: 5
+    merged_raw_1min__vwap_excursion_ratio: 5
+    merged_raw_1min__reversion_strength: 5
+    merged_raw_1min__ema_fast: 5
+    merged_raw_1min__ema_slow: 5
+    merged_raw_1min__ema_sep: 5
+    merged_raw_1min__er_mean: 5
+    merged_raw_1min__er_std: 5
+    merged_raw_1min__er_downvol: 5
+    merged_raw_1min__er_thr_dyn: 5
+    merged_raw_1min__er_low: 5
+    merged_raw_1min__reason: 5
+    merged_raw_1min__weak_run: 5
+    merged_raw_1min__trend_direction: 5
+    merged_raw_1min__sma_1m: 5
+    merged_raw_1min__sma_1m_slope: 5
+    merged_raw_1min__speed: 5
+    merged_raw_1min__prev_speed: 5
+    merged_raw_1min__abs_speed: 5
+    merged_raw_1min__abs_prev_spd: 5
+    merged_raw_1min__delta_speed: 5
+    merged_raw_1min__same_dir: 5
+    merged_raw_1min__is_bullish: 5
+    merged_raw_1min__is_bearish: 5
+    merged_raw_1min__range_atr: 5
+    merged_raw_1min__range_atr_sma_prev: 5
+    merged_raw_1min__range_expanding: 5
+    merged_raw_1min__range_contracting: 5
+    merged_raw_1min__fast_er: 5
+    merged_raw_1min__er_falling_fast: 5
+    merged_raw_1min__er_noisy: 5
+    merged_raw_1min__er_supports_accel: 5
+    merged_raw_1min__close_position: 5
+    merged_raw_1min__bull_close_qual: 5
+    merged_raw_1min__bear_close_qual: 5
+    merged_raw_1min__bull_close_weak: 5
+    merged_raw_1min__bear_close_weak: 5
+    merged_raw_1min__bull_sma_support: 5
+    merged_raw_1min__bear_sma_support: 5
+    merged_raw_1min__bull_sma_weak: 5
+    merged_raw_1min__bear_sma_weak: 5
+    merged_raw_1min__bull_score: 5
+    merged_raw_1min__bear_score: 5
+    merged_raw_1min__active_score: 5
+    merged_raw_1min__active_c1: 5
+    merged_raw_1min__active_c2: 5
+    merged_raw_1min__active_c3: 5
+    merged_raw_1min__active_c4: 5
+    merged_raw_1min__active_c5: 5
+    merged_raw_1min__speed_dropping_fast: 5
+    merged_raw_1min__accel_score_weak: 5
+    merged_raw_1min__range_weak: 5
+    merged_raw_1min__close_weak: 5
+    merged_raw_1min__sma_weak: 5
+    merged_raw_1min__decel_score: 5
+    merged_raw_1min__immediate_decel: 5
+    merged_raw_1min__raw_state: 5
+    merged_raw_1min__pending_state: 5
+    merged_raw_1min__pending_count: 5
+    merged_raw_1min__bars_in_state: 5
+    merged_raw_1min__accel_memory: 5
+    merged_raw_1min__weak_accel_bars: 5
+    merged_raw_1min__allowed_raw_state: 5
+    merged_raw_1min__is_accel: 5
+    merged_raw_1min__is_decel: 5
+    merged_raw_1min__is_steady: 5
+    merged_raw_1min__state_dir: 5
+    merged_raw_1min__Nifty_Futures_Close: 1
+    merged_raw_1min__Nifty_Futures_High: 1
+    merged_raw_1min__Nifty_Futures_Low: 1
+    merged_raw_1min__Nifty_Futures_Open: 1
+    merged_raw_1min__atr__trend: 5
+    merged_raw_1min__atr__mom: 5
+    merged_raw_1min__close__ema: 5
+    merged_raw_1min__close__mom: 5
+    merged_raw_1min__er__trend: 5
+    merged_raw_1min__er__ema: 5
+    merged_raw_1min__er__mom: 5
+    merged_raw_1min__high__ema: 5
+    merged_raw_1min__high__mom: 5
+    merged_raw_1min__low__ema: 5
+    merged_raw_1min__low__mom: 5
+    merged_raw_1min__open__ema: 5
+    merged_raw_1min__open__mom: 5
+    merged_raw_1min__state__trend: 5
+    merged_raw_1min__state__mom: 5
+    merged_raw_1min__structural_position_120m: 1
+    merged_raw_1min__structural_position_1d: 1
+    merged_raw_1min__structural_position_60m: 1
+    merged_raw_1min__volume__ema: 5
+    merged_raw_1min__volume__mom: 5
+  clock_overrides: {}
+  na_policy: sentinel
+  na_treatment:
+    policy: sentinel
+    for_model: native
+    columns:
+      Volume_Quality:
+        filled: MISSING
+        n: 7500
+      state_name:
+        filled: MISSING
+        n: 5
+      maturity_name:
+        filled: MISSING
+        n: 5
+      structural_position_120m:
+        filled: MISSING
+        n: 120
+      structural_position_1d:
+        filled: MISSING
+        n: 375
+      structural_position_60m:
+        filled: MISSING
+        n: 61
+      anchored_high:
+        kept_nan: true
+        n: 30
+      anchored_low:
+        kept_nan: true
+        n: 30
+      frozen_high:
+        kept_nan: true
+        n: 481575
+      frozen_low:
+        kept_nan: true
+        n: 481575
+      same_slot_vol_ratio:
+        kept_nan: true
+        n: 3750
+      window_vol_ratio:
+        kept_nan: true
+        n: 3894
+      window_rng_ratio:
+        kept_nan: true
+        n: 3894
+      window_oi_ratio:
+        kept_nan: true
+        n: 490324
+      absorption_score:
+        kept_nan: true
+        n: 3894
+      inside_share:
+        kept_nan: true
+        n: 24
+      box_width_slot_norm:
+        kept_nan: true
+        n: 447
+      prior_leg_in_atr:
+        kept_nan: true
+        n: 60
+      dyn_vol_thr:
+        kept_nan: true
+        n: 4494
+      dyn_rng_thr:
+        kept_nan: true
+        n: 4494
+      dyn_box_thr:
+        kept_nan: true
+        n: 826
+      dyn_abs_thr:
+        kept_nan: true
+        n: 4494
+      sell_footprints:
+        kept_nan: true
+        n: 24
+      buy_footprints:
+        kept_nan: true
+        n: 24
+      gap_fill_ratio:
+        kept_nan: true
+        n: 7213
+      score:
+        kept_nan: true
+        n: 3000
+      vol_z:
+        kept_nan: true
+        n: 7500
+      range_z:
+        kept_nan: true
+        n: 7500
+      vwap:
+        kept_nan: true
+        n: 5
+      direction_score:
+        kept_nan: true
+        n: 10
+      ema_pressure:
+        kept_nan: true
+        n: 5
+      break_event:
+        kept_nan: true
+        n: 5
+      maturity_code:
+        kept_nan: true
+        n: 5
+      maturity_dir:
+        kept_nan: true
+        n: 5
+      exhaustion_event:
+        kept_nan: true
+        n: 5
+      extension_atr:
+        kept_nan: true
+        n: 291702
+      peak_ext_atr:
+        kept_nan: true
+        n: 291702
+      signed_di_gap:
+        kept_nan: true
+        n: 291702
+      mom_fade_frac:
+        kept_nan: true
+        n: 291702
+      giveback_atr:
+        kept_nan: true
+        n: 291702
+      mature_bars:
+        kept_nan: true
+        n: 5
+      trend_age:
+        kept_nan: true
+        n: 5
+      vwap_dist_atr:
+        kept_nan: true
+        n: 10
+      bars_since_fresh:
+        kept_nan: true
+        n: 5
+      bars_since_mature:
+        kept_nan: true
+        n: 5
+      bars_since_exhausted:
+        kept_nan: true
+        n: 5
+      er_mean:
+        kept_nan: true
+        n: 155
+      er_std:
+        kept_nan: true
+        n: 155
+      er_downvol:
+        kept_nan: true
+        n: 160
+      sma_1m:
+        kept_nan: true
+        n: 5
+      sma_1m_slope:
+        kept_nan: true
+        n: 10
+      speed:
+        kept_nan: true
+        n: 45
+      prev_speed:
+        kept_nan: true
+        n: 90
+      abs_speed:
+        kept_nan: true
+        n: 45
+      abs_prev_spd:
+        kept_nan: true
+        n: 90
+      delta_speed:
+        kept_nan: true
+        n: 90
+      range_atr_sma_prev:
+        kept_nan: true
+        n: 25
+      fast_er:
+        kept_nan: true
+        n: 20
+      atr__trend:
+        kept_nan: true
+        n: 10
+      er__trend:
+        kept_nan: true
+        n: 5
+      er__ema:
+        kept_nan: true
+        n: 120
+      er__mom:
+        kept_nan: true
+        n: 45
+      state__trend:
+        kept_nan: true
+        n: 5
+    na_in_built_output:
+      merged_raw_1min__open: 1376
+      merged_raw_1min__high: 1376
+      merged_raw_1min__low: 1376
+      merged_raw_1min__close: 1376
+      merged_raw_1min__volume: 1376
+      merged_raw_1min__oi: 1376
+      merged_raw_1min__anchored_high: 1406
+      merged_raw_1min__anchored_low: 1406
+      merged_raw_1min__frozen_high: 482055
+      merged_raw_1min__frozen_low: 482055
+      merged_raw_1min__same_slot_vol_ratio: 5116
+      merged_raw_1min__window_vol_ratio: 5260
+      merged_raw_1min__window_rng_ratio: 5260
+      merged_raw_1min__window_oi_ratio: 490344
+      merged_raw_1min__absorption_score: 5260
+      merged_raw_1min__efficiency_ratio: 1376
+      merged_raw_1min__inside_share: 1400
+      merged_raw_1min__box_width_slot_norm: 1822
+      merged_raw_1min__prior_leg_in_atr: 1436
+      merged_raw_1min__volatility_regime: 1376
+      merged_raw_1min__dyn_vol_thr: 5860
+      merged_raw_1min__dyn_rng_thr: 5860
+      merged_raw_1min__dyn_box_thr: 2201
+      merged_raw_1min__dyn_abs_thr: 5860
+      merged_raw_1min__sell_footprints: 1400
+      merged_raw_1min__buy_footprints: 1400
+      merged_raw_1min__raw_accumulation: 1376
+      merged_raw_1min__raw_distribution: 1376
+      merged_raw_1min__phase_state_raw: 1376
+      merged_raw_1min__phase_age: 1376
+      merged_raw_1min__acc_confirmed: 1376
+      merged_raw_1min__dist_confirmed: 1376
+      merged_raw_1min__acc_resolved_up: 1376
+      merged_raw_1min__acc_failed_down: 1376
+      merged_raw_1min__dist_resolved_dn: 1376
+      merged_raw_1min__dist_failed_up: 1376
+      merged_raw_1min__Flow_State: 1376
+      merged_raw_1min__Flow_State_Label: 1376
+      merged_raw_1min__gap_state: 82284
+      merged_raw_1min__gap_fill_ratio: 8569
+      merged_raw_1min__gap_up_stack: 1376
+      merged_raw_1min__gap_down_stack: 1376
+      merged_raw_1min__gap_up_total_unfilled_pts: 1376
+      merged_raw_1min__gap_down_total_unfilled_pts: 1376
+      merged_raw_1min__spot: 1376
+      merged_raw_1min__vix: 1376
+      merged_raw_1min__drawdown_big: 1376
+      merged_raw_1min__drawdown_fast: 1376
+      merged_raw_1min__bars_underwater: 1376
+      merged_raw_1min__volatility_scale: 82284
+      merged_raw_1min__state_big: 1376
+      merged_raw_1min__state_fast: 1376
+      merged_raw_1min__state_combined: 1376
+      merged_raw_1min__label_combined: 1376
+      merged_raw_1min__score: 4368
+      merged_raw_1min__riskScore: 1376
+      merged_raw_1min__vol_z: 8856
+      merged_raw_1min__range_z: 8856
+      merged_raw_1min__close_pos: 1376
+      merged_raw_1min__close_clean: 1376
+      merged_raw_1min__close_rejection: 1376
+      merged_raw_1min__close_messy: 1376
+      merged_raw_1min__minute_of_day: 1376
+      merged_raw_1min__session_phase: 1376
+      merged_raw_1min__Volume_Quality: 1376
+      merged_raw_1min__minute_of_session: 1376
+      merged_raw_1min__zone_id: 1376
+      merged_raw_1min__Intraday_Positioning: 1376
+      merged_raw_1min__vwap: 6875
+      merged_raw_1min__direction_score: 6880
+      merged_raw_1min__ema_pressure: 6875
+      merged_raw_1min__state_name: 6870
+      merged_raw_1min__break_event: 6875
+      merged_raw_1min__maturity_code: 6875
+      merged_raw_1min__maturity_name: 6870
+      merged_raw_1min__maturity_dir: 6875
+      merged_raw_1min__exhaustion_event: 6875
+      merged_raw_1min__extension_atr: 294608
+      merged_raw_1min__peak_ext_atr: 294608
+      merged_raw_1min__signed_di_gap: 294608
+      merged_raw_1min__mom_fade_frac: 294608
+      merged_raw_1min__giveback_atr: 294608
+      merged_raw_1min__mature_bars: 6875
+      merged_raw_1min__trend_age: 6875
+      merged_raw_1min__vwap_dist_atr: 6880
+      merged_raw_1min__bars_since_fresh: 6875
+      merged_raw_1min__bars_since_mature: 6875
+      merged_raw_1min__bars_since_exhausted: 6875
+      merged_raw_1min__Nifty_Futures_Volume: 1376
+      merged_raw_1min__vwap_microstructure: 6870
+      merged_raw_1min__vwap_band_state: 6870
+      merged_raw_1min__vwap_excursion_ratio: 6870
+      merged_raw_1min__reversion_strength: 6870
+      merged_raw_1min__ema_fast: 6870
+      merged_raw_1min__ema_slow: 6870
+      merged_raw_1min__ema_sep: 6870
+      merged_raw_1min__er_mean: 7025
+      merged_raw_1min__er_std: 7025
+      merged_raw_1min__er_downvol: 7030
+      merged_raw_1min__er_thr_dyn: 6870
+      merged_raw_1min__er_low: 6870
+      merged_raw_1min__reason: 6870
+      merged_raw_1min__weak_run: 6870
+      merged_raw_1min__trend_direction: 6870
+      merged_raw_1min__sma_1m: 6875
+      merged_raw_1min__sma_1m_slope: 6880
+      merged_raw_1min__speed: 6915
+      merged_raw_1min__prev_speed: 6960
+      merged_raw_1min__abs_speed: 6915
+      merged_raw_1min__abs_prev_spd: 6960
+      merged_raw_1min__delta_speed: 6960
+      merged_raw_1min__same_dir: 6870
+      merged_raw_1min__is_bullish: 6870
+      merged_raw_1min__is_bearish: 6870
+      merged_raw_1min__range_atr: 6870
+      merged_raw_1min__range_atr_sma_prev: 6895
+      merged_raw_1min__range_expanding: 6870
+      merged_raw_1min__range_contracting: 6870
+      merged_raw_1min__fast_er: 6890
+      merged_raw_1min__er_falling_fast: 6870
+      merged_raw_1min__er_noisy: 6870
+      merged_raw_1min__er_supports_accel: 6870
+      merged_raw_1min__close_position: 6870
+      merged_raw_1min__bull_close_qual: 6870
+      merged_raw_1min__bear_close_qual: 6870
+      merged_raw_1min__bull_close_weak: 6870
+      merged_raw_1min__bear_close_weak: 6870
+      merged_raw_1min__bull_sma_support: 6870
+      merged_raw_1min__bear_sma_support: 6870
+      merged_raw_1min__bull_sma_weak: 6870
+      merged_raw_1min__bear_sma_weak: 6870
+      merged_raw_1min__bull_score: 6870
+      merged_raw_1min__bear_score: 6870
+      merged_raw_1min__active_score: 6870
+      merged_raw_1min__active_c1: 6870
+      merged_raw_1min__active_c2: 6870
+      merged_raw_1min__active_c3: 6870
+      merged_raw_1min__active_c4: 6870
+      merged_raw_1min__active_c5: 6870
+      merged_raw_1min__speed_dropping_fast: 6870
+      merged_raw_1min__accel_score_weak: 6870
+      merged_raw_1min__range_weak: 6870
+      merged_raw_1min__close_weak: 6870
+      merged_raw_1min__sma_weak: 6870
+      merged_raw_1min__decel_score: 6870
+      merged_raw_1min__immediate_decel: 6870
+      merged_raw_1min__raw_state: 6870
+      merged_raw_1min__pending_state: 6870
+      merged_raw_1min__pending_count: 6870
+      merged_raw_1min__bars_in_state: 6870
+      merged_raw_1min__accel_memory: 6870
+      merged_raw_1min__weak_accel_bars: 6870
+      merged_raw_1min__allowed_raw_state: 6870
+      merged_raw_1min__is_accel: 6870
+      merged_raw_1min__is_decel: 6870
+      merged_raw_1min__is_steady: 6870
+      merged_raw_1min__state_dir: 6870
+      merged_raw_1min__Nifty_Futures_Close: 1376
+      merged_raw_1min__Nifty_Futures_High: 1376
+      merged_raw_1min__Nifty_Futures_Low: 1376
+      merged_raw_1min__Nifty_Futures_Open: 1376
+      merged_raw_1min__atr__trend: 6880
+      merged_raw_1min__atr__mom: 6870
+      merged_raw_1min__close__ema: 6870
+      merged_raw_1min__close__mom: 6870
+      merged_raw_1min__er__trend: 6875
+      merged_raw_1min__er__ema: 6990
+      merged_raw_1min__er__mom: 6915
+      merged_raw_1min__high__ema: 6870
+      merged_raw_1min__high__mom: 6870
+      merged_raw_1min__low__ema: 6870
+      merged_raw_1min__low__mom: 6870
+      merged_raw_1min__open__ema: 6870
+      merged_raw_1min__open__mom: 6870
+      merged_raw_1min__state__trend: 6875
+      merged_raw_1min__state__mom: 6870
+      merged_raw_1min__structural_position_120m: 1376
+      merged_raw_1min__structural_position_1d: 1376
+      merged_raw_1min__structural_position_60m: 1376
+      merged_raw_1min__volume__ema: 6870
+      merged_raw_1min__volume__mom: 6870
+  categorical:
+  - merged_raw_1min__raw_accumulation
+  - merged_raw_1min__raw_distribution
+  - merged_raw_1min__acc_confirmed
+  - merged_raw_1min__dist_confirmed
+  - merged_raw_1min__acc_resolved_up
+  - merged_raw_1min__acc_failed_down
+  - merged_raw_1min__dist_resolved_dn
+  - merged_raw_1min__dist_failed_up
+  - merged_raw_1min__Flow_State_Label
+  - merged_raw_1min__gap_state
+  - merged_raw_1min__label_combined
+  - merged_raw_1min__close_clean
+  - merged_raw_1min__close_rejection
+  - merged_raw_1min__close_messy
+  - merged_raw_1min__session_phase
+  - merged_raw_1min__Volume_Quality
+  - merged_raw_1min__Intraday_Positioning
+  - merged_raw_1min__state_name
+  - merged_raw_1min__maturity_name
+  - merged_raw_1min__vwap_microstructure
+  - merged_raw_1min__vwap_band_state
+  - merged_raw_1min__er_low
+  - merged_raw_1min__reason
+  - merged_raw_1min__trend_direction
+  - merged_raw_1min__same_dir
+  - merged_raw_1min__is_bullish
+  - merged_raw_1min__is_bearish
+  - merged_raw_1min__range_expanding
+  - merged_raw_1min__range_contracting
+  - merged_raw_1min__er_falling_fast
+  - merged_raw_1min__er_noisy
+  - merged_raw_1min__er_supports_accel
+  - merged_raw_1min__bull_close_qual
+  - merged_raw_1min__bear_close_qual
+  - merged_raw_1min__bull_close_weak
+  - merged_raw_1min__bear_close_weak
+  - merged_raw_1min__bull_sma_support
+  - merged_raw_1min__bear_sma_support
+  - merged_raw_1min__bull_sma_weak
+  - merged_raw_1min__bear_sma_weak
+  - merged_raw_1min__active_c1
+  - merged_raw_1min__active_c2
+  - merged_raw_1min__active_c3
+  - merged_raw_1min__active_c4
+  - merged_raw_1min__active_c5
+  - merged_raw_1min__speed_dropping_fast
+  - merged_raw_1min__accel_score_weak
+  - merged_raw_1min__range_weak
+  - merged_raw_1min__close_weak
+  - merged_raw_1min__sma_weak
+  - merged_raw_1min__immediate_decel
+  - merged_raw_1min__raw_state
+  - merged_raw_1min__pending_state
+  - merged_raw_1min__allowed_raw_state
+  - merged_raw_1min__is_accel
+  - merged_raw_1min__is_decel
+  - merged_raw_1min__is_steady
+  - merged_raw_1min__state_dir
+  - merged_raw_1min__state__mom
+  - merged_raw_1min__structural_position_120m
+  - merged_raw_1min__structural_position_1d
+  - merged_raw_1min__structural_position_60m
+  parquet_sha256: 9e12015ae00400ca4c1c85d7766388283beec3e1253879c1da3db2d93d5ba5b7
+  columns:
+  - merged_raw_1min__open
+  - merged_raw_1min__high
+  - merged_raw_1min__low
+  - merged_raw_1min__close
+  - merged_raw_1min__volume
+  - merged_raw_1min__oi
+  - merged_raw_1min__anchored_high
+  - merged_raw_1min__anchored_low
+  - merged_raw_1min__frozen_high
+  - merged_raw_1min__frozen_low
+  - merged_raw_1min__same_slot_vol_ratio
+  - merged_raw_1min__window_vol_ratio
+  - merged_raw_1min__window_rng_ratio
+  - merged_raw_1min__window_oi_ratio
+  - merged_raw_1min__absorption_score
+  - merged_raw_1min__efficiency_ratio
+  - merged_raw_1min__inside_share
+  - merged_raw_1min__box_width_slot_norm
+  - merged_raw_1min__prior_leg_in_atr
+  - merged_raw_1min__volatility_regime
+  - merged_raw_1min__dyn_vol_thr
+  - merged_raw_1min__dyn_rng_thr
+  - merged_raw_1min__dyn_box_thr
+  - merged_raw_1min__dyn_abs_thr
+  - merged_raw_1min__sell_footprints
+  - merged_raw_1min__buy_footprints
+  - merged_raw_1min__raw_accumulation
+  - merged_raw_1min__raw_distribution
+  - merged_raw_1min__phase_state_raw
+  - merged_raw_1min__phase_age
+  - merged_raw_1min__acc_confirmed
+  - merged_raw_1min__dist_confirmed
+  - merged_raw_1min__acc_resolved_up
+  - merged_raw_1min__acc_failed_down
+  - merged_raw_1min__dist_resolved_dn
+  - merged_raw_1min__dist_failed_up
+  - merged_raw_1min__Flow_State
+  - merged_raw_1min__Flow_State_Label
+  - merged_raw_1min__gap_state
+  - merged_raw_1min__gap_fill_ratio
+  - merged_raw_1min__gap_up_stack
+  - merged_raw_1min__gap_down_stack
+  - merged_raw_1min__gap_up_total_unfilled_pts
+  - merged_raw_1min__gap_down_total_unfilled_pts
+  - merged_raw_1min__spot
+  - merged_raw_1min__vix
+  - merged_raw_1min__drawdown_big
+  - merged_raw_1min__drawdown_fast
+  - merged_raw_1min__bars_underwater
+  - merged_raw_1min__volatility_scale
+  - merged_raw_1min__state_big
+  - merged_raw_1min__state_fast
+  - merged_raw_1min__state_combined
+  - merged_raw_1min__label_combined
+  - merged_raw_1min__score
+  - merged_raw_1min__riskScore
+  - merged_raw_1min__vol_z
+  - merged_raw_1min__range_z
+  - merged_raw_1min__close_pos
+  - merged_raw_1min__close_clean
+  - merged_raw_1min__close_rejection
+  - merged_raw_1min__close_messy
+  - merged_raw_1min__minute_of_day
+  - merged_raw_1min__session_phase
+  - merged_raw_1min__Volume_Quality
+  - merged_raw_1min__minute_of_session
+  - merged_raw_1min__zone_id
+  - merged_raw_1min__Intraday_Positioning
+  - merged_raw_1min__vwap
+  - merged_raw_1min__direction_score
+  - merged_raw_1min__ema_pressure
+  - merged_raw_1min__state_name
+  - merged_raw_1min__break_event
+  - merged_raw_1min__maturity_code
+  - merged_raw_1min__maturity_name
+  - merged_raw_1min__maturity_dir
+  - merged_raw_1min__exhaustion_event
+  - merged_raw_1min__extension_atr
+  - merged_raw_1min__peak_ext_atr
+  - merged_raw_1min__signed_di_gap
+  - merged_raw_1min__mom_fade_frac
+  - merged_raw_1min__giveback_atr
+  - merged_raw_1min__mature_bars
+  - merged_raw_1min__trend_age
+  - merged_raw_1min__vwap_dist_atr
+  - merged_raw_1min__bars_since_fresh
+  - merged_raw_1min__bars_since_mature
+  - merged_raw_1min__bars_since_exhausted
+  - merged_raw_1min__Nifty_Futures_Volume
+  - merged_raw_1min__vwap_microstructure
+  - merged_raw_1min__vwap_band_state
+  - merged_raw_1min__vwap_excursion_ratio
+  - merged_raw_1min__reversion_strength
+  - merged_raw_1min__ema_fast
+  - merged_raw_1min__ema_slow
+  - merged_raw_1min__ema_sep
+  - merged_raw_1min__er_mean
+  - merged_raw_1min__er_std
+  - merged_raw_1min__er_downvol
+  - merged_raw_1min__er_thr_dyn
+  - merged_raw_1min__er_low
+  - merged_raw_1min__reason
+  - merged_raw_1min__weak_run
+  - merged_raw_1min__trend_direction
+  - merged_raw_1min__sma_1m
+  - merged_raw_1min__sma_1m_slope
+  - merged_raw_1min__speed
+  - merged_raw_1min__prev_speed
+  - merged_raw_1min__abs_speed
+  - merged_raw_1min__abs_prev_spd
+  - merged_raw_1min__delta_speed
+  - merged_raw_1min__same_dir
+  - merged_raw_1min__is_bullish
+  - merged_raw_1min__is_bearish
+  - merged_raw_1min__range_atr
+  - merged_raw_1min__range_atr_sma_prev
+  - merged_raw_1min__range_expanding
+  - merged_raw_1min__range_contracting
+  - merged_raw_1min__fast_er
+  - merged_raw_1min__er_falling_fast
+  - merged_raw_1min__er_noisy
+  - merged_raw_1min__er_supports_accel
+  - merged_raw_1min__close_position
+  - merged_raw_1min__bull_close_qual
+  - merged_raw_1min__bear_close_qual
+  - merged_raw_1min__bull_close_weak
+  - merged_raw_1min__bear_close_weak
+  - merged_raw_1min__bull_sma_support
+  - merged_raw_1min__bear_sma_support
+  - merged_raw_1min__bull_sma_weak
+  - merged_raw_1min__bear_sma_weak
+  - merged_raw_1min__bull_score
+  - merged_raw_1min__bear_score
+  - merged_raw_1min__active_score
+  - merged_raw_1min__active_c1
+  - merged_raw_1min__active_c2
+  - merged_raw_1min__active_c3
+  - merged_raw_1min__active_c4
+  - merged_raw_1min__active_c5
+  - merged_raw_1min__speed_dropping_fast
+  - merged_raw_1min__accel_score_weak
+  - merged_raw_1min__range_weak
+  - merged_raw_1min__close_weak
+  - merged_raw_1min__sma_weak
+  - merged_raw_1min__decel_score
+  - merged_raw_1min__immediate_decel
+  - merged_raw_1min__raw_state
+  - merged_raw_1min__pending_state
+  - merged_raw_1min__pending_count
+  - merged_raw_1min__bars_in_state
+  - merged_raw_1min__accel_memory
+  - merged_raw_1min__weak_accel_bars
+  - merged_raw_1min__allowed_raw_state
+  - merged_raw_1min__is_accel
+  - merged_raw_1min__is_decel
+  - merged_raw_1min__is_steady
+  - merged_raw_1min__state_dir
+  - merged_raw_1min__Nifty_Futures_Close
+  - merged_raw_1min__Nifty_Futures_High
+  - merged_raw_1min__Nifty_Futures_Low
+  - merged_raw_1min__Nifty_Futures_Open
+  - merged_raw_1min__atr__trend
+  - merged_raw_1min__atr__mom
+  - merged_raw_1min__close__ema
+  - merged_raw_1min__close__mom
+  - merged_raw_1min__er__trend
+  - merged_raw_1min__er__ema
+  - merged_raw_1min__er__mom
+  - merged_raw_1min__high__ema
+  - merged_raw_1min__high__mom
+  - merged_raw_1min__low__ema
+  - merged_raw_1min__low__mom
+  - merged_raw_1min__open__ema
+  - merged_raw_1min__open__mom
+  - merged_raw_1min__state__trend
+  - merged_raw_1min__state__mom
+  - merged_raw_1min__structural_position_120m
+  - merged_raw_1min__structural_position_1d
+  - merged_raw_1min__structural_position_60m
+  - merged_raw_1min__volume__ema
+  - merged_raw_1min__volume__mom
+- name: prateek_fade_risk
+  file: prateek_fade_risk.parquet
+  column_clocks:
+    prateek_fade_risk__fade_risk: 5
+  clock_minutes: 5
+  clock_source: measured
+  clock_measured:
+    prateek_fade_risk__fade_risk: 5
+  clock_overrides: {}
+  na_policy: sentinel
+  na_treatment:
+    policy: sentinel
+    for_model: native
+    columns: {}
+    na_in_built_output:
+      prateek_fade_risk__fade_risk: 6870
+  categorical: []
+  parquet_sha256: fa6fe77ec962e150abf064d95c4f23211913cbea7e22bcdbdc3b8484d864b51d
+  columns:
+  - prateek_fade_risk__fade_risk
+published_at: '2026-07-15T12:16:49+00:00'

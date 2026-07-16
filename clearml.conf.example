@@ -1,0 +1,41 @@
+# ClearML config TEMPLATE.
+#   1. copy to  ~/clearml.conf   on every machine that runs a script or an agent
+#   2. fill in the credentials from ClearML -> Settings -> Workspace -> Create Credentials
+#   3. NEVER commit the filled-in file (.gitignore already blocks clearml.conf)
+
+api {
+    web_server:   https://app.clear.ml
+    api_server:   https://api.clear.ml
+    files_server: https://files.clear.ml
+
+    credentials {
+        access_key: "YOUR_ACCESS_KEY"
+        secret_key: "YOUR_SECRET_KEY"
+    }
+}
+
+sdk {
+    development {
+        # Model artifacts land in YOUR bucket. app.clear.ml only ever holds metadata,
+        # so no market data or model bytes leave company GCP.
+        default_output_uri: "gs://demo-nifty-pipeline/clearml"
+    }
+
+    google.storage {
+        # NO credentials_json / key file. Your org enforces
+        # iam.disableServiceAccountKeyCreation, so service-account keys cannot be created.
+        # Authenticate KEYLESSLY instead, with Application Default Credentials:
+        #
+        #   on a GCE VM / GKE node : attach a service account with
+        #                            roles/storage.objectAdmin on the bucket. Nothing to install.
+        #   on a laptop            : gcloud auth application-default login
+        #                            gcloud auth application-default set-quota-project mega-ml
+        #
+        # This 'project' line is NOT optional. ClearML builds a GCS client with
+        # project=None unless you set it here, and google-cloud-storage then raises
+        # "Project could not be determined" -- even with perfectly valid credentials.
+        # This is the trap where `dvc pull` works but Dataset.get_local_copy() fails
+        # on the very same machine.
+        project: "mega-ml"
+    }
+}

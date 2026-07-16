@@ -1,0 +1,106 @@
+# HYPERPARAMETERS -- the ONE place they live. Edit this file, never the code.
+#
+# WHY THIS FILE EXISTS
+#   they used to be argparse defaults inside trainer/train.py. that is how the max_depth bug
+#   happened: ONE default (6) was shared by all three models, and 6 is a BOOSTING depth, so
+#   RandomForest was silently built as a depth-6 forest -- crippled. it took a day to find,
+#   because the number was buried in code that nobody reads.
+#
+#   the search space was hardcoded in a SECOND place (trainer/hpo.py), so the two could disagree
+#   with each other and nothing would notice.
+#
+#   now there is one file. defaults and search space, side by side, for each model.
+#
+# HOW IT IS USED
+#   trainer/train.py  reads `default:` -> those become the argparse defaults
+#   trainer/hpo.py    reads `search:`  -> that becomes the ClearML search space
+#
+#   argparse still exists, because ClearML's optimiser overrides parameters BY NAME (Args/...).
+#   but the VALUES come from here. you never edit Python to change a number.
+#
+# THE RULE FOR `search:`
+#   [a, b, c]           -> a discrete choice. tries exactly these values.
+#   {min, max, step}    -> a uniform range.
+#   {min, max, log: true} -> a LOG range, for anything spanning orders of magnitude
+#                            (learning_rate: 0.01 and 0.1 are one "step" apart in log space,
+#                             which is how you actually want to search it).
+
+random_forest:
+  # DEFAULTS = the proposed-hyperparameter PDF, 1-MIN column (our v3 is 1-minute data).
+  # run WITHOUT --tune and training uses these directly -- a fast single pass, no HPO search.
+  default:
+    n_estimators: 250            # pdf 1-min: enough trees for a smooth vote
+    # a forest WANTS deep trees -- averaging cancels the noise (this is the opposite of xgboost).
+    # pdf 1-min: 22. deep, but min_samples_leaf stops it becoming one-leaf-per-row.
+    max_depth: 22
+    min_samples_leaf: 30         # pdf 1-min: a pattern must repeat over 30 bars to count
+    # low on purpose: ~22% of ~282 features per split. forces some trees to build rules WITHOUT
+    # the raw price columns, so the bucketed features get a vote too (pdf's reasoning).
+    max_features: "0.22"
+    seed: 42
+  search:
+    max_depth: [0, 16, 24, 32]          # 0 = unlimited. the rungs let us SEE if unlimited wins.
+    min_samples_leaf: [2, 5, 10, 25, 50, 100]
+    max_features: [sqrt, log2, "0.3", "0.5"]
+    n_estimators: {min: 300, max: 1500, step: 150}  # a BUDGET knob. more trees never overfits
+                                                    # a forest, it only costs time.
+
+xgboost:
+  # DEFAULTS = the proposed-hyperparameter PDF, 1-MIN column. objective stays multi:softprob in
+  # code (the pdf's binary:logistic / aucpr are 2-class; we have 7 classes). device stays CPU
+  # (no GPU on this box -- cuda would crash). run WITHOUT --tune to use these directly.
+  default:
+    n_estimators: 1000           # pdf 1-min: high, shallow trees learn slowly + steadily
+    max_depth: 4                 # pdf 1-min: shallow. deep trees memorise 1-min market noise.
+    learning_rate: 0.03          # pdf 1-min: low, conservative steps on noisy data
+    subsample: 0.7               # row sampling -- robust across market regimes
+    colsample_bytree: 0.7        # column sampling -- handles correlated raw/bucketed features
+    # a floor on the SUM OF WEIGHTS in a leaf, NOT a row count. pdf 1-min: 10 (blocks splitting
+    # on rare outlier bars). NOTE for us: NO_TRADE has weight 0, so a high floor can also block
+    # splits near the weight-0 rows -- watch the entry-class recall; drop to 3-5 if it starves.
+    min_child_weight: 10
+    reg_lambda: 1.5              # pdf 1-min: L2, smooths leaf weights
+    reg_alpha: 0.1              # pdf 1-min: L1, prunes useless features to zero
+    gamma: 0.2                 # pdf 1-min: min loss reduction required to make a split
+    seed: 42
+  search:
+    max_depth: {min: 3, max: 10}
+    learning_rate: {min: 0.01, max: 0.2, log: true}
+    n_estimators: {min: 200, max: 1500, step: 100}
+    subsample: {min: 0.6, max: 1.0, step: 0.1}
+    colsample_bytree: {min: 0.5, max: 1.0, step: 0.1}
+    min_child_weight: [0.5, 1, 3, 5, 10]
+    reg_lambda: [0.5, 1, 5, 20]
+    reg_alpha: [0, 0.1, 0.5, 1, 2]
+    gamma: [0, 0.1, 0.2, 0.3, 0.5]
+
+catboost:
+  # your proposed grid, WITH THE REGULARISATION FIXED (see the note below each changed line).
+  # your values had ALL THREE overfit-brakes set to their loosest -- backwards for noisy 7-class
+  # 1-min data, where overfitting = losing money live.
+  default:
+    n_estimators: 1200           # your 'iterations' -- fine, high with a low learning rate
+    max_depth: 8                 # your 'depth' -- fine (catboost caps at 16)
+    learning_rate: 0.05          # your value -- fine
+    # >>> THE CRITICAL FIX <<<  you had 0.5. catboost's default is 3.0, and that is already the
+    # LOW end for noisy financial data. 0.5 barely regularises at all -- depth-8 trees over 1200
+    # rounds on 513k noisy rows will memorise. raised to 3.0 (the sane floor; go 5-10 if it still
+    # overfits -- watch the train-vs-test gap).
+    l2_leaf_reg: 3.0             # was 0.5  -- too low, overfitting risk
+    # you set 0.2. default is 1.0. LOWER random_strength = LESS noise-injection = MORE overfit.
+    # on noisy data you want MORE randomness, not less. raised to 1.0.
+    random_strength: 1.0         # was 0.2  -- too low, same wrong direction
+    # you set 0.0 = NO bagging randomness at all (every tree sees the same row weights), which
+    # kills ensemble diversity. 1.0 gives Bayesian bagging -- more robust across market regimes.
+    bagging_temperature: 1.0     # was 0.0  -- turns bagging off; 1.0 turns it on
+    seed: 42
+  search:
+    # catboost builds OBLIVIOUS trees (the same split on every node of a level), so its depth is
+    # NOT comparable to xgboost's. the library HARD CAPS depth at 16 -- you asked for 20, but
+    # catboost REFUSES depth > 16 ("depth should be in range [1, 16]"), so any trial sampling
+    # 17-20 would error and score nothing. capped at 16 (the real ceiling). NOTE: depth 12-16 on
+    # oblivious trees is already enormous (2^16 = 65k leaves) and very slow; expect long trials.
+    max_depth: {min: 4, max: 16}
+    learning_rate: {min: 0.01, max: 0.2, log: true}
+    n_estimators: {min: 200, max: 1500, step: 100}
+    l2_leaf_reg: [1, 3, 10, 30]

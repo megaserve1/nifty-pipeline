@@ -1,0 +1,38 @@
+# final_pipeline dependencies
+#   pip install -r requirements.txt
+#
+# FLOOR PINS, NOT EXACT PINS -- but the pandas MAJOR is load-bearing and pinned hard:
+# the certified manifests record pandas-3 dtypes ('str'); a pandas-2 machine reads the same
+# parquet as 'object' and is REFUSED by its own certificate (assert_schema, correctly). every
+# machine in the fleet must sit on the same pandas major, or the contract cannot hold.
+
+# --- core: versioning, publishing, orchestration ---
+pyyaml>=6.0
+dvc[gs]>=3.0            # DVC with Google Cloud Storage support
+clearml>=2.1,<3
+
+# --- data ---
+pandas>=3.0,<4          # MAJOR pinned: the manifest dtype contract depends on it (see above)
+pyarrow>=15
+numpy>=1.26
+
+# --- training + model artifacts ---
+scikit-learn>=1.5
+xgboost>=2.0
+catboost>=1.2
+joblib>=1.3
+
+# --- explainability ---
+shap>=0.46
+matplotlib>=3.8         # shap_explain draws waterfall PNGs on a HEADLESS agent. this was
+                        # missing, so every SHAP task on a fresh machine died at import.
+
+# --- tests ---
+pytest>=8
+
+# (jupyter + papermill removed 2026-07-15: the notebook-execution path is dead -- the feature
+#  team hands over parquets now. they were 200+ MB of venv for a code path nothing calls.)
+
+# --- reserved: add these when their gates/monitors are implemented ---
+# deepchecks            # pre-deploy validation gate
+# evidently             # live drift monitoring

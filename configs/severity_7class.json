@@ -1,0 +1,74 @@
+{
+  "_what_this_is": "How much each KIND OF MISTAKE costs, in trading terms. The model's mistakes are not equal: buying big when you should have sold big can wipe you out; buying small when you should have bought big just earns you less. This file says which is which. SHAP investigates the expensive ones first.",
+
+  "_the_formula": "importance = error_rate x severity. A CRITICAL mistake that happens rarely must still outrank a MILD mistake that happens often -- which is why the tiers are far apart (100 vs 3), not 1-2-3.",
+
+  "_the_size_ladder": "SUPER = biggest conviction/size (weight 0.91). SUB = medium (0.46). SMALL = smallest (0.18). Read the weights in the labels file: SUPER > SUB > SMALL.",
+
+  "_how_to_read_a_key": "'TRUE->PREDICTED'. So 'EXIT_SUPER->ENTRY_SUPER' means the truth was a big exit and the model said big entry.",
+
+  "_the_two_asymmetries_that_matter": [
+    "1. AN UNWANTED TRADE COSTS MORE THAN A MISSED ONE. Predicting a trade when the truth was NO_TRADE puts real money at risk (spread, slippage, and an open position that can move against you). Predicting NO_TRADE when a signal existed only costs foregone profit -- you cannot lose what you never bet. Capital preservation comes first. So NO_TRADE->ENTRY_SUPER (15) outranks ENTRY_SUPER->NO_TRADE (6).",
+    "2. OVER-SIZING COSTS MORE THAN UNDER-SIZING. Predicting SUPER when the truth was SMALL means you took a big position on a weak signal -- over-leveraged. Predicting SMALL when the truth was SUPER just means you under-committed and made less. So ENTRY_SMALL->ENTRY_SUPER (6) outranks ENTRY_SUPER->ENTRY_SMALL (3)."
+  ],
+
+  "_change_these_numbers": "These are a starting point built on standard trading logic, not gospel. If your book says a missed SUPER entry hurts more than an unwanted small trade, change it. The pipeline just obeys this file.",
+
+  "default": 1,
+
+  "severity": {
+    "_tier_A_comment": "FULL REVERSAL AT MAXIMUM SIZE. The worst thing the model can do: take the biggest possible position in exactly the wrong direction.",
+    "ENTRY_SUPER->EXIT_SUPER": 100,
+    "EXIT_SUPER->ENTRY_SUPER": 100,
+
+    "_tier_B_comment": "REVERSAL INVOLVING ONE SUPER. Still a wrong-direction trade, and one side of it is at max size.",
+    "ENTRY_SUPER->EXIT_SUB": 70,
+    "EXIT_SUB->ENTRY_SUPER": 70,
+    "EXIT_SUPER->ENTRY_SUB": 70,
+    "ENTRY_SUB->EXIT_SUPER": 70,
+    "ENTRY_SUPER->EXIT_SMALL": 60,
+    "EXIT_SMALL->ENTRY_SUPER": 60,
+    "EXIT_SUPER->ENTRY_SMALL": 60,
+    "ENTRY_SMALL->EXIT_SUPER": 60,
+
+    "_tier_C_comment": "REVERSAL AT MEDIUM OR LOW SIZE. Wrong direction, but the position is smaller, so the damage is smaller.",
+    "ENTRY_SUB->EXIT_SUB": 40,
+    "EXIT_SUB->ENTRY_SUB": 40,
+    "ENTRY_SUB->EXIT_SMALL": 30,
+    "EXIT_SMALL->ENTRY_SUB": 30,
+    "EXIT_SUB->ENTRY_SMALL": 30,
+    "ENTRY_SMALL->EXIT_SUB": 30,
+    "ENTRY_SMALL->EXIT_SMALL": 25,
+    "EXIT_SMALL->ENTRY_SMALL": 25,
+
+    "_tier_D_comment": "AN UNWANTED TRADE. The truth was NO_TRADE and the model traded anyway. Real money at risk. Scaled by how big the unwanted position was.",
+    "NO_TRADE->ENTRY_SUPER": 15,
+    "NO_TRADE->EXIT_SUPER": 15,
+    "NO_TRADE->ENTRY_SUB": 10,
+    "NO_TRADE->EXIT_SUB": 10,
+    "NO_TRADE->ENTRY_SMALL": 8,
+    "NO_TRADE->EXIT_SMALL": 8,
+
+    "_tier_E_comment": "A MISSED OPPORTUNITY. A real signal existed and the model said do nothing. Costs foregone profit only -- no capital at risk. Cheaper than an unwanted trade (see asymmetry 1).",
+    "ENTRY_SUPER->NO_TRADE": 6,
+    "EXIT_SUPER->NO_TRADE": 6,
+    "ENTRY_SUB->NO_TRADE": 4,
+    "EXIT_SUB->NO_TRADE": 4,
+    "ENTRY_SMALL->NO_TRADE": 3,
+    "EXIT_SMALL->NO_TRADE": 3,
+
+    "_tier_F_comment": "RIGHT DIRECTION, WRONG SIZE. The model got the call right and the size wrong. OVER-sizing (predicting bigger than truth) is worse than UNDER-sizing (see asymmetry 2).",
+    "ENTRY_SMALL->ENTRY_SUPER": 6,
+    "EXIT_SMALL->EXIT_SUPER": 6,
+    "ENTRY_SUB->ENTRY_SUPER": 5,
+    "EXIT_SUB->EXIT_SUPER": 5,
+    "ENTRY_SMALL->ENTRY_SUB": 4,
+    "EXIT_SMALL->EXIT_SUB": 4,
+    "ENTRY_SUPER->ENTRY_SUB": 3,
+    "EXIT_SUPER->EXIT_SUB": 3,
+    "ENTRY_SUPER->ENTRY_SMALL": 3,
+    "EXIT_SUPER->EXIT_SMALL": 3,
+    "ENTRY_SUB->ENTRY_SMALL": 2,
+    "EXIT_SUB->EXIT_SMALL": 2
+  }
+}
