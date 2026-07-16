@@ -69,6 +69,27 @@ from trainer.objective import (        # noqa: E402
 from trainer import hyperparams        # noqa: E402  -- configs/hyperparams.yaml, the ONE source
 
 
+# ---------------------------------------------------------------- fetch the data file
+def find_dataset_parquet(local, dataset_id: str):
+    """the parquet inside a downloaded ClearML dataset -- WHATEVER it is named.
+
+    THE TRAP: in gcs mode the dataset is an EXTERNAL-FILE pointer to the DVC blob, and DVC stores
+    content-addressed -- the downloaded file is named by its md5 (e.g. '9015ad71...'), with NO
+    '.parquet' extension. So the old `glob("*.parquet")` found nothing and the trainer died with
+    "no parquet inside" even though the file was right there. pandas reads parquet by CONTENT, not
+    by name, so we just find the real data file (the biggest non-hidden file) and read it.
+    """
+    import pathlib
+    p = next(pathlib.Path(local).glob("*.parquet"), None)   # local mode: named normally
+    if p is not None:
+        return p
+    files = [f for f in pathlib.Path(local).rglob("*")      # gcs/dvc mode: md5-named blob
+             if f.is_file() and not f.name.startswith(".") and f.name != "manifest.json"]
+    if not files:
+        raise SystemExit(f"no data file inside dataset {dataset_id} (downloaded to {local})")
+    return max(files, key=lambda f: f.stat().st_size)       # the parquet is the biggest file
+
+
 # ------------------------------------------------------------------ the models
 def parse_max_features(v):
     """the forest's max_features arrives as a STRING, because "sqrt" and "0.3" travel down the
@@ -302,9 +323,7 @@ def main():
     print(f"[1/6] fetching dataset {a.dataset_id}")
     ds = Dataset.get(dataset_id=a.dataset_id, alias="training_data")   # never "the latest"
     local = pathlib.Path(ds.get_local_copy())
-    parquet = next(local.glob("*.parquet"), None)
-    if parquet is None:
-        raise SystemExit(f"no parquet inside dataset {a.dataset_id}")
+    parquet = find_dataset_parquet(local, a.dataset_id)
     df = pd.read_parquet(parquet)
     print(f"      {parquet.name}  ({len(df):,} rows)")
 

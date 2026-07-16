@@ -182,8 +182,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset_id", default="")
     ap.add_argument("--dataset_version", default="")
-    ap.add_argument("--expect_models", type=int, default=len(C.MODEL_TYPES),
-                    help="how many models to wait for before choosing")
+    # THE MODEL NAMES to wait for, comma-separated (e.g. "random_forest,xgboost,catboost").
+    # This was type=int -- but enqueue_champion sends the NAMES (so a --models subset can crown),
+    # and argparse crashed with "invalid int value: 'random_forest,xgboost,catboost'" before the
+    # code below (which already expects names) ever ran. A half-applied fix. It is a string now.
+    ap.add_argument("--expect_models", default=",".join(C.MODEL_TYPES),
+                    help="comma-separated model NAMES to wait for before choosing")
     ap.add_argument("--wait_minutes", type=int, default=240)
     ap.add_argument("--crown_partial", action="store_true",
                     help="crown a champion even if a model was STILL TRAINING when we gave up. "
@@ -208,15 +212,14 @@ def main():
     version = a.dataset_version
 
     # ---- 1. WAIT for the models, then collect them --------------------------
-    # expect_models arrives as "xgboost,catboost" (names -- the enqueuer says WHO to wait
-    # for) or as a bare "3" from an old clone (count -- wait for all known types).
-    raw = str(a.expect_models)
-    expected = [m.strip() for m in raw.split(",") if m.strip() and not m.strip().isdigit()] \
-               or int(raw) if raw.strip().isdigit() else \
-               [m.strip() for m in raw.split(",") if m.strip()]
-    n_expect = expected if isinstance(expected, int) else len(expected)
-    print(f"[1/4] waiting for {n_expect} model(s) trained on v{version}: "
-          f"{expected if not isinstance(expected, int) else 'all types'}")
+    # expect_models arrives as "random_forest,xgboost,catboost" (names -- the enqueuer says WHO
+    # to wait for). a bare "3" from an old clone means "the first 3 known types" (count fallback).
+    raw = str(a.expect_models).strip()
+    if raw.isdigit():
+        expected = list(C.MODEL_TYPES)[:int(raw)] or list(C.MODEL_TYPES)
+    else:
+        expected = [m.strip() for m in raw.split(",") if m.strip()]
+    print(f"[1/4] waiting for {len(expected)} model(s) trained on v{version}: {expected}")
     print(f"      (this task was queued alongside them, so it must wait -- otherwise it would")
     print(f"       start on the first free agent and find nothing finished)")
     found, running, dead = wait_for_models(version, expected, a.wait_minutes)

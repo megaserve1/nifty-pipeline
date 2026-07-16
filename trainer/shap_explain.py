@@ -104,7 +104,8 @@ def main():
     print(f"[2/6] fetching dataset {bundle['dataset_id']}")
     ds = Dataset.get(dataset_id=bundle["dataset_id"], alias="shap_data")
     local = pathlib.Path(ds.get_local_copy())
-    df = pd.read_parquet(next(local.glob("*.parquet")))
+    from trainer.train import find_dataset_parquet
+    df = pd.read_parquet(find_dataset_parquet(local, bundle["dataset_id"]))
 
     ts = pd.to_datetime(df[C.LABEL_TS_COL])
     # THE SPLIT COMES FROM THE BUNDLE, NOT FROM TODAY'S CONFIG.
