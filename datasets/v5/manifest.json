@@ -1,15 +1,15 @@
 {
   "manifest_schema_version": 1,
-  "built_at": "2026-07-17T10:13:57+00:00",
+  "built_at": "2026-07-17T10:44:05+00:00",
   "version": "v5",
   "recipe_sha256": "73294464c52b25c9bacef63710e37b2dc0477816a515afcc89166fc15ab1a965",
-  "parquet_sha256": "050545ca87e5e45f250b4b3e47158dba17a0c2f08b1561ac9d404edb3cbe1650",
-  "rows": 0,
+  "parquet_sha256": "a34409cae9314bf5c048c682f46b788b8140df76ea9b07ec3918f16a38d5c122",
+  "rows": 513611,
   "n_features": 485,
   "schema": [
     {
       "col": "timestamp",
-      "dtype": "datetime64[ms]"
+      "dtype": "datetime64[us]"
     },
     {
       "col": "primary_label",
@@ -109,11 +109,11 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_confirmed",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_survived",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__mark_bo",
@@ -149,7 +149,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_green",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__total_range",
@@ -213,7 +213,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__label_1min",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__label_streak",
@@ -221,119 +221,119 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_uptrend",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_downtrend",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bullish_engulfing",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__morning_star",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__abandoned_baby_bull",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__piercing_line",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__three_white_soldiers",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__marubozu_green",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__kicker_bullish",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__hammer",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__inverted_hammer",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bullish_harami",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__confirmed_dragonfly",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__tweezer_bottom",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__confirmed_bullish_doji",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__confirmed_bullish_spinning_top",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bearish_engulfing",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__evening_star",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__abandoned_baby_bear",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__dark_cloud_cover",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__three_black_crows",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__marubozu_red",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__shooting_star",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__hanging_man",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bearish_harami",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__confirmed_gravestone",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__tweezer_top",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__confirmed_bearish_doji",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__confirmed_bearish_spinning_top",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bull_strength_raw",
@@ -353,15 +353,15 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__verification_event",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__verification_active",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__verification_armed",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__verification_lock_level",
@@ -421,7 +421,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__trigger",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__fade_dir",
@@ -509,67 +509,67 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__raw_accumulation",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__raw_distribution",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__phase_state_raw",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__phase_age",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__acc_confirmed",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__dist_confirmed",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__acc_resolved_up",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__acc_failed_down",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__dist_resolved_dn",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__dist_failed_up",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__Flow_State",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__has_gap_up_below",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__has_gap_down_above",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__up_unfilled_count",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__down_unfilled_count",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__total_unfilled_count",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__nearest_up_gap_low",
@@ -665,11 +665,11 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__gap_up_stack",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__gap_down_stack",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__gap_up_total_unfilled_pts",
@@ -741,7 +741,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__bars_in_res_zone",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__sup_level_name",
@@ -769,7 +769,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__bars_in_sup_zone",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__sma_1m",
@@ -805,15 +805,15 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__same_dir",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_bullish",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_bearish",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__range_atr",
@@ -825,11 +825,11 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__range_expanding",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__range_contracting",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__er",
@@ -841,15 +841,15 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__er_falling_fast",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__er_noisy",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__er_supports_accel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__close_position",
@@ -857,35 +857,35 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__bull_close_qual",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bear_close_qual",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bull_close_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bear_close_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bull_sma_support",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bear_sma_support",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bull_sma_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bear_sma_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bull_score",
@@ -901,43 +901,43 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__active_c1",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__active_c2",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__active_c3",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__active_c4",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__active_c5",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__speed_dropping_fast",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__accel_score_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__range_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__close_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__sma_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__decel_score",
@@ -945,15 +945,15 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__immediate_decel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__raw_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__pending_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__pending_count",
@@ -973,23 +973,23 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__allowed_raw_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_accel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_decel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__is_steady",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__state_dir",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__ema",
@@ -1049,7 +1049,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__bars_underwater",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__vol_scale",
@@ -1057,11 +1057,11 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__state_big",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__state_fast",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__score",
@@ -1105,7 +1105,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__er_low",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__weak_run",
@@ -1137,7 +1137,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__state_name",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__break_event",
@@ -1257,19 +1257,19 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__close_clean",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__close_rejection",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__close_messy",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__minute_of_day",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__session_phase",
@@ -1481,7 +1481,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__vol_climax_flag",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__vix_vel_5min_5m",
@@ -1589,7 +1589,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__Expiry_Flag",
-      "dtype": "int8"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__ATR_14_NEW_FUTURES",
@@ -1597,7 +1597,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__Time_Counter",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__lr_close_5__nifty_features_v3",
@@ -1685,7 +1685,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__vol_climax_flag__nifty_features_v3",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__ret_1d__nifty_features_v3",
@@ -1725,7 +1725,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__gap_filled_flag",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__prev_day_range_pct",
@@ -1733,11 +1733,11 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__consecutive_up_closes",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__consecutive_down_closes",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bars_since_vol_spike",
@@ -1745,11 +1745,11 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__bars_above_vwap",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__bars_below_vwap",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "raw_bucket_raw_computed_v5__fut_spot_spread__nifty_features_v3",
@@ -1797,7 +1797,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__RRG_Regime",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__nifty_beat_breadth",
@@ -1805,7 +1805,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__US2Y_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__US2Y_vs_nifty_rs_ratio",
@@ -1813,7 +1813,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__US10Y_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__US10Y_vs_nifty_rs_ratio",
@@ -1821,7 +1821,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__IN2Y_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__IN2Y_vs_nifty_rs_ratio",
@@ -1829,7 +1829,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__IN10Y_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__IN10Y_vs_nifty_rs_ratio",
@@ -1837,7 +1837,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__DXY_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__DXY_vs_nifty_rs_ratio",
@@ -1845,7 +1845,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__GC_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__GC_vs_nifty_rs_ratio",
@@ -1853,7 +1853,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__CL_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__CL_vs_nifty_rs_ratio",
@@ -1861,7 +1861,7 @@
     },
     {
       "col": "raw_bucket_raw_computed_v5__BTCUSD_vs_nifty_quadrant",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "raw_bucket_raw_computed_v5__BTCUSD_vs_nifty_rs_ratio",
@@ -5182,7 +5182,493 @@
             "n": 10575
           }
         },
-        "na_in_built_output": {}
+        "na_in_built_output": {
+          "raw_bucket_raw_computed_v5__bar_range": 6870,
+          "raw_bucket_raw_computed_v5__atr_prev": 6870,
+          "raw_bucket_raw_computed_v5__significance": 6870,
+          "raw_bucket_raw_computed_v5__clv": 6870,
+          "raw_bucket_raw_computed_v5__direction": 6870,
+          "raw_bucket_raw_computed_v5__signed_body": 6870,
+          "raw_bucket_raw_computed_v5__f_body": 6870,
+          "raw_bucket_raw_computed_v5__f_range": 6870,
+          "raw_bucket_raw_computed_v5__force_count": 6870,
+          "raw_bucket_raw_computed_v5__conviction_score": 6870,
+          "raw_bucket_raw_computed_v5__dom_resistance": 6870,
+          "raw_bucket_raw_computed_v5__dom_support": 6870,
+          "raw_bucket_raw_computed_v5__dist_to_res_atr": 6870,
+          "raw_bucket_raw_computed_v5__dist_to_sup_atr": 6870,
+          "raw_bucket_raw_computed_v5__atr14": 6870,
+          "raw_bucket_raw_computed_v5__brk_level": 6870,
+          "raw_bucket_raw_computed_v5__stop_level": 6870,
+          "raw_bucket_raw_computed_v5__mfe_atr": 6870,
+          "raw_bucket_raw_computed_v5__mae_atr": 6870,
+          "raw_bucket_raw_computed_v5__atr_ratio": 6870,
+          "raw_bucket_raw_computed_v5__bars_since_bo": 6870,
+          "raw_bucket_raw_computed_v5__is_confirmed": 6870,
+          "raw_bucket_raw_computed_v5__is_survived": 6870,
+          "raw_bucket_raw_computed_v5__mark_bo": 6870,
+          "raw_bucket_raw_computed_v5__mark_fail": 6870,
+          "raw_bucket_raw_computed_v5__mark_fade": 6870,
+          "raw_bucket_raw_computed_v5__mark_conf": 6870,
+          "raw_bucket_raw_computed_v5__mark_surv": 6870,
+          "raw_bucket_raw_computed_v5__mark_upgrade": 6870,
+          "raw_bucket_raw_computed_v5__mark_rt": 6870,
+          "raw_bucket_raw_computed_v5__mark_lost": 6870,
+          "raw_bucket_raw_computed_v5__is_green": 1376,
+          "raw_bucket_raw_computed_v5__total_range": 1376,
+          "raw_bucket_raw_computed_v5__body_perc": 1376,
+          "raw_bucket_raw_computed_v5__upper_wick_perc": 1376,
+          "raw_bucket_raw_computed_v5__lower_wick_perc": 1376,
+          "raw_bucket_raw_computed_v5__atr_14": 1376,
+          "raw_bucket_raw_computed_v5__ema_5": 1376,
+          "raw_bucket_raw_computed_v5__ema_20": 1376,
+          "raw_bucket_raw_computed_v5__ema_diff": 1376,
+          "raw_bucket_raw_computed_v5__vwap": 1376,
+          "raw_bucket_raw_computed_v5__vwap_slope": 1376,
+          "raw_bucket_raw_computed_v5__rsi_14": 1376,
+          "raw_bucket_raw_computed_v5__vote_ema": 1376,
+          "raw_bucket_raw_computed_v5__vote_vwap": 1376,
+          "raw_bucket_raw_computed_v5__vote_rsi": 1376,
+          "raw_bucket_raw_computed_v5__vote_sum": 1376,
+          "raw_bucket_raw_computed_v5__label_1min": 1376,
+          "raw_bucket_raw_computed_v5__label_streak": 1376,
+          "raw_bucket_raw_computed_v5__is_uptrend": 1376,
+          "raw_bucket_raw_computed_v5__is_downtrend": 1376,
+          "raw_bucket_raw_computed_v5__bullish_engulfing": 1376,
+          "raw_bucket_raw_computed_v5__morning_star": 1376,
+          "raw_bucket_raw_computed_v5__abandoned_baby_bull": 1376,
+          "raw_bucket_raw_computed_v5__piercing_line": 1376,
+          "raw_bucket_raw_computed_v5__three_white_soldiers": 1376,
+          "raw_bucket_raw_computed_v5__marubozu_green": 1376,
+          "raw_bucket_raw_computed_v5__kicker_bullish": 1376,
+          "raw_bucket_raw_computed_v5__hammer": 1376,
+          "raw_bucket_raw_computed_v5__inverted_hammer": 1376,
+          "raw_bucket_raw_computed_v5__bullish_harami": 1376,
+          "raw_bucket_raw_computed_v5__confirmed_dragonfly": 1376,
+          "raw_bucket_raw_computed_v5__tweezer_bottom": 1376,
+          "raw_bucket_raw_computed_v5__confirmed_bullish_doji": 1376,
+          "raw_bucket_raw_computed_v5__confirmed_bullish_spinning_top": 1376,
+          "raw_bucket_raw_computed_v5__bearish_engulfing": 1376,
+          "raw_bucket_raw_computed_v5__evening_star": 1376,
+          "raw_bucket_raw_computed_v5__abandoned_baby_bear": 82284,
+          "raw_bucket_raw_computed_v5__dark_cloud_cover": 1376,
+          "raw_bucket_raw_computed_v5__three_black_crows": 1376,
+          "raw_bucket_raw_computed_v5__marubozu_red": 1376,
+          "raw_bucket_raw_computed_v5__shooting_star": 1376,
+          "raw_bucket_raw_computed_v5__hanging_man": 1376,
+          "raw_bucket_raw_computed_v5__bearish_harami": 1376,
+          "raw_bucket_raw_computed_v5__confirmed_gravestone": 1376,
+          "raw_bucket_raw_computed_v5__tweezer_top": 1376,
+          "raw_bucket_raw_computed_v5__confirmed_bearish_doji": 1376,
+          "raw_bucket_raw_computed_v5__confirmed_bearish_spinning_top": 1376,
+          "raw_bucket_raw_computed_v5__bull_strength_raw": 1376,
+          "raw_bucket_raw_computed_v5__bear_strength_raw": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_bull_signal": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_bear_signal": 1376,
+          "raw_bucket_raw_computed_v5__verification_event": 1376,
+          "raw_bucket_raw_computed_v5__verification_active": 1376,
+          "raw_bucket_raw_computed_v5__verification_armed": 1376,
+          "raw_bucket_raw_computed_v5__verification_lock_level": 1376,
+          "raw_bucket_raw_computed_v5__verification_arm_thresh": 1376,
+          "raw_bucket_raw_computed_v5__verification_conf_thresh": 1376,
+          "raw_bucket_raw_computed_v5__bars_in_verification": 1376,
+          "raw_bucket_raw_computed_v5__n_confirmation_events": 1376,
+          "raw_bucket_raw_computed_v5__n_false_events": 1376,
+          "raw_bucket_raw_computed_v5__n_verifications_active": 1376,
+          "raw_bucket_raw_computed_v5__n_verifications_armed": 1376,
+          "raw_bucket_raw_computed_v5__atr14__fade_risk_raw": 6870,
+          "raw_bucket_raw_computed_v5__ema9": 6870,
+          "raw_bucket_raw_computed_v5__ema_gap_pct": 6870,
+          "raw_bucket_raw_computed_v5__trend_state": 6870,
+          "raw_bucket_raw_computed_v5__clue_score": 6870,
+          "raw_bucket_raw_computed_v5__leg_atr": 6870,
+          "raw_bucket_raw_computed_v5__trigger": 6870,
+          "raw_bucket_raw_computed_v5__fade_dir": 6870,
+          "raw_bucket_raw_computed_v5__episode_len": 6870,
+          "raw_bucket_raw_computed_v5__anchored_high": 1376,
+          "raw_bucket_raw_computed_v5__anchored_low": 1376,
+          "raw_bucket_raw_computed_v5__frozen_high": 6870,
+          "raw_bucket_raw_computed_v5__frozen_low": 6870,
+          "raw_bucket_raw_computed_v5__same_slot_vol_ratio": 1376,
+          "raw_bucket_raw_computed_v5__window_vol_ratio": 1376,
+          "raw_bucket_raw_computed_v5__window_rng_ratio": 1376,
+          "raw_bucket_raw_computed_v5__absorption_score": 1376,
+          "raw_bucket_raw_computed_v5__efficiency_ratio": 1376,
+          "raw_bucket_raw_computed_v5__inside_share": 1376,
+          "raw_bucket_raw_computed_v5__box_width_slot_norm": 1376,
+          "raw_bucket_raw_computed_v5__prior_leg_in_atr": 1376,
+          "raw_bucket_raw_computed_v5__volatility_regime": 1376,
+          "raw_bucket_raw_computed_v5__dyn_vol_thr": 1376,
+          "raw_bucket_raw_computed_v5__dyn_rng_thr": 1376,
+          "raw_bucket_raw_computed_v5__dyn_box_thr": 1376,
+          "raw_bucket_raw_computed_v5__dyn_abs_thr": 1376,
+          "raw_bucket_raw_computed_v5__sell_footprints": 1376,
+          "raw_bucket_raw_computed_v5__buy_footprints": 1376,
+          "raw_bucket_raw_computed_v5__raw_accumulation": 1376,
+          "raw_bucket_raw_computed_v5__raw_distribution": 1376,
+          "raw_bucket_raw_computed_v5__phase_state_raw": 1376,
+          "raw_bucket_raw_computed_v5__phase_age": 1376,
+          "raw_bucket_raw_computed_v5__acc_confirmed": 1376,
+          "raw_bucket_raw_computed_v5__dist_confirmed": 1376,
+          "raw_bucket_raw_computed_v5__acc_resolved_up": 1376,
+          "raw_bucket_raw_computed_v5__acc_failed_down": 1376,
+          "raw_bucket_raw_computed_v5__dist_resolved_dn": 1376,
+          "raw_bucket_raw_computed_v5__dist_failed_up": 1376,
+          "raw_bucket_raw_computed_v5__Flow_State": 1376,
+          "raw_bucket_raw_computed_v5__has_gap_up_below": 1376,
+          "raw_bucket_raw_computed_v5__has_gap_down_above": 1376,
+          "raw_bucket_raw_computed_v5__up_unfilled_count": 1376,
+          "raw_bucket_raw_computed_v5__down_unfilled_count": 1376,
+          "raw_bucket_raw_computed_v5__total_unfilled_count": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_low": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_high": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_size": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_size_atr": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_distance": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_distance_atr": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_ratio": 1376,
+          "raw_bucket_raw_computed_v5__nearest_up_gap_age": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_low": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_high": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_size": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_size_atr": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_distance": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_distance_atr": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_ratio": 1376,
+          "raw_bucket_raw_computed_v5__nearest_down_gap_age": 1376,
+          "raw_bucket_raw_computed_v5__total_up_gap_area": 1376,
+          "raw_bucket_raw_computed_v5__total_down_gap_area": 1376,
+          "raw_bucket_raw_computed_v5__total_gap_area": 1376,
+          "raw_bucket_raw_computed_v5__total_up_gap_area_atr": 1376,
+          "raw_bucket_raw_computed_v5__total_down_gap_area_atr": 1376,
+          "raw_bucket_raw_computed_v5__total_gap_area_atr": 1376,
+          "raw_bucket_raw_computed_v5__gap_fill_ratio": 1376,
+          "raw_bucket_raw_computed_v5__gap_up_stack": 1376,
+          "raw_bucket_raw_computed_v5__gap_down_stack": 1376,
+          "raw_bucket_raw_computed_v5__gap_up_total_unfilled_pts": 1376,
+          "raw_bucket_raw_computed_v5__gap_down_total_unfilled_pts": 1376,
+          "raw_bucket_raw_computed_v5__minute_of_session": 1376,
+          "raw_bucket_raw_computed_v5__zone_id": 1376,
+          "raw_bucket_raw_computed_v5__dist_from_prev_day_high": 1376,
+          "raw_bucket_raw_computed_v5__dist_from_prev_day_low": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_3d_high": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_3d_low": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_10d_high": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_10d_low": 1376,
+          "raw_bucket_raw_computed_v5__atr_20": 1376,
+          "raw_bucket_raw_computed_v5__res_level_name": 1376,
+          "raw_bucket_raw_computed_v5__res_level_tf": 1376,
+          "raw_bucket_raw_computed_v5__res_polarity": 1376,
+          "raw_bucket_raw_computed_v5__res_distance_atr": 1376,
+          "raw_bucket_raw_computed_v5__res_weighted_score": 1376,
+          "raw_bucket_raw_computed_v5__res_weight": 1376,
+          "raw_bucket_raw_computed_v5__bars_in_res_zone": 1376,
+          "raw_bucket_raw_computed_v5__sup_level_name": 1376,
+          "raw_bucket_raw_computed_v5__sup_level_tf": 1376,
+          "raw_bucket_raw_computed_v5__sup_polarity": 1376,
+          "raw_bucket_raw_computed_v5__sup_distance_atr": 1376,
+          "raw_bucket_raw_computed_v5__sup_weighted_score": 1376,
+          "raw_bucket_raw_computed_v5__sup_weight": 1376,
+          "raw_bucket_raw_computed_v5__bars_in_sup_zone": 1376,
+          "raw_bucket_raw_computed_v5__sma_1m": 6870,
+          "raw_bucket_raw_computed_v5__sma_1m_slope": 6870,
+          "raw_bucket_raw_computed_v5__atr": 6870,
+          "raw_bucket_raw_computed_v5__speed": 6870,
+          "raw_bucket_raw_computed_v5__prev_speed": 6870,
+          "raw_bucket_raw_computed_v5__abs_speed": 6870,
+          "raw_bucket_raw_computed_v5__abs_prev_spd": 6870,
+          "raw_bucket_raw_computed_v5__delta_speed": 6870,
+          "raw_bucket_raw_computed_v5__same_dir": 6870,
+          "raw_bucket_raw_computed_v5__is_bullish": 6870,
+          "raw_bucket_raw_computed_v5__is_bearish": 6870,
+          "raw_bucket_raw_computed_v5__range_atr": 6870,
+          "raw_bucket_raw_computed_v5__range_atr_sma_prev": 6870,
+          "raw_bucket_raw_computed_v5__range_expanding": 6870,
+          "raw_bucket_raw_computed_v5__range_contracting": 6870,
+          "raw_bucket_raw_computed_v5__er": 6870,
+          "raw_bucket_raw_computed_v5__fast_er": 6870,
+          "raw_bucket_raw_computed_v5__er_falling_fast": 6870,
+          "raw_bucket_raw_computed_v5__er_noisy": 6870,
+          "raw_bucket_raw_computed_v5__er_supports_accel": 6870,
+          "raw_bucket_raw_computed_v5__close_position": 6870,
+          "raw_bucket_raw_computed_v5__bull_close_qual": 6870,
+          "raw_bucket_raw_computed_v5__bear_close_qual": 6870,
+          "raw_bucket_raw_computed_v5__bull_close_weak": 6870,
+          "raw_bucket_raw_computed_v5__bear_close_weak": 6870,
+          "raw_bucket_raw_computed_v5__bull_sma_support": 6870,
+          "raw_bucket_raw_computed_v5__bear_sma_support": 6870,
+          "raw_bucket_raw_computed_v5__bull_sma_weak": 6870,
+          "raw_bucket_raw_computed_v5__bear_sma_weak": 6870,
+          "raw_bucket_raw_computed_v5__bull_score": 6870,
+          "raw_bucket_raw_computed_v5__bear_score": 6870,
+          "raw_bucket_raw_computed_v5__active_score": 6870,
+          "raw_bucket_raw_computed_v5__active_c1": 6870,
+          "raw_bucket_raw_computed_v5__active_c2": 6870,
+          "raw_bucket_raw_computed_v5__active_c3": 6870,
+          "raw_bucket_raw_computed_v5__active_c4": 6870,
+          "raw_bucket_raw_computed_v5__active_c5": 6870,
+          "raw_bucket_raw_computed_v5__speed_dropping_fast": 6870,
+          "raw_bucket_raw_computed_v5__accel_score_weak": 6870,
+          "raw_bucket_raw_computed_v5__range_weak": 6870,
+          "raw_bucket_raw_computed_v5__close_weak": 6870,
+          "raw_bucket_raw_computed_v5__sma_weak": 6870,
+          "raw_bucket_raw_computed_v5__decel_score": 6870,
+          "raw_bucket_raw_computed_v5__immediate_decel": 6870,
+          "raw_bucket_raw_computed_v5__raw_state": 6870,
+          "raw_bucket_raw_computed_v5__pending_state": 6870,
+          "raw_bucket_raw_computed_v5__pending_count": 6870,
+          "raw_bucket_raw_computed_v5__bars_in_state": 6870,
+          "raw_bucket_raw_computed_v5__accel_memory": 6870,
+          "raw_bucket_raw_computed_v5__weak_accel_bars": 6870,
+          "raw_bucket_raw_computed_v5__allowed_raw_state": 6870,
+          "raw_bucket_raw_computed_v5__is_accel": 6870,
+          "raw_bucket_raw_computed_v5__is_decel": 6870,
+          "raw_bucket_raw_computed_v5__is_steady": 6870,
+          "raw_bucket_raw_computed_v5__state_dir": 6870,
+          "raw_bucket_raw_computed_v5__ema": 6870,
+          "raw_bucket_raw_computed_v5__body_ratio": 6870,
+          "raw_bucket_raw_computed_v5__above_ema": 6870,
+          "raw_bucket_raw_computed_v5__bull_run_count": 6870,
+          "raw_bucket_raw_computed_v5__sustained_run": 6870,
+          "raw_bucket_raw_computed_v5__has_clearance": 6870,
+          "raw_bucket_raw_computed_v5__clearance_count": 6870,
+          "raw_bucket_raw_computed_v5__clearance_ok": 6870,
+          "raw_bucket_raw_computed_v5__body_ok": 6870,
+          "raw_bucket_raw_computed_v5__is_trend": 6870,
+          "raw_bucket_raw_computed_v5__locked": 6870,
+          "raw_bucket_raw_computed_v5__atr__stress_signal_raw": 1376,
+          "raw_bucket_raw_computed_v5__drawdown_big": 1376,
+          "raw_bucket_raw_computed_v5__drawdown_fast": 1376,
+          "raw_bucket_raw_computed_v5__bars_underwater": 1376,
+          "raw_bucket_raw_computed_v5__vol_scale": 82284,
+          "raw_bucket_raw_computed_v5__state_big": 1376,
+          "raw_bucket_raw_computed_v5__state_fast": 1376,
+          "raw_bucket_raw_computed_v5__score": 1376,
+          "raw_bucket_raw_computed_v5__riskScore": 1376,
+          "raw_bucket_raw_computed_v5__ema_fast": 6870,
+          "raw_bucket_raw_computed_v5__ema_slow": 6870,
+          "raw_bucket_raw_computed_v5__ema_sep": 6870,
+          "raw_bucket_raw_computed_v5__er__trend_direction_raw": 6870,
+          "raw_bucket_raw_computed_v5__er_mean": 6870,
+          "raw_bucket_raw_computed_v5__er_std": 6870,
+          "raw_bucket_raw_computed_v5__er_downvol": 6870,
+          "raw_bucket_raw_computed_v5__er_thr_dyn": 6870,
+          "raw_bucket_raw_computed_v5__er_low": 6870,
+          "raw_bucket_raw_computed_v5__weak_run": 6870,
+          "raw_bucket_raw_computed_v5__label_int_raw": 6870,
+          "raw_bucket_raw_computed_v5__atr__trend_maturity_raw": 6870,
+          "raw_bucket_raw_computed_v5__vwap__trend_maturity_raw": 6870,
+          "raw_bucket_raw_computed_v5__direction_score": 6870,
+          "raw_bucket_raw_computed_v5__ema_pressure": 6870,
+          "raw_bucket_raw_computed_v5__er__trend_maturity_raw": 6870,
+          "raw_bucket_raw_computed_v5__state_name": 6870,
+          "raw_bucket_raw_computed_v5__break_event": 6870,
+          "raw_bucket_raw_computed_v5__maturity_code": 6870,
+          "raw_bucket_raw_computed_v5__maturity_dir": 6870,
+          "raw_bucket_raw_computed_v5__exhaustion_event": 6870,
+          "raw_bucket_raw_computed_v5__extension_atr": 6870,
+          "raw_bucket_raw_computed_v5__peak_ext_atr": 6870,
+          "raw_bucket_raw_computed_v5__signed_di_gap": 6870,
+          "raw_bucket_raw_computed_v5__mom_fade_frac": 6870,
+          "raw_bucket_raw_computed_v5__giveback_atr": 6870,
+          "raw_bucket_raw_computed_v5__mature_bars": 6870,
+          "raw_bucket_raw_computed_v5__trend_age": 6870,
+          "raw_bucket_raw_computed_v5__vwap_dist_atr": 6870,
+          "raw_bucket_raw_computed_v5__bars_since_fresh": 6870,
+          "raw_bucket_raw_computed_v5__bars_since_mature": 6870,
+          "raw_bucket_raw_computed_v5__bars_since_exhausted": 6870,
+          "raw_bucket_raw_computed_v5__rv_60": 1376,
+          "raw_bucket_raw_computed_v5__atr_pct": 1376,
+          "raw_bucket_raw_computed_v5__india_vix_zscore_20": 82284,
+          "raw_bucket_raw_computed_v5__rv_rank_60": 1376,
+          "raw_bucket_raw_computed_v5__atr_rank_60": 1376,
+          "raw_bucket_raw_computed_v5__realized_60": 1376,
+          "raw_bucket_raw_computed_v5__implied_vix": 82284,
+          "raw_bucket_raw_computed_v5__rv_rank_60d": 1376,
+          "raw_bucket_raw_computed_v5__atr_rank_60d": 1376,
+          "raw_bucket_raw_computed_v5__vol_level_pct60d_score": 1376,
+          "raw_bucket_raw_computed_v5__vol_level_ord": 1376,
+          "raw_bucket_raw_computed_v5__vol_z": 1376,
+          "raw_bucket_raw_computed_v5__range_z": 1376,
+          "raw_bucket_raw_computed_v5__close_pos": 1376,
+          "raw_bucket_raw_computed_v5__close_clean": 1376,
+          "raw_bucket_raw_computed_v5__close_rejection": 1376,
+          "raw_bucket_raw_computed_v5__close_messy": 1376,
+          "raw_bucket_raw_computed_v5__minute_of_day": 1376,
+          "raw_bucket_raw_computed_v5__session_phase": 1376,
+          "raw_bucket_raw_computed_v5__vwap_band_state": 6870,
+          "raw_bucket_raw_computed_v5__vwap_excursion_ratio": 6870,
+          "raw_bucket_raw_computed_v5__reversion_strength": 6870,
+          "raw_bucket_raw_computed_v5__lr_close_1": 1376,
+          "raw_bucket_raw_computed_v5__lr_close_5": 1376,
+          "raw_bucket_raw_computed_v5__lr_close_15": 1376,
+          "raw_bucket_raw_computed_v5__ret_zscore_10": 1376,
+          "raw_bucket_raw_computed_v5__ret_zscore_30": 1376,
+          "raw_bucket_raw_computed_v5__intraday_cum_ret": 1376,
+          "raw_bucket_raw_computed_v5__trend_efficiency_15": 1376,
+          "raw_bucket_raw_computed_v5__trend_efficiency_30": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_last_peak": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_last_trough": 1376,
+          "raw_bucket_raw_computed_v5__trend_duration": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_intraday_high": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_intraday_low": 1376,
+          "raw_bucket_raw_computed_v5__range_position": 1376,
+          "raw_bucket_raw_computed_v5__vwap_dist_atr__aditya_raw_faeture_swing_trade": 1376,
+          "raw_bucket_raw_computed_v5__vwap_slope_15": 1376,
+          "raw_bucket_raw_computed_v5__vwap_slope_30": 1376,
+          "raw_bucket_raw_computed_v5__time_away_from_vwap": 1376,
+          "raw_bucket_raw_computed_v5__vwap_reversion_strength": 1376,
+          "raw_bucket_raw_computed_v5__rv_15": 1376,
+          "raw_bucket_raw_computed_v5__rv_60__aditya_raw_faeture_swing_trade": 1376,
+          "raw_bucket_raw_computed_v5__vol_ratio_5_60": 1376,
+          "raw_bucket_raw_computed_v5__atr_pct__aditya_raw_faeture_swing_trade": 1376,
+          "raw_bucket_raw_computed_v5__breadth_ratio": 1376,
+          "raw_bucket_raw_computed_v5__breadth_mom5": 1376,
+          "raw_bucket_raw_computed_v5__banking_ret": 1376,
+          "raw_bucket_raw_computed_v5__banking_ret_lag1": 1376,
+          "raw_bucket_raw_computed_v5__bank_it_spread": 1376,
+          "raw_bucket_raw_computed_v5__fut_oi_chg5": 1376,
+          "raw_bucket_raw_computed_v5__fut_spot_spread": 1376,
+          "raw_bucket_raw_computed_v5__basis_zscore_30": 1376,
+          "raw_bucket_raw_computed_v5__lr_futures_5": 1376,
+          "raw_bucket_raw_computed_v5__tc_sin": 1376,
+          "raw_bucket_raw_computed_v5__tc_cos": 1376,
+          "raw_bucket_raw_computed_v5__ret_1d": 1376,
+          "raw_bucket_raw_computed_v5__ret_3d": 1376,
+          "raw_bucket_raw_computed_v5__ret_5d": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_3d_high__aditya_raw_faeture_swing_trade": 1376,
+          "raw_bucket_raw_computed_v5__distance_from_3d_low__aditya_raw_faeture_swing_trade": 1376,
+          "raw_bucket_raw_computed_v5__avg_vix_1d": 82284,
+          "raw_bucket_raw_computed_v5__avg_breadth_1d": 82284,
+          "raw_bucket_raw_computed_v5__futures_oi_trend_1d": 82284,
+          "raw_bucket_raw_computed_v5__rolling_max_drawdown_3d": 1376,
+          "raw_bucket_raw_computed_v5__trend_efficiency_1d": 1376,
+          "raw_bucket_raw_computed_v5__vol_zscore_20": 1376,
+          "raw_bucket_raw_computed_v5__vol_trend_5": 1376,
+          "raw_bucket_raw_computed_v5__price_vol_divergence": 1376,
+          "raw_bucket_raw_computed_v5__vol_per_range": 1376,
+          "raw_bucket_raw_computed_v5__vol_climax_flag": 1376,
+          "raw_bucket_raw_computed_v5__vix_vel_5min_5m": 6870,
+          "raw_bucket_raw_computed_v5__vix_accel_5min_5m": 6870,
+          "raw_bucket_raw_computed_v5__vix_vel_z_5m": 6870,
+          "raw_bucket_raw_computed_v5__vwap_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__vwap_m_5m": 6870,
+          "raw_bucket_raw_computed_v5__basis_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__basis_std_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__basis_tension_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__vwap_slope_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__vwap_accel_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__kinetic_energy_d_5m": 6870,
+          "raw_bucket_raw_computed_v5__vwap_spread_5m": 6870,
+          "raw_bucket_raw_computed_v5__dc_pos_275_bucket": 1376,
+          "raw_bucket_raw_computed_v5__iv_skew": 1376,
+          "raw_bucket_raw_computed_v5__PCR_OI": 1376,
+          "raw_bucket_raw_computed_v5__PCR_Volume": 1376,
+          "raw_bucket_raw_computed_v5__pcr_regime": 1376,
+          "raw_bucket_raw_computed_v5__vix_ret_1": 1376,
+          "raw_bucket_raw_computed_v5__PCR_OI_chg1": 1376,
+          "raw_bucket_raw_computed_v5__PCR_Volume_chg1": 1376,
+          "raw_bucket_raw_computed_v5__abs_speed_pct_rank_60": 1376,
+          "raw_bucket_raw_computed_v5__fut_oi_chg5__nifty_context_features": 1376,
+          "raw_bucket_raw_computed_v5__usd_inr_chg_1d": 82284,
+          "raw_bucket_raw_computed_v5__banking_ret__nifty_context_features": 1376,
+          "raw_bucket_raw_computed_v5__banking_ret_lag1__nifty_context_features": 1376,
+          "raw_bucket_raw_computed_v5__Sma_50_Close_dist_atr_14": 1376,
+          "raw_bucket_raw_computed_v5__Expiry_Flag": 82284,
+          "raw_bucket_raw_computed_v5__ATR_14_NEW_FUTURES": 1376,
+          "raw_bucket_raw_computed_v5__Time_Counter": 1376,
+          "raw_bucket_raw_computed_v5__lr_close_5__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__lr_close_15__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__ret_zscore_30__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__intraday_cum_ret__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__trend_efficiency_30__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_last_peak__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_last_trough__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__range_position__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__structure_location": 1376,
+          "raw_bucket_raw_computed_v5__vwap__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vwap_dist_atr__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vwap_slope_30__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__time_away_from_vwap__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vwap_reversion_strength__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vol_ratio_5_60__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__tc_sin__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__tc_cos__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vol_zscore_20__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vol_trend_5__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__price_vol_divergence__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vol_per_range__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__vol_climax_flag__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__ret_1d__nifty_features_v3": 82284,
+          "raw_bucket_raw_computed_v5__ret_3d__nifty_features_v3": 82284,
+          "raw_bucket_raw_computed_v5__ret_5d__nifty_features_v3": 82284,
+          "raw_bucket_raw_computed_v5__ret_10d": 82284,
+          "raw_bucket_raw_computed_v5__ret_20d": 82284,
+          "raw_bucket_raw_computed_v5__drawdown_from_10d_high": 1376,
+          "raw_bucket_raw_computed_v5__drawdown_from_20d_high": 1376,
+          "raw_bucket_raw_computed_v5__overnight_gap_atr": 82284,
+          "raw_bucket_raw_computed_v5__prev_day_close_location": 82284,
+          "raw_bucket_raw_computed_v5__gap_filled_flag": 1376,
+          "raw_bucket_raw_computed_v5__prev_day_range_pct": 82284,
+          "raw_bucket_raw_computed_v5__consecutive_up_closes": 1376,
+          "raw_bucket_raw_computed_v5__consecutive_down_closes": 1376,
+          "raw_bucket_raw_computed_v5__bars_since_vol_spike": 1376,
+          "raw_bucket_raw_computed_v5__bars_above_vwap": 1376,
+          "raw_bucket_raw_computed_v5__bars_below_vwap": 1376,
+          "raw_bucket_raw_computed_v5__fut_spot_spread__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__basis_zscore_30__nifty_features_v3": 1376,
+          "raw_bucket_raw_computed_v5__futures_oi_trend_1d__nifty_features_v3": 82284,
+          "raw_bucket_raw_computed_v5__hurst_100": 1376,
+          "raw_bucket_raw_computed_v5__hurst_200": 1376,
+          "raw_bucket_raw_computed_v5__india_vix_chg_1d": 82284,
+          "raw_bucket_raw_computed_v5__rolling_max_drawdown_3d__nifty_features_v3": 82284,
+          "raw_bucket_raw_computed_v5__trend_efficiency_1d__nifty_features_v3": 82284,
+          "raw_bucket_raw_computed_v5__ema_close_location_strength": 1376,
+          "raw_bucket_raw_computed_v5__break_attempt_count": 1376,
+          "raw_bucket_raw_computed_v5__break_attempt_count_support": 1376,
+          "raw_bucket_raw_computed_v5__RRG_Regime": 82284,
+          "raw_bucket_raw_computed_v5__nifty_beat_breadth": 82284,
+          "raw_bucket_raw_computed_v5__US2Y_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__US2Y_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__US10Y_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__US10Y_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__IN2Y_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__IN2Y_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__IN10Y_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__IN10Y_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__DXY_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__DXY_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__GC_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__GC_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__CL_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__CL_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__BTCUSD_vs_nifty_quadrant": 82284,
+          "raw_bucket_raw_computed_v5__BTCUSD_vs_nifty_rs_ratio": 82284,
+          "raw_bucket_raw_computed_v5__mom_1m": 1376,
+          "raw_bucket_raw_computed_v5__mom_5m": 1376,
+          "raw_bucket_raw_computed_v5__mom_15m": 1376,
+          "raw_bucket_raw_computed_v5__mom_30m": 1376,
+          "raw_bucket_raw_computed_v5__chmom": 1376,
+          "raw_bucket_raw_computed_v5__rsi_14__nifty_technical_features": 1376,
+          "raw_bucket_raw_computed_v5__stoch_k": 1376,
+          "raw_bucket_raw_computed_v5__williams_r": 1376,
+          "raw_bucket_raw_computed_v5__mfi_14": 1376,
+          "raw_bucket_raw_computed_v5__macd": 1376,
+          "raw_bucket_raw_computed_v5__ppo": 1376,
+          "raw_bucket_raw_computed_v5__apo": 1376,
+          "raw_bucket_raw_computed_v5__sma_15": 1376,
+          "raw_bucket_raw_computed_v5__sma_60": 1376,
+          "raw_bucket_raw_computed_v5__sma_375": 1376,
+          "raw_bucket_raw_computed_v5__ema_20__nifty_technical_features": 1376,
+          "raw_bucket_raw_computed_v5__ema_375": 1376,
+          "raw_bucket_raw_computed_v5__bb_position": 1376,
+          "raw_bucket_raw_computed_v5__obv": 1376,
+          "raw_bucket_raw_computed_v5__ad": 1376,
+          "raw_bucket_raw_computed_v5__adosc": 1376,
+          "raw_bucket_raw_computed_v5__dolvol": 1376,
+          "raw_bucket_raw_computed_v5__amihud_ill": 1376,
+          "raw_bucket_raw_computed_v5__vsa_dev": 6870
+        }
       },
       "categorical": [
         "raw_bucket_raw_computed_v5__is_confirmed",
@@ -5779,7 +6265,15 @@
   ],
   "labels_name": "labels_1min_A20_Ex_z2_En_zNA_anchor_7class",
   "labels_sha256": "0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce",
-  "class_distribution": {},
+  "class_distribution": {
+    "NO_TRADE": 353407,
+    "EXIT_SUPER": 60942,
+    "EXIT_SMALL": 34830,
+    "EXIT_SUB": 25320,
+    "ENTRY_SUPER": 19603,
+    "ENTRY_SMALL": 13614,
+    "ENTRY_SUB": 5895
+  },
   "zero_weight_classes": [],
   "no_peek": {
     "applied": true,
