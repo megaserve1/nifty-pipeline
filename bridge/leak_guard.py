@@ -67,10 +67,18 @@ import pandas as pd
 
 # --- 1. the future, and the answer -------------------------------------------------
 # matched against the LOWERCASED column name.
+# "fut" / "future" as a column PREFIX is this project's abbreviation for the futures INSTRUMENT
+# (basis, open interest), NOT forward-in-time. The greedy ^fut[_.] / ^future[_.] rules used to
+# false-ban fut_spot_spread (the futures-minus-spot BASIS, a documented key input), fut_oi_chg*,
+# fut_spot_spread_chg1 and Future_option_Diff -- silently dropping them from v6 (--all) with the
+# reason "it looks FORWARD". They are backward-looking (measured future-corr < 0.05, far under the
+# 0.10 limit). So we ban only genuine forward-RETURN names (^fut_ret / ^future_ret) and columns
+# ending in _future; anything else that truly leaks is still caught by the behavioural
+# measured-against-price test below.
 FUTURE_PATTERNS = [
-    r"^fwd[_.]", r"[_.]fwd$", r"^forward[_.]", r"^future[_.]", r"[_.]future$",
+    r"^fwd[_.]", r"[_.]fwd$", r"^forward[_.]", r"[_.]future$",
     r"^next[_.]", r"^ahead[_.]", r"[_.]ahead$", r"^lead[_.]", r"[_.]lead\d*$",
-    r"^signed_ret", r"^fut[_.]",
+    r"^signed_ret", r"^fut_ret", r"^future_ret",
 ]
 # THE WORD "label" IS AMBIGUOUS IN THIS CODEBASE, AND GETTING THIS WRONG IS EXPENSIVE.
 #

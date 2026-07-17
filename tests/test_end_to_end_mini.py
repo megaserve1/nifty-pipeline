@@ -115,6 +115,12 @@ def world(tmp_path, monkeypatch):
     monkeypatch.setattr(C, "VERSIONS_DIR", tmp_path / "versions")
     monkeypatch.setattr(C, "DATASETS_DIR", tmp_path / "datasets")
     monkeypatch.setattr(C, "EMBARGO_SESSIONS", 5)    # 60 synthetic sessions, not 5 years
+    # This test verifies the leak-guard ARMED (banned columns must die) and the per-column
+    # sentinel / kept-NaN behaviour. The project default is report-only + a flat -999 (a
+    # deliberate config choice), so arm the guard and restore the per-column sentinel HERE, or
+    # the planted leaks would survive and the no-peek NaN check would see -999 instead of NaN.
+    monkeypatch.setattr(C, "LEAK_GUARD_ENFORCE", True)
+    monkeypatch.setattr(C, "NA_FIXED_SENTINEL", None)
     return tmp_path, grid, poison_stamp
 
 

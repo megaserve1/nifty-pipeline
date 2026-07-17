@@ -8,7 +8,9 @@ core/make_version.py -- SELECT features -> freeze a DATASET VERSION (the recipe)
         -> versions/dataset_vN.yaml   (immutable; N auto-increments)
 
 Shortcuts:
-    --all                            take every registered feature
+    --all                            take every registered feature (all groups combined)
+    --group Bucket_Raw_Features      take every feature in ONE group / sub-folder (no ticking)
+    --groups                         list the groups and how many features each holds
     --from v1 --drop a,b --add c     derive a new version from an old one
 
 THE RECIPE IS IMMUTABLE. Nothing is ever written back into it -- the manifest certifies
@@ -279,6 +281,62 @@ def mode_all():
     freeze(sorted(reg), source="--all")          # a MAJOR -- it is a fresh whole-menu choice
 
 
+def mode_group(group: str):
+    """select every feature in ONE OR MORE groups (data/features sub-folders) -- no ticking.
+
+    pass a comma-separated list to COMBINE folders (their union):
+        --group Bucket_Features,Bucket_Raw_Features        -> bucket + bucket_raw
+        --group Bucket_Raw_Features,Raw_Computed_Faetures  -> bucket_raw + rawcomputed
+        --all                                              -> all three combined
+    the group names are the sub-folders register.py recorded. each build is a fresh MAJOR.
+    """
+    reg = load_registry()
+    all_groups = sorted({(m.get("group") or "_root") for m in reg.values()})
+    wanted = [g.strip() for g in group.split(",") if g.strip()]
+    unknown = [g for g in wanted if g not in all_groups]
+    if unknown:
+        raise SystemExit(f"unknown group(s): {unknown}\n"
+                         f"  groups on the menu: {all_groups}\n"
+                         f"  (list them:  python core/make_version.py --groups)")
+    picks = sorted(n for n, m in reg.items() if (m.get("group") or "_root") in wanted)
+    if not picks:
+        raise SystemExit(f"no features in {wanted}")
+    print(f"selecting group(s) {wanted}: {len(picks)} features")
+    freeze(picks, source=f"group:{'+'.join(wanted)}")
+
+
+def mode_feature(names: str):
+    """select EXACTLY these registered features by NAME -- no folder, no ballot.
+
+    for when each delivered parquet IS a whole version (the combined tables the feature team
+    hands over). one name -> one version:
+        --feature combo_bucket_bucketraw     -> a version built from just that parquet
+    comma-separate to put several parquets in one version.
+    """
+    reg = load_registry()
+    wanted = [x.strip() for x in names.split(",") if x.strip()]
+    unknown = [n for n in wanted if n not in reg]
+    if unknown:
+        raise SystemExit(f"unknown feature(s): {unknown}\n"
+                         f"  (list what is registered:  python bridge/register.py --list)")
+    print(f"selecting {len(wanted)} feature(s) by name: {wanted}")
+    freeze(sorted(wanted), source=f"feature:{'+'.join(wanted)}")
+
+
+def mode_groups():
+    """show the groups and how many features each holds -- so you pick the exact name."""
+    from collections import Counter
+    reg = load_registry()
+    tally = Counter((m.get("group") or "_root") for m in reg.values())
+    if not tally:
+        print("no features registered yet -- run  python bridge/register.py  first")
+        return
+    print("feature groups (a whole group -> one dataset):\n")
+    for g, n in sorted(tally.items()):
+        print(f"  {g:24s} {n:3d} features   ->  python core/make_version.py --group {g}")
+    print(f"\n  all groups combined:  python core/make_version.py --all")
+
+
 def mode_from_plan(path):
     """run a PLAN FILE: many variations at once.
 
@@ -348,6 +406,15 @@ def main():
     ap.add_argument("--drop", default="", metavar="a,b")
     ap.add_argument("--add", default="", metavar="c,d")
     ap.add_argument("--all", action="store_true", help="select every registered feature")
+    ap.add_argument("--group", metavar="NAME[,NAME2]",
+                    help="select every feature in one or more groups / sub-folders -- no ticking. "
+                         "comma-separate to COMBINE folders, e.g. "
+                         "--group Bucket_Features,Bucket_Raw_Features")
+    ap.add_argument("--groups", action="store_true",
+                    help="list the feature groups and their counts, then stop")
+    ap.add_argument("--feature", metavar="NAME[,NAME2]",
+                    help="select EXACTLY these features by name (one delivered parquet = one "
+                         "version). no folder, no ballot.")
     ap.add_argument("--from-plan", nargs="?", const=str(C.CONFIGS_DIR / "version_plan.yaml"),
                     metavar="FILE",
                     help="run a plan file: many variations at once (an ablation sweep)")
@@ -361,6 +428,12 @@ def main():
         mode_from_sheet()
     elif a.base:
         derive(a.base, split(a.drop), split(a.add))
+    elif a.groups:
+        mode_groups()
+    elif a.feature:
+        mode_feature(a.feature)
+    elif a.group:
+        mode_group(a.group)
     elif a.all:
         mode_all()
     elif a.from_plan:

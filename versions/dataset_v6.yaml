@@ -1,0 +1,13 @@
+# FROZEN RECIPE -- immutable. Never edit; make a new version instead.
+# The lock (hashes, clearml id) is written beside this as *.lock.yaml
+name: dataset_v6
+kind: selection
+parent: null
+created: '2026-07-17T15:31:04'
+author: megaserve
+selected_by: feature:all_columns_v6
+labels_name: labels_1min_A20_Ex_z2_En_zNA_anchor_7class
+date_range: full
+features:
+- all_columns_v6
+feature_clocks: {}

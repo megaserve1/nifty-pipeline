@@ -1,4 +1,4 @@
 [core]
     remote = gcs
 ['remote "gcs"']
-    url = gs://demo-nifty-pipeline/final_pipeline/dvc
+    url = gs://live-nifty-pipeline/final_pipeline/dvc

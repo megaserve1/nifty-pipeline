@@ -133,9 +133,10 @@ app.clear.ml holds metadata only; all bytes go to our bucket via `default_output
 1. **Rotate the ClearML key.** The key printed in plaintext on 2026-07-08 is still
    live. New key from app.clear.ml → update `~/clearml.conf` on the laptop, the VM,
    and the remote PC. This is overdue.
-2. **Set the production bucket.** `config.py` still says `demo-nifty-pipeline`.
-   One line, but until it changes, every publish pushes production data into the
-   demo bucket. Also update the dvc remote and `clearml.conf` output_uri.
+2. **Production bucket — DONE 2026-07-16.** `config.py` `GCS_BUCKET` and the dvc
+   remote (`.dvc/config`) both point at `live-nifty-pipeline`. NOTE: pointing the
+   config does not move existing data — a new version must be published to populate
+   the new bucket (v3's bytes still live in the old `demo-nifty-pipeline`).
 3. `git init && dvc init` + first push (the repo/DVC bootstrap has still never run).
 
 ### The training machine

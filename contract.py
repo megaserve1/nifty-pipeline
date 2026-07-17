@@ -138,8 +138,18 @@ def assert_schema(df, man: dict) -> None:
     Catches a feature notebook that silently renamed a column or changed a dtype
     between the build and the training run.
     """
-    want = [(c["col"], c["dtype"]) for c in man["schema"]]
-    got = [(c, str(t)) for c, t in zip(df.columns, df.dtypes)]
+    # object / str / string are the SAME text type, but pandas spells them differently across
+    # major versions (pandas 3 writes 'str' where pandas 2 reads 'object'). The manifest is
+    # certified on the BUILD machine; a worker PC on a different pandas major reads the identical
+    # parquet with a different spelling and would false-alarm SCHEMA DRIFT, aborting all three
+    # trainers on a perfectly good dataset. Collapse the text family to one token on BOTH sides.
+    # A genuine text->number or number->number retype still differs, so the guard keeps its job.
+    _TEXT = {"object", "str", "string", "string[python]", "string[pyarrow]"}
+    def _canon(dt):
+        dt = str(dt)
+        return "text" if dt in _TEXT else dt
+    want = [(c["col"], _canon(c["dtype"])) for c in man["schema"]]
+    got = [(c, _canon(t)) for c, t in zip(df.columns, df.dtypes)]
     if got != want:
         w, g = dict(want), dict(got)
         added = sorted(set(g) - set(w))

@@ -20,6 +20,7 @@ run:
 """
 import argparse
 import datetime as dt
+import re
 import sys
 import pathlib
 
@@ -69,10 +70,25 @@ def feature_name(path) -> str:
     """
     stem = path.stem                                # drop the .parquet
     stem = stem.split(" - Copy")[0]                 # windows' ' - Copy' suffix
-    stem = stem.replace("-", "_").replace(" ", "_") # no spaces, no dashes
+    # anything that is not a letter or digit -> underscore. this kills parentheses, brackets,
+    # spaces and dashes in one go -- e.g. 'Bucket_Bucket_Raw(V4)' -> 'bucket_bucket_raw_v4'.
+    # the name becomes a column prefix (feature__col), so a '(' here ends up in every column
+    # name, and some downstream tools choke on that. keep it strictly [a-z0-9_].
+    stem = re.sub(r"[^0-9A-Za-z]+", "_", stem)
     while "__" in stem:                             # collapse any doubled underscores
         stem = stem.replace("__", "_")
     return stem.strip("_").lower()
+
+
+def feature_group(path) -> str:
+    """which sub-folder of data/features this parquet lives in -- that folder IS the group.
+
+    data/features/Bucket_Raw_Features/gap_state_raw.parquet  ->  'Bucket_Raw_Features'
+    a file dropped straight into data/features (no sub-folder) has no group -> '_root'.
+    the group lets make_version pick a whole folder at once, instead of ticking 30+ boxes.
+    """
+    rel = path.relative_to(C.FEATURES_DIR)
+    return rel.parts[0] if len(rel.parts) > 1 else "_root"
 
 
 def read_time_index(df: pd.DataFrame) -> pd.DataFrame:
@@ -165,11 +181,15 @@ def main():
         if not reg:
             print("the menu is empty -- run  python bridge/register.py  first")
             return
-        print(f"{'FEATURE':32s} {'CLOCK':7s} {'NA POLICY':10s} {'COLS':>4s}  FILE")
-        for name, m in sorted(reg.items()):
-            print(f"{name:32s} {m.get('clock','?'):7s} {m.get('na_policy','?'):10s} "
+        print(f"{'FEATURE':30s} {'GROUP':22s} {'CLOCK':7s} {'COLS':>4s}  FILE")
+        for name, m in sorted(reg.items(), key=lambda kv: (kv[1].get('group', ''), kv[0])):
+            print(f"{name:30s} {m.get('group','_root'):22s} {m.get('clock','?'):7s} "
                   f"{len(m.get('columns', [])):4d}  {m['file']}")
-        print(f"\n{len(reg)} features registered")
+        # a per-group tally, so you can confirm the counts before building a group dataset
+        from collections import Counter
+        tally = Counter(m.get('group', '_root') for m in reg.values())
+        print(f"\n{len(reg)} features registered   groups: "
+              + ", ".join(f"{g}={n}" for g, n in sorted(tally.items())))
         return
 
     # ---- the drop folder must exist. we do NOT create it. -------------------
@@ -179,10 +199,13 @@ def main():
         raise SystemExit(f"feature folder not found: {C.FEATURES_DIR}\n"
                          f"the feature team drops one parquet per feature there.")
 
-    files = sorted(p for p in C.FEATURES_DIR.iterdir()
-                   if p.suffix == ".parquet" and not p.name.startswith("."))
+    # RECURSE into sub-folders. the feature team groups parquets by folder
+    # (Bucket_Raw_Features, Bucket_Features, Raw_Computed_Faetures ...). each folder is a GROUP.
+    # .iterdir() only saw the top level, so a grouped drop was INVISIBLE -- 0 files, "done!".
+    files = sorted(p for p in C.FEATURES_DIR.rglob("*.parquet")
+                   if not p.name.startswith(".") and "__pycache__" not in p.parts)
     if not files:
-        raise SystemExit(f"no .parquet files in {C.FEATURES_DIR}")
+        raise SystemExit(f"no .parquet files under {C.FEATURES_DIR} (searched sub-folders too)")
 
     print(f"scanning {C.FEATURES_DIR}  ->  {len(files)} feature parquets\n")
 
@@ -190,6 +213,8 @@ def main():
     seen_this_scan = {}
     for p in files:
         name = feature_name(p)
+        rel_file = p.relative_to(C.FEATURES_DIR).as_posix()   # e.g. Bucket_Features/gap_state_bucket.parquet
+        group = feature_group(p)                              # the sub-folder this came from
 
         # two different files cannot own one name. if that happens the second one would be
         # silently ignored for ever, and the team would think their feature was in the
@@ -200,14 +225,14 @@ def main():
         # colliding within one scan, which the registry alone cannot see.)
         if name in seen_this_scan:
             print(f"  DUPLICATE refused: '{name}' claimed by both "
-                  f"{seen_this_scan[name]} and {p.name}. rename one of them.")
+                  f"{seen_this_scan[name]} and {rel_file}. rename one of them.")
             continue
-        if name in reg and reg[name]["file"] != p.name:
+        if name in reg and reg[name]["file"] != rel_file:
             print(f"  DUPLICATE refused: '{name}' is already {reg[name]['file']}, "
-                  f"now also {p.name}. rename one of them (or delete the registry entry "
+                  f"now also {rel_file}. rename one of them (or delete the registry entry "
                   f"if the file was renamed on purpose).")
             continue
-        seen_this_scan[name] = p.name
+        seen_this_scan[name] = rel_file
 
         if name in reg and not a.rescan:
             skipped += 1
@@ -215,6 +240,11 @@ def main():
                   f"{reg[name].get('na_policy','?')}")
             continue
 
+        # a per-file heartbeat. clock measurement is a groupby over ~513k rows PER COLUMN, so a
+        # wide base table (170 cols) is silent for a minute or two. without this line the whole
+        # scan looks frozen for 25-40 min and the temptation is to kill it -- which is the one
+        # thing that actually breaks it. flush so it shows immediately, not buffered.
+        print(f"  scan   {name:32s} [{group}] reading + measuring clocks ...", flush=True)
         try:
             # anything a human already cleared in allow_columns survives the rescan
             info = inspect(p, allow=(reg.get(name, {}) or {}).get("allow_columns"))
@@ -229,7 +259,10 @@ def main():
         # field so a disagreement is visible instead of erased.
         keep_clock = old.get("clock") or info["clock"]
         reg[name] = {
-            "file": p.name,
+            "file": rel_file,
+            # the sub-folder this feature came from. make_version --group <name> selects a whole
+            # group in one shot. a human never has to tick 30+ boxes to build a group dataset.
+            "group": group,
             "clock": keep_clock,
             "clock_measured": info["clock"],
             # keep whatever the human already set; only default it the first time

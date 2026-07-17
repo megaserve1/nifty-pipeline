@@ -125,7 +125,7 @@ def enqueue_all(dataset_id: str, version: str, models: list) -> dict:
         run.set_parameters(params)
         Task.enqueue(run, queue_name=C.TRAIN_QUEUE)
         ids[mtype] = run.id
-        print(f"      queued  train_{mtype} v{version}   ({run.id})")
+        print(f"      queued  train_{mtype} v{str(version).lstrip('v')}   ({run.id})")
 
     print(f"\n  {len(ids)} models are queued on '{C.TRAIN_QUEUE}'.")
     print(f"  THEY ONLY RUN IF A WORKER IS LISTENING:")
@@ -160,7 +160,7 @@ def enqueue_champion(dataset_id: str, version: str, models: list):
         "Args/expect_models": ",".join(models),
     })
     Task.enqueue(run, queue_name=C.TRAIN_QUEUE)
-    print(f"      queued  select_champion v{version}   (it WAITS for: {', '.join(models)})")
+    print(f"      queued  select_champion v{str(version).lstrip('v')}   (it WAITS for: {', '.join(models)})")
     return run.id
 
 

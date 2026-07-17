@@ -35,7 +35,12 @@ CONFIGS_DIR  = ROOT / "configs"
 # now moves when the file does, and it cannot be forgotten because there is nothing to remember.
 # (LABELS_FILE is defined below, in the [BRIDGE] section -- Python resolves this at call time.)
 def labels_name() -> str:
-    return LABELS_FILE.rsplit(".", 1)[0].replace("labels_1min_2026-07-03_1535_", "labels_1min_")
+    import re
+    stem = LABELS_FILE.rsplit(".", 1)[0]
+    # strip ANY  YYYY-MM-DD_HHMM  stamp so the logical name is stable across re-labels. hard-coding
+    # one date meant a new labels file kept its full dated name -- the exact staleness this guards
+    # against. the labels_sha256 in the manifest is what proves two files differ, not this name.
+    return re.sub(r"^(labels_1min_)\d{4}-\d{2}-\d{2}_\d{4}_", r"\1", stem)
 
 # ---- the three models ---------------------------------------------------------
 MODEL_TYPES = ["random_forest", "xgboost", "catboost"]
@@ -71,7 +76,7 @@ STORAGE_MODE = "gcs"
 # Where ClearML writes model artifacts. In "gcs" mode this MUST be your own GCS bucket --
 # app.clear.ml holds only metadata, so no market data or model bytes ever leave company GCP.
 # In "local" mode it is None: artifacts go to the self-hosted fileserver (see model_output_uri).
-GCS_BUCKET     = "demo-nifty-pipeline"          # >>> SET to the production bucket <<<
+GCS_BUCKET     = "live-nifty-pipeline"          # production bucket for the live run (set 2026-07-16)
 GCS_OUTPUT_URI = f"gs://{GCS_BUCKET}/clearml"
 
 
@@ -191,7 +196,7 @@ LABELS_DIR  = DATA_DIR / "labels"
 # fixed. 12.4% is on the LOW side (20-40% was the aim -- weight_raw 12,000-33,000 rather than
 # 7,000), so expect it still to lean toward over-trading. Do not argue about it: run
 # trainer/local_check.py and read the "minutes it would trade" line. That is the evidence.
-LABELS_FILE = "labels_1min_2026-07-03_1535_A20_Ex_z2_En_zNA_7class_notrade7k.csv"
+LABELS_FILE = "labels_1min_2026-07-17_1139_A20_Ex_z2_En_zNA_anchor_7class.csv"
 
 # the previous file, kept so a result can be reproduced against it.
 LABELS_FILE_ZERO_NOTRADE = "labels_1min_2026-07-03_1535_A20_Ex_z2_En_zNA_7class.csv"
@@ -287,6 +292,23 @@ STALE_TOLERANCE_BARS = 3
 
 # a missing CATEGORY keeps its own identity rather than being blended into a real one
 CATEGORICAL_NA_LABEL = "MISSING"
+
+# ---- leak-guard enforcement (project decision, 2026-07-17) ---------------------
+# The feature team has CONFIRMED the current feature set has no walk-forward/lookahead, so the
+# leak-guard runs in REPORT-ONLY mode: it still prints what it WOULD flag (kept on the record),
+# but build_dataset does NOT drop those columns. Set back to True to re-arm the guard.
+LEAK_GUARD_ENFORCE = False
+# ...EXCEPT these. A raw DATE or TIMESTAMP is never a feature -- it lets the model memorise which
+# day it is and fail on every unseen date. These are dropped even in report-only mode. (matched
+# case-insensitively against the exact column name.)
+CALENDAR_ALWAYS_DROP = ("session", "t5", "date", "datetime", "timestamp", "expiry_date")
+
+# ---- fixed NaN sentinel (project decision, 2026-07-17) ------------------------
+# When set, EVERY numeric NaN is filled with this one value for ALL models (no drop, no 0). The
+# per-column formula above is safer (it can never collide), but a flat -999 is simpler to explain
+# and is out of range for this feature set. Set to None to go back to the per-column sentinel.
+# (Text/categorical NaN still becomes CATEGORICAL_NA_LABEL -- a number can't live in a text column.)
+NA_FIXED_SENTINEL = -999.0
 
 
 # --- make sure the folders exist ------------------------------------------------

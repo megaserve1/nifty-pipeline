@@ -211,9 +211,22 @@ def main():
         # back, and the case where the feature team quietly re-drops a file with a new column in
         # it and nobody re-runs register.py.
         screen = leak_guard.screen(raw, allow=meta.get("allow_columns"))
-        if screen["banned"]:
+        # a raw date/timestamp is NEVER a feature, in either mode -- it lets the model memorise
+        # which day it is. dropped up front so 'allow everything' can never let it back in.
+        cal = [c for c in raw.columns if c.lower() in C.CALENDAR_ALWAYS_DROP]
+        if screen["banned"] or cal:
             leak_guard.report(screen, where=f"{name} ({meta['file']})")
-            raw = raw[screen["ok"]]
+            if C.LEAK_GUARD_ENFORCE:
+                keep = [c for c in screen["ok"] if c not in cal]      # guard armed: drop all bans
+            else:
+                # report-only (feature team confirmed no lookahead): keep the flagged columns,
+                # but still drop the raw calendar columns above.
+                keep = [c for c in raw.columns if c not in cal]
+                dropped = [c for c in raw.columns if c not in keep]
+                if dropped:
+                    print(f"      LEAK_GUARD_ENFORCE=False -> keeping flagged columns; "
+                          f"still dropping calendar {dropped}")
+            raw = raw[keep]
             if not len(raw.columns):
                 raise SystemExit(f"every column of '{name}' was refused -- it is a working file, "
                                  f"not a feature file. take it out of {C.FEATURES_DIR}.")
@@ -258,6 +271,7 @@ def main():
             tolerance_bars=C.STALE_TOLERANCE_BARS,
             sentinel_margin=C.SENTINEL_MARGIN,
             categorical_na_label=C.CATEGORICAL_NA_LABEL,
+            fixed_sentinel=C.NA_FIXED_SENTINEL,   # -999 for ALL models when set; None = per-column
         )
 
         # THE MEASUREMENT IS THE CEILING, NOT A SUGGESTION.
@@ -416,8 +430,29 @@ def main():
     print(f"      {len(df):,} rows x {df.shape[1]} cols")
     print(f"      {complete:,} rows have every feature present "
           f"({complete/max(len(df),1)*100:.1f}%)")
-    print(f"      NOTE: rows with NaN are KEPT. the NaN is information (see na_policy), and")
-    print(f"            xgboost/catboost learn from it. dropping them would delete the dataset.")
+
+    if C.NA_FIXED_SENTINEL is not None:
+        # FLAT SENTINEL (project decision): fill EVERY remaining NaN -- the feature's own missing
+        # AND the no-closed-bar minutes alignment leaves at each session open -- so the parquet
+        # carries no NaN at all. numeric -> the fixed value; text -> the categorical marker (a
+        # number cannot live in a text column). done AFTER assembly so alignment NaN is caught too.
+        catset = set(categorical_columns)
+        num_feat = [c for c in feature_columns if c not in catset]
+        cat_feat = [c for c in feature_columns if c in catset]
+        n_num = int(df[num_feat].isna().sum().sum()) if num_feat else 0
+        if n_num:
+            df[num_feat] = df[num_feat].fillna(C.NA_FIXED_SENTINEL)
+        n_cat = 0
+        for c in cat_feat:
+            m = df[c].isna()
+            if m.any():
+                n_cat += int(m.sum())
+                df[c] = df[c].astype("object").where(~m, C.CATEGORICAL_NA_LABEL)
+        print(f"      NA_FIXED_SENTINEL: filled {n_num:,} numeric NaN with {C.NA_FIXED_SENTINEL} "
+              f"and {n_cat:,} categorical NaN with '{C.CATEGORICAL_NA_LABEL}' -> no NaN left")
+    else:
+        print(f"      NOTE: rows with NaN are KEPT. the NaN is information (see na_policy), and")
+        print(f"            xgboost/catboost learn from it. dropping them would delete the dataset.")
 
     # ---- 4. write the parquet ----------------------------------------------
     #

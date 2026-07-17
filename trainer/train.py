@@ -105,8 +105,13 @@ def parse_max_features(v):
         raise SystemExit(f"max_features must be sqrt / log2 / a fraction, got {v!r}")
 
 
-def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None):
-    """make one model. each library gets the settings that suit it."""
+def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has_val: bool = False):
+    """make one model. each library gets the settings that suit it.
+
+    has_val: whether a validation split exists. early stopping (xgboost/catboost) needs an
+    eval_set at fit time, so we only ARM it when there is a val split to stop against -- otherwise
+    the library raises 'need at least one validation set'.
+    """
     if model_type == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
         return RandomForestClassifier(
@@ -122,9 +127,13 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None):
             # THIS, not max_depth, is the forest's real regulariser, and it is what decorrelates
             # the trees. averaging only helps if the trees disagree.
             max_features=parse_max_features(params.get("max_features", "sqrt")),
+            # bootstrap this fraction of rows per tree (feature-team set 0.7). None = all rows.
+            max_samples=params.get("max_samples", None),
             n_jobs=-1,                       # use every core on the machine
             random_state=params["seed"],
-            class_weight=None,               # we pass per-row sample_weight instead
+            # per-row sample_weight (from the labels) already encodes class importance -- and it
+            # matches the team's class_weight dict but finer-grained -- so this stays None.
+            class_weight=None,
         )
 
     if model_type == "xgboost":
@@ -151,25 +160,42 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None):
             n_jobs=-1,
             random_state=params["seed"],
             eval_metric="mlogloss",
+            # stop early once val mlogloss stops improving -- essential at n_estimators=6000.
+            # only ARMED when a val split exists (fit passes eval_set); else None = train all trees.
+            early_stopping_rounds=(int(params["early_stopping_rounds"])
+                                   if has_val and params.get("early_stopping_rounds") else None),
             verbosity=0,
         )
 
     if model_type == "catboost":
         from catboost import CatBoostClassifier
-        return CatBoostClassifier(
+        kw = dict(
             iterations=params["n_estimators"],
-            depth=params["max_depth"] or 6,   # catboost HARD CAPS depth at 16
+            depth=params["max_depth"] or 6,   # catboost HARD CAPS depth at 16 (oblivious trees)
             learning_rate=params["learning_rate"],
             l2_leaf_reg=params.get("l2_leaf_reg", 3.0),   # L2 on leaf values -- the main brake
-            # the two knobs that add RANDOMNESS, i.e. overfit protection on noisy data:
-            random_strength=params.get("random_strength", 1.0),   # noise added when scoring splits
-            bagging_temperature=params.get("bagging_temperature", 1.0),  # row-weight randomness
+            min_data_in_leaf=int(params.get("min_data_in_leaf", 1)),
+            rsm=params.get("rsm", 1.0),                   # column sampling (= colsample_bytree)
+            random_strength=params.get("random_strength", 1.0),  # noise added when scoring splits
             loss_function="MultiClass",
             random_seed=params["seed"],
             cat_features=cat_idx or None,     # catboost reads text columns as-is
             verbose=0,
             allow_writing_files=False,        # do not litter the agent's disk
         )
+        # BOOTSTRAP: `subsample` is only valid for a NON-Bayesian bootstrap. the default (Bayesian)
+        # uses bagging_temperature and silently IGNORES subsample -- so pass exactly the matching
+        # pair, never both. feature-team set bootstrap_type=Bernoulli + subsample=0.7.
+        bt = str(params.get("bootstrap_type", "Bayesian"))
+        kw["bootstrap_type"] = bt
+        if bt.lower() == "bayesian":
+            kw["bagging_temperature"] = params.get("bagging_temperature", 1.0)
+        else:
+            kw["subsample"] = params.get("subsample", 1.0)
+        # early stopping needs an eval_set at fit time -- only arm it when a val split exists.
+        if has_val and params.get("early_stopping_rounds"):
+            kw["early_stopping_rounds"] = int(params["early_stopping_rounds"])
+        return CatBoostClassifier(**kw)
 
     raise SystemExit(f"unknown model type {model_type!r}. one of: {C.MODEL_TYPES}")
 
@@ -446,8 +472,14 @@ def main():
 
     # ---- 6. train, score, save ----------------------------------------------
     print(f"[6/6] training {a.model_type} on {len(Xtr):,} rows x {len(feat_cols)} features")
-    model = build_model(a.model_type, len(classes), params, cat_idx)
-    model.fit(Xtr, ytr, sample_weight=wtr)          # the per-row weight, in every library
+    model = build_model(a.model_type, len(classes), params, cat_idx, has_val=bool(len(Xva)))
+    # boosters early-stop on the val split; the forest fits all trees at once (no early stopping).
+    if len(Xva) and a.model_type == "xgboost":
+        model.fit(Xtr, ytr, sample_weight=wtr, eval_set=[(Xva, yva)], verbose=False)
+    elif len(Xva) and a.model_type == "catboost":
+        model.fit(Xtr, ytr, sample_weight=wtr, eval_set=(Xva, yva))
+    else:
+        model.fit(Xtr, ytr, sample_weight=wtr)      # the per-row weight, in every library
 
     # --- VALIDATION. this is the number hpo.py optimises. ---------------------
     # WITHOUT THIS BLOCK THE WHOLE SEARCH IS THEATRE. clearml's optimiser does not call a score

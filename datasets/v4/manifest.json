@@ -1,0 +1,4063 @@
+{
+  "manifest_schema_version": 1,
+  "built_at": "2026-07-17T10:06:45+00:00",
+  "version": "v4",
+  "recipe_sha256": "667ce0fcc3498ef1e45c1874f28cb4036af77eff40b34c1972ccc382a010d4ea",
+  "parquet_sha256": "2e1dbd070c12f2fbf4eea788dd51b755c3f1cd086906bd5672f5d2dae67f7d3e",
+  "rows": 0,
+  "n_features": 333,
+  "schema": [
+    {
+      "col": "timestamp",
+      "dtype": "datetime64[ms]"
+    },
+    {
+      "col": "primary_label",
+      "dtype": "str"
+    },
+    {
+      "col": "weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "weight_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bar_conviction",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__breakout_state",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__live_label",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__fade_risk",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__gap_state",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__Intraday_Positioning",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_state",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_state",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_state",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__state",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__pullback_severity",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__label_combined",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__trend_direction",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__maturity_name",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vol_level_pct60d_ord",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__Volume_Quality",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap_microstructure",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bar_range",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_prev",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__significance",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__clv",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__direction",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__signed_body",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__f_body",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__f_range",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__force_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__conviction_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dom_resistance",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dom_support",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_to_res_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_to_sup_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr14",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__brk_level",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__stop_level",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mfe_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mae_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_since_bo",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_confirmed",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_survived",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_bo",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_fail",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_fade",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_conf",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_surv",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_upgrade",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_rt",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mark_lost",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_green",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_range",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__body_perc",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__upper_wick_perc",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__lower_wick_perc",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_14",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_5",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_20",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_diff",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap_slope",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__rsi_14",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vote_ema",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vote_vwap",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vote_rsi",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vote_sum",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__label_1min",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__label_streak",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_uptrend",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_downtrend",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bullish_engulfing",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__morning_star",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__abandoned_baby_bull",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__piercing_line",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__three_white_soldiers",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__marubozu_green",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__kicker_bullish",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__hammer",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__inverted_hammer",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bullish_harami",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__confirmed_dragonfly",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__tweezer_bottom",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__confirmed_bullish_doji",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__confirmed_bullish_spinning_top",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bearish_engulfing",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__evening_star",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__abandoned_baby_bear",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dark_cloud_cover",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__three_black_crows",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__marubozu_red",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__shooting_star",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__hanging_man",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bearish_harami",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__confirmed_gravestone",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__tweezer_top",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__confirmed_bearish_doji",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__confirmed_bearish_spinning_top",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_strength_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bear_strength_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_since_bull_signal",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_since_bear_signal",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__verification_event",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__verification_active",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__verification_armed",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__verification_lock_level",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__verification_arm_thresh",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__verification_conf_thresh",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_in_verification",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__n_confirmation_events",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__n_false_events",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__n_verifications_active",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__n_verifications_armed",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr14__fade_risk_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema9",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_gap_pct",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__trend_state",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__clue_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__leg_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__trigger",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__fade_dir",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__episode_len",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__anchored_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__anchored_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__frozen_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__frozen_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__same_slot_vol_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__window_vol_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__window_rng_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__absorption_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__efficiency_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__inside_share",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__box_width_slot_norm",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__prior_leg_in_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__volatility_regime",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dyn_vol_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dyn_rng_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dyn_box_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dyn_abs_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sell_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__buy_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__raw_accumulation",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__raw_distribution",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__phase_state_raw",
+      "dtype": "int64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__phase_age",
+      "dtype": "int64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__acc_confirmed",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_confirmed",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__acc_resolved_up",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__acc_failed_down",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_resolved_dn",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_failed_up",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__Flow_State",
+      "dtype": "int64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__has_gap_up_below",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__has_gap_down_above",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__up_unfilled_count",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__down_unfilled_count",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_unfilled_count",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_size",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_size_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_distance",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_up_gap_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_size",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_size_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_distance",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__nearest_down_gap_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_up_gap_area",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_down_gap_area",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_gap_area",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_up_gap_area_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_down_gap_area_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__total_gap_area_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__gap_fill_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__gap_up_stack",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__gap_down_stack",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__gap_up_total_unfilled_pts",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__gap_down_total_unfilled_pts",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__minute_of_session",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__zone_id",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_from_prev_day_high",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__dist_from_prev_day_low",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__distance_from_3d_high",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__distance_from_3d_low",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__distance_from_10d_high",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__distance_from_10d_low",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_20",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_level_name",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_level_tf",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_polarity",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_weighted_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__res_weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_in_res_zone",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_level_name",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_level_tf",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_polarity",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_weighted_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sup_weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_in_sup_zone",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sma_1m",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sma_1m_slope",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__prev_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__abs_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__abs_prev_spd",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__delta_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__same_dir",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_bullish",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_bearish",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_atr_sma_prev",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_expanding",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_contracting",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__fast_er",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_falling_fast",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_noisy",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_supports_accel",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__close_position",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_close_qual",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bear_close_qual",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_close_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bear_close_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_sma_support",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bear_sma_support",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_sma_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bear_sma_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bear_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__active_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__active_c1",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__active_c2",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__active_c3",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__active_c4",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__active_c5",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__speed_dropping_fast",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__accel_score_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__close_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sma_weak",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__decel_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__immediate_decel",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__raw_state",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__pending_state",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__pending_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_in_state",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__accel_memory",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__weak_accel_bars",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__allowed_raw_state",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_accel",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_decel",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_steady",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__state_dir",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__body_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__above_ema",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bull_run_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__sustained_run",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__has_clearance",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__clearance_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__clearance_ok",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__body_ok",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__is_trend",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__locked",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr__stress_signal_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__drawdown_big",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__drawdown_fast",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_underwater",
+      "dtype": "int64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vol_scale",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__state_big",
+      "dtype": "int64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__state_fast",
+      "dtype": "int64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__riskScore",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_fast",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_slow",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_sep",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er__trend_direction_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_mean",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_std",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_downvol",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_thr_dyn",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er_low",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__weak_run",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__label_int_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr__trend_maturity_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap__trend_maturity_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__direction_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__ema_pressure",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__er__trend_maturity_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__state_name",
+      "dtype": "object"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__break_event",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__maturity_code",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__maturity_dir",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__exhaustion_event",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__extension_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__peak_ext_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__signed_di_gap",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mom_fade_frac",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__giveback_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__mature_bars",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__trend_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap_dist_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_since_fresh",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_since_mature",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__bars_since_exhausted",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__rv_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_pct",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__india_vix_zscore_20",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__rv_rank_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_rank_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__realized_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__implied_vix",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__rv_rank_60d",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__atr_rank_60d",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vol_level_pct60d_score",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vol_level_ord",
+      "dtype": "float32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vol_z",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__range_z",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__close_pos",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__close_clean",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__close_rejection",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__close_messy",
+      "dtype": "bool"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__minute_of_day",
+      "dtype": "int32"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__session_phase",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap_band_state",
+      "dtype": "str"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__vwap_excursion_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "bucket_bucket_raw_v4__reversion_strength",
+      "dtype": "float64"
+    }
+  ],
+  "feature_columns": [
+    "bucket_bucket_raw_v4__bar_conviction",
+    "bucket_bucket_raw_v4__breakout_state",
+    "bucket_bucket_raw_v4__live_label",
+    "bucket_bucket_raw_v4__fade_risk",
+    "bucket_bucket_raw_v4__gap_state",
+    "bucket_bucket_raw_v4__Intraday_Positioning",
+    "bucket_bucket_raw_v4__res_state",
+    "bucket_bucket_raw_v4__sup_state",
+    "bucket_bucket_raw_v4__range_state",
+    "bucket_bucket_raw_v4__state",
+    "bucket_bucket_raw_v4__pullback_severity",
+    "bucket_bucket_raw_v4__label_combined",
+    "bucket_bucket_raw_v4__trend_direction",
+    "bucket_bucket_raw_v4__maturity_name",
+    "bucket_bucket_raw_v4__vol_level_pct60d_ord",
+    "bucket_bucket_raw_v4__Volume_Quality",
+    "bucket_bucket_raw_v4__vwap_microstructure",
+    "bucket_bucket_raw_v4__bar_range",
+    "bucket_bucket_raw_v4__atr_prev",
+    "bucket_bucket_raw_v4__significance",
+    "bucket_bucket_raw_v4__clv",
+    "bucket_bucket_raw_v4__direction",
+    "bucket_bucket_raw_v4__signed_body",
+    "bucket_bucket_raw_v4__f_body",
+    "bucket_bucket_raw_v4__f_range",
+    "bucket_bucket_raw_v4__force_count",
+    "bucket_bucket_raw_v4__conviction_score",
+    "bucket_bucket_raw_v4__dom_resistance",
+    "bucket_bucket_raw_v4__dom_support",
+    "bucket_bucket_raw_v4__dist_to_res_atr",
+    "bucket_bucket_raw_v4__dist_to_sup_atr",
+    "bucket_bucket_raw_v4__atr14",
+    "bucket_bucket_raw_v4__brk_level",
+    "bucket_bucket_raw_v4__stop_level",
+    "bucket_bucket_raw_v4__mfe_atr",
+    "bucket_bucket_raw_v4__mae_atr",
+    "bucket_bucket_raw_v4__atr_ratio",
+    "bucket_bucket_raw_v4__bars_since_bo",
+    "bucket_bucket_raw_v4__is_confirmed",
+    "bucket_bucket_raw_v4__is_survived",
+    "bucket_bucket_raw_v4__mark_bo",
+    "bucket_bucket_raw_v4__mark_fail",
+    "bucket_bucket_raw_v4__mark_fade",
+    "bucket_bucket_raw_v4__mark_conf",
+    "bucket_bucket_raw_v4__mark_surv",
+    "bucket_bucket_raw_v4__mark_upgrade",
+    "bucket_bucket_raw_v4__mark_rt",
+    "bucket_bucket_raw_v4__mark_lost",
+    "bucket_bucket_raw_v4__is_green",
+    "bucket_bucket_raw_v4__total_range",
+    "bucket_bucket_raw_v4__body_perc",
+    "bucket_bucket_raw_v4__upper_wick_perc",
+    "bucket_bucket_raw_v4__lower_wick_perc",
+    "bucket_bucket_raw_v4__atr_14",
+    "bucket_bucket_raw_v4__ema_5",
+    "bucket_bucket_raw_v4__ema_20",
+    "bucket_bucket_raw_v4__ema_diff",
+    "bucket_bucket_raw_v4__vwap",
+    "bucket_bucket_raw_v4__vwap_slope",
+    "bucket_bucket_raw_v4__rsi_14",
+    "bucket_bucket_raw_v4__vote_ema",
+    "bucket_bucket_raw_v4__vote_vwap",
+    "bucket_bucket_raw_v4__vote_rsi",
+    "bucket_bucket_raw_v4__vote_sum",
+    "bucket_bucket_raw_v4__label_1min",
+    "bucket_bucket_raw_v4__label_streak",
+    "bucket_bucket_raw_v4__is_uptrend",
+    "bucket_bucket_raw_v4__is_downtrend",
+    "bucket_bucket_raw_v4__bullish_engulfing",
+    "bucket_bucket_raw_v4__morning_star",
+    "bucket_bucket_raw_v4__abandoned_baby_bull",
+    "bucket_bucket_raw_v4__piercing_line",
+    "bucket_bucket_raw_v4__three_white_soldiers",
+    "bucket_bucket_raw_v4__marubozu_green",
+    "bucket_bucket_raw_v4__kicker_bullish",
+    "bucket_bucket_raw_v4__hammer",
+    "bucket_bucket_raw_v4__inverted_hammer",
+    "bucket_bucket_raw_v4__bullish_harami",
+    "bucket_bucket_raw_v4__confirmed_dragonfly",
+    "bucket_bucket_raw_v4__tweezer_bottom",
+    "bucket_bucket_raw_v4__confirmed_bullish_doji",
+    "bucket_bucket_raw_v4__confirmed_bullish_spinning_top",
+    "bucket_bucket_raw_v4__bearish_engulfing",
+    "bucket_bucket_raw_v4__evening_star",
+    "bucket_bucket_raw_v4__abandoned_baby_bear",
+    "bucket_bucket_raw_v4__dark_cloud_cover",
+    "bucket_bucket_raw_v4__three_black_crows",
+    "bucket_bucket_raw_v4__marubozu_red",
+    "bucket_bucket_raw_v4__shooting_star",
+    "bucket_bucket_raw_v4__hanging_man",
+    "bucket_bucket_raw_v4__bearish_harami",
+    "bucket_bucket_raw_v4__confirmed_gravestone",
+    "bucket_bucket_raw_v4__tweezer_top",
+    "bucket_bucket_raw_v4__confirmed_bearish_doji",
+    "bucket_bucket_raw_v4__confirmed_bearish_spinning_top",
+    "bucket_bucket_raw_v4__bull_strength_raw",
+    "bucket_bucket_raw_v4__bear_strength_raw",
+    "bucket_bucket_raw_v4__bars_since_bull_signal",
+    "bucket_bucket_raw_v4__bars_since_bear_signal",
+    "bucket_bucket_raw_v4__verification_event",
+    "bucket_bucket_raw_v4__verification_active",
+    "bucket_bucket_raw_v4__verification_armed",
+    "bucket_bucket_raw_v4__verification_lock_level",
+    "bucket_bucket_raw_v4__verification_arm_thresh",
+    "bucket_bucket_raw_v4__verification_conf_thresh",
+    "bucket_bucket_raw_v4__bars_in_verification",
+    "bucket_bucket_raw_v4__n_confirmation_events",
+    "bucket_bucket_raw_v4__n_false_events",
+    "bucket_bucket_raw_v4__n_verifications_active",
+    "bucket_bucket_raw_v4__n_verifications_armed",
+    "bucket_bucket_raw_v4__atr14__fade_risk_raw",
+    "bucket_bucket_raw_v4__ema9",
+    "bucket_bucket_raw_v4__ema_gap_pct",
+    "bucket_bucket_raw_v4__trend_state",
+    "bucket_bucket_raw_v4__clue_score",
+    "bucket_bucket_raw_v4__leg_atr",
+    "bucket_bucket_raw_v4__trigger",
+    "bucket_bucket_raw_v4__fade_dir",
+    "bucket_bucket_raw_v4__episode_len",
+    "bucket_bucket_raw_v4__anchored_high",
+    "bucket_bucket_raw_v4__anchored_low",
+    "bucket_bucket_raw_v4__frozen_high",
+    "bucket_bucket_raw_v4__frozen_low",
+    "bucket_bucket_raw_v4__same_slot_vol_ratio",
+    "bucket_bucket_raw_v4__window_vol_ratio",
+    "bucket_bucket_raw_v4__window_rng_ratio",
+    "bucket_bucket_raw_v4__absorption_score",
+    "bucket_bucket_raw_v4__efficiency_ratio",
+    "bucket_bucket_raw_v4__inside_share",
+    "bucket_bucket_raw_v4__box_width_slot_norm",
+    "bucket_bucket_raw_v4__prior_leg_in_atr",
+    "bucket_bucket_raw_v4__volatility_regime",
+    "bucket_bucket_raw_v4__dyn_vol_thr",
+    "bucket_bucket_raw_v4__dyn_rng_thr",
+    "bucket_bucket_raw_v4__dyn_box_thr",
+    "bucket_bucket_raw_v4__dyn_abs_thr",
+    "bucket_bucket_raw_v4__sell_footprints",
+    "bucket_bucket_raw_v4__buy_footprints",
+    "bucket_bucket_raw_v4__raw_accumulation",
+    "bucket_bucket_raw_v4__raw_distribution",
+    "bucket_bucket_raw_v4__phase_state_raw",
+    "bucket_bucket_raw_v4__phase_age",
+    "bucket_bucket_raw_v4__acc_confirmed",
+    "bucket_bucket_raw_v4__dist_confirmed",
+    "bucket_bucket_raw_v4__acc_resolved_up",
+    "bucket_bucket_raw_v4__acc_failed_down",
+    "bucket_bucket_raw_v4__dist_resolved_dn",
+    "bucket_bucket_raw_v4__dist_failed_up",
+    "bucket_bucket_raw_v4__Flow_State",
+    "bucket_bucket_raw_v4__has_gap_up_below",
+    "bucket_bucket_raw_v4__has_gap_down_above",
+    "bucket_bucket_raw_v4__up_unfilled_count",
+    "bucket_bucket_raw_v4__down_unfilled_count",
+    "bucket_bucket_raw_v4__total_unfilled_count",
+    "bucket_bucket_raw_v4__nearest_up_gap_low",
+    "bucket_bucket_raw_v4__nearest_up_gap_high",
+    "bucket_bucket_raw_v4__nearest_up_gap_size",
+    "bucket_bucket_raw_v4__nearest_up_gap_size_atr",
+    "bucket_bucket_raw_v4__nearest_up_gap_distance",
+    "bucket_bucket_raw_v4__nearest_up_gap_distance_atr",
+    "bucket_bucket_raw_v4__nearest_up_gap_ratio",
+    "bucket_bucket_raw_v4__nearest_up_gap_age",
+    "bucket_bucket_raw_v4__nearest_down_gap_low",
+    "bucket_bucket_raw_v4__nearest_down_gap_high",
+    "bucket_bucket_raw_v4__nearest_down_gap_size",
+    "bucket_bucket_raw_v4__nearest_down_gap_size_atr",
+    "bucket_bucket_raw_v4__nearest_down_gap_distance",
+    "bucket_bucket_raw_v4__nearest_down_gap_distance_atr",
+    "bucket_bucket_raw_v4__nearest_down_gap_ratio",
+    "bucket_bucket_raw_v4__nearest_down_gap_age",
+    "bucket_bucket_raw_v4__total_up_gap_area",
+    "bucket_bucket_raw_v4__total_down_gap_area",
+    "bucket_bucket_raw_v4__total_gap_area",
+    "bucket_bucket_raw_v4__total_up_gap_area_atr",
+    "bucket_bucket_raw_v4__total_down_gap_area_atr",
+    "bucket_bucket_raw_v4__total_gap_area_atr",
+    "bucket_bucket_raw_v4__gap_fill_ratio",
+    "bucket_bucket_raw_v4__gap_up_stack",
+    "bucket_bucket_raw_v4__gap_down_stack",
+    "bucket_bucket_raw_v4__gap_up_total_unfilled_pts",
+    "bucket_bucket_raw_v4__gap_down_total_unfilled_pts",
+    "bucket_bucket_raw_v4__minute_of_session",
+    "bucket_bucket_raw_v4__zone_id",
+    "bucket_bucket_raw_v4__dist_from_prev_day_high",
+    "bucket_bucket_raw_v4__dist_from_prev_day_low",
+    "bucket_bucket_raw_v4__distance_from_3d_high",
+    "bucket_bucket_raw_v4__distance_from_3d_low",
+    "bucket_bucket_raw_v4__distance_from_10d_high",
+    "bucket_bucket_raw_v4__distance_from_10d_low",
+    "bucket_bucket_raw_v4__atr_20",
+    "bucket_bucket_raw_v4__res_level_name",
+    "bucket_bucket_raw_v4__res_level_tf",
+    "bucket_bucket_raw_v4__res_polarity",
+    "bucket_bucket_raw_v4__res_distance_atr",
+    "bucket_bucket_raw_v4__res_weighted_score",
+    "bucket_bucket_raw_v4__res_weight",
+    "bucket_bucket_raw_v4__bars_in_res_zone",
+    "bucket_bucket_raw_v4__sup_level_name",
+    "bucket_bucket_raw_v4__sup_level_tf",
+    "bucket_bucket_raw_v4__sup_polarity",
+    "bucket_bucket_raw_v4__sup_distance_atr",
+    "bucket_bucket_raw_v4__sup_weighted_score",
+    "bucket_bucket_raw_v4__sup_weight",
+    "bucket_bucket_raw_v4__bars_in_sup_zone",
+    "bucket_bucket_raw_v4__sma_1m",
+    "bucket_bucket_raw_v4__sma_1m_slope",
+    "bucket_bucket_raw_v4__atr",
+    "bucket_bucket_raw_v4__speed",
+    "bucket_bucket_raw_v4__prev_speed",
+    "bucket_bucket_raw_v4__abs_speed",
+    "bucket_bucket_raw_v4__abs_prev_spd",
+    "bucket_bucket_raw_v4__delta_speed",
+    "bucket_bucket_raw_v4__same_dir",
+    "bucket_bucket_raw_v4__is_bullish",
+    "bucket_bucket_raw_v4__is_bearish",
+    "bucket_bucket_raw_v4__range_atr",
+    "bucket_bucket_raw_v4__range_atr_sma_prev",
+    "bucket_bucket_raw_v4__range_expanding",
+    "bucket_bucket_raw_v4__range_contracting",
+    "bucket_bucket_raw_v4__er",
+    "bucket_bucket_raw_v4__fast_er",
+    "bucket_bucket_raw_v4__er_falling_fast",
+    "bucket_bucket_raw_v4__er_noisy",
+    "bucket_bucket_raw_v4__er_supports_accel",
+    "bucket_bucket_raw_v4__close_position",
+    "bucket_bucket_raw_v4__bull_close_qual",
+    "bucket_bucket_raw_v4__bear_close_qual",
+    "bucket_bucket_raw_v4__bull_close_weak",
+    "bucket_bucket_raw_v4__bear_close_weak",
+    "bucket_bucket_raw_v4__bull_sma_support",
+    "bucket_bucket_raw_v4__bear_sma_support",
+    "bucket_bucket_raw_v4__bull_sma_weak",
+    "bucket_bucket_raw_v4__bear_sma_weak",
+    "bucket_bucket_raw_v4__bull_score",
+    "bucket_bucket_raw_v4__bear_score",
+    "bucket_bucket_raw_v4__active_score",
+    "bucket_bucket_raw_v4__active_c1",
+    "bucket_bucket_raw_v4__active_c2",
+    "bucket_bucket_raw_v4__active_c3",
+    "bucket_bucket_raw_v4__active_c4",
+    "bucket_bucket_raw_v4__active_c5",
+    "bucket_bucket_raw_v4__speed_dropping_fast",
+    "bucket_bucket_raw_v4__accel_score_weak",
+    "bucket_bucket_raw_v4__range_weak",
+    "bucket_bucket_raw_v4__close_weak",
+    "bucket_bucket_raw_v4__sma_weak",
+    "bucket_bucket_raw_v4__decel_score",
+    "bucket_bucket_raw_v4__immediate_decel",
+    "bucket_bucket_raw_v4__raw_state",
+    "bucket_bucket_raw_v4__pending_state",
+    "bucket_bucket_raw_v4__pending_count",
+    "bucket_bucket_raw_v4__bars_in_state",
+    "bucket_bucket_raw_v4__accel_memory",
+    "bucket_bucket_raw_v4__weak_accel_bars",
+    "bucket_bucket_raw_v4__allowed_raw_state",
+    "bucket_bucket_raw_v4__is_accel",
+    "bucket_bucket_raw_v4__is_decel",
+    "bucket_bucket_raw_v4__is_steady",
+    "bucket_bucket_raw_v4__state_dir",
+    "bucket_bucket_raw_v4__ema",
+    "bucket_bucket_raw_v4__body_ratio",
+    "bucket_bucket_raw_v4__above_ema",
+    "bucket_bucket_raw_v4__bull_run_count",
+    "bucket_bucket_raw_v4__sustained_run",
+    "bucket_bucket_raw_v4__has_clearance",
+    "bucket_bucket_raw_v4__clearance_count",
+    "bucket_bucket_raw_v4__clearance_ok",
+    "bucket_bucket_raw_v4__body_ok",
+    "bucket_bucket_raw_v4__is_trend",
+    "bucket_bucket_raw_v4__locked",
+    "bucket_bucket_raw_v4__atr__stress_signal_raw",
+    "bucket_bucket_raw_v4__drawdown_big",
+    "bucket_bucket_raw_v4__drawdown_fast",
+    "bucket_bucket_raw_v4__bars_underwater",
+    "bucket_bucket_raw_v4__vol_scale",
+    "bucket_bucket_raw_v4__state_big",
+    "bucket_bucket_raw_v4__state_fast",
+    "bucket_bucket_raw_v4__score",
+    "bucket_bucket_raw_v4__riskScore",
+    "bucket_bucket_raw_v4__ema_fast",
+    "bucket_bucket_raw_v4__ema_slow",
+    "bucket_bucket_raw_v4__ema_sep",
+    "bucket_bucket_raw_v4__er__trend_direction_raw",
+    "bucket_bucket_raw_v4__er_mean",
+    "bucket_bucket_raw_v4__er_std",
+    "bucket_bucket_raw_v4__er_downvol",
+    "bucket_bucket_raw_v4__er_thr_dyn",
+    "bucket_bucket_raw_v4__er_low",
+    "bucket_bucket_raw_v4__weak_run",
+    "bucket_bucket_raw_v4__label_int_raw",
+    "bucket_bucket_raw_v4__atr__trend_maturity_raw",
+    "bucket_bucket_raw_v4__vwap__trend_maturity_raw",
+    "bucket_bucket_raw_v4__direction_score",
+    "bucket_bucket_raw_v4__ema_pressure",
+    "bucket_bucket_raw_v4__er__trend_maturity_raw",
+    "bucket_bucket_raw_v4__state_name",
+    "bucket_bucket_raw_v4__break_event",
+    "bucket_bucket_raw_v4__maturity_code",
+    "bucket_bucket_raw_v4__maturity_dir",
+    "bucket_bucket_raw_v4__exhaustion_event",
+    "bucket_bucket_raw_v4__extension_atr",
+    "bucket_bucket_raw_v4__peak_ext_atr",
+    "bucket_bucket_raw_v4__signed_di_gap",
+    "bucket_bucket_raw_v4__mom_fade_frac",
+    "bucket_bucket_raw_v4__giveback_atr",
+    "bucket_bucket_raw_v4__mature_bars",
+    "bucket_bucket_raw_v4__trend_age",
+    "bucket_bucket_raw_v4__vwap_dist_atr",
+    "bucket_bucket_raw_v4__bars_since_fresh",
+    "bucket_bucket_raw_v4__bars_since_mature",
+    "bucket_bucket_raw_v4__bars_since_exhausted",
+    "bucket_bucket_raw_v4__rv_60",
+    "bucket_bucket_raw_v4__atr_pct",
+    "bucket_bucket_raw_v4__india_vix_zscore_20",
+    "bucket_bucket_raw_v4__rv_rank_60",
+    "bucket_bucket_raw_v4__atr_rank_60",
+    "bucket_bucket_raw_v4__realized_60",
+    "bucket_bucket_raw_v4__implied_vix",
+    "bucket_bucket_raw_v4__rv_rank_60d",
+    "bucket_bucket_raw_v4__atr_rank_60d",
+    "bucket_bucket_raw_v4__vol_level_pct60d_score",
+    "bucket_bucket_raw_v4__vol_level_ord",
+    "bucket_bucket_raw_v4__vol_z",
+    "bucket_bucket_raw_v4__range_z",
+    "bucket_bucket_raw_v4__close_pos",
+    "bucket_bucket_raw_v4__close_clean",
+    "bucket_bucket_raw_v4__close_rejection",
+    "bucket_bucket_raw_v4__close_messy",
+    "bucket_bucket_raw_v4__minute_of_day",
+    "bucket_bucket_raw_v4__session_phase",
+    "bucket_bucket_raw_v4__vwap_band_state",
+    "bucket_bucket_raw_v4__vwap_excursion_ratio",
+    "bucket_bucket_raw_v4__reversion_strength"
+  ],
+  "categorical_columns": [
+    "bucket_bucket_raw_v4__bar_conviction",
+    "bucket_bucket_raw_v4__breakout_state",
+    "bucket_bucket_raw_v4__live_label",
+    "bucket_bucket_raw_v4__gap_state",
+    "bucket_bucket_raw_v4__Intraday_Positioning",
+    "bucket_bucket_raw_v4__res_state",
+    "bucket_bucket_raw_v4__sup_state",
+    "bucket_bucket_raw_v4__range_state",
+    "bucket_bucket_raw_v4__state",
+    "bucket_bucket_raw_v4__pullback_severity",
+    "bucket_bucket_raw_v4__label_combined",
+    "bucket_bucket_raw_v4__trend_direction",
+    "bucket_bucket_raw_v4__maturity_name",
+    "bucket_bucket_raw_v4__Volume_Quality",
+    "bucket_bucket_raw_v4__vwap_microstructure",
+    "bucket_bucket_raw_v4__is_confirmed",
+    "bucket_bucket_raw_v4__is_survived",
+    "bucket_bucket_raw_v4__is_green",
+    "bucket_bucket_raw_v4__label_1min",
+    "bucket_bucket_raw_v4__is_uptrend",
+    "bucket_bucket_raw_v4__is_downtrend",
+    "bucket_bucket_raw_v4__bullish_engulfing",
+    "bucket_bucket_raw_v4__morning_star",
+    "bucket_bucket_raw_v4__abandoned_baby_bull",
+    "bucket_bucket_raw_v4__piercing_line",
+    "bucket_bucket_raw_v4__three_white_soldiers",
+    "bucket_bucket_raw_v4__marubozu_green",
+    "bucket_bucket_raw_v4__kicker_bullish",
+    "bucket_bucket_raw_v4__hammer",
+    "bucket_bucket_raw_v4__inverted_hammer",
+    "bucket_bucket_raw_v4__bullish_harami",
+    "bucket_bucket_raw_v4__confirmed_dragonfly",
+    "bucket_bucket_raw_v4__tweezer_bottom",
+    "bucket_bucket_raw_v4__confirmed_bullish_doji",
+    "bucket_bucket_raw_v4__confirmed_bullish_spinning_top",
+    "bucket_bucket_raw_v4__bearish_engulfing",
+    "bucket_bucket_raw_v4__evening_star",
+    "bucket_bucket_raw_v4__abandoned_baby_bear",
+    "bucket_bucket_raw_v4__dark_cloud_cover",
+    "bucket_bucket_raw_v4__three_black_crows",
+    "bucket_bucket_raw_v4__marubozu_red",
+    "bucket_bucket_raw_v4__shooting_star",
+    "bucket_bucket_raw_v4__hanging_man",
+    "bucket_bucket_raw_v4__bearish_harami",
+    "bucket_bucket_raw_v4__confirmed_gravestone",
+    "bucket_bucket_raw_v4__tweezer_top",
+    "bucket_bucket_raw_v4__confirmed_bearish_doji",
+    "bucket_bucket_raw_v4__confirmed_bearish_spinning_top",
+    "bucket_bucket_raw_v4__verification_event",
+    "bucket_bucket_raw_v4__verification_active",
+    "bucket_bucket_raw_v4__verification_armed",
+    "bucket_bucket_raw_v4__trigger",
+    "bucket_bucket_raw_v4__raw_accumulation",
+    "bucket_bucket_raw_v4__raw_distribution",
+    "bucket_bucket_raw_v4__acc_confirmed",
+    "bucket_bucket_raw_v4__dist_confirmed",
+    "bucket_bucket_raw_v4__acc_resolved_up",
+    "bucket_bucket_raw_v4__acc_failed_down",
+    "bucket_bucket_raw_v4__dist_resolved_dn",
+    "bucket_bucket_raw_v4__dist_failed_up",
+    "bucket_bucket_raw_v4__res_level_name",
+    "bucket_bucket_raw_v4__res_level_tf",
+    "bucket_bucket_raw_v4__res_polarity",
+    "bucket_bucket_raw_v4__sup_level_name",
+    "bucket_bucket_raw_v4__sup_level_tf",
+    "bucket_bucket_raw_v4__sup_polarity",
+    "bucket_bucket_raw_v4__same_dir",
+    "bucket_bucket_raw_v4__is_bullish",
+    "bucket_bucket_raw_v4__is_bearish",
+    "bucket_bucket_raw_v4__range_expanding",
+    "bucket_bucket_raw_v4__range_contracting",
+    "bucket_bucket_raw_v4__er_falling_fast",
+    "bucket_bucket_raw_v4__er_noisy",
+    "bucket_bucket_raw_v4__er_supports_accel",
+    "bucket_bucket_raw_v4__bull_close_qual",
+    "bucket_bucket_raw_v4__bear_close_qual",
+    "bucket_bucket_raw_v4__bull_close_weak",
+    "bucket_bucket_raw_v4__bear_close_weak",
+    "bucket_bucket_raw_v4__bull_sma_support",
+    "bucket_bucket_raw_v4__bear_sma_support",
+    "bucket_bucket_raw_v4__bull_sma_weak",
+    "bucket_bucket_raw_v4__bear_sma_weak",
+    "bucket_bucket_raw_v4__active_c1",
+    "bucket_bucket_raw_v4__active_c2",
+    "bucket_bucket_raw_v4__active_c3",
+    "bucket_bucket_raw_v4__active_c4",
+    "bucket_bucket_raw_v4__active_c5",
+    "bucket_bucket_raw_v4__speed_dropping_fast",
+    "bucket_bucket_raw_v4__accel_score_weak",
+    "bucket_bucket_raw_v4__range_weak",
+    "bucket_bucket_raw_v4__close_weak",
+    "bucket_bucket_raw_v4__sma_weak",
+    "bucket_bucket_raw_v4__immediate_decel",
+    "bucket_bucket_raw_v4__raw_state",
+    "bucket_bucket_raw_v4__pending_state",
+    "bucket_bucket_raw_v4__allowed_raw_state",
+    "bucket_bucket_raw_v4__is_accel",
+    "bucket_bucket_raw_v4__is_decel",
+    "bucket_bucket_raw_v4__is_steady",
+    "bucket_bucket_raw_v4__state_dir",
+    "bucket_bucket_raw_v4__er_low",
+    "bucket_bucket_raw_v4__state_name",
+    "bucket_bucket_raw_v4__close_clean",
+    "bucket_bucket_raw_v4__close_rejection",
+    "bucket_bucket_raw_v4__close_messy",
+    "bucket_bucket_raw_v4__session_phase",
+    "bucket_bucket_raw_v4__vwap_band_state"
+  ],
+  "label_col": "primary_label",
+  "weight_cols": [
+    "weight",
+    "weight_raw"
+  ],
+  "per_feature": [
+    {
+      "name": "bucket_bucket_raw_v4",
+      "file": "Bucket_Bucket_Raw(V4).parquet",
+      "column_clocks": {
+        "bucket_bucket_raw_v4__bar_conviction": 5,
+        "bucket_bucket_raw_v4__breakout_state": 5,
+        "bucket_bucket_raw_v4__live_label": 1,
+        "bucket_bucket_raw_v4__fade_risk": 5,
+        "bucket_bucket_raw_v4__gap_state": 60,
+        "bucket_bucket_raw_v4__Intraday_Positioning": 1,
+        "bucket_bucket_raw_v4__res_state": 1,
+        "bucket_bucket_raw_v4__sup_state": 1,
+        "bucket_bucket_raw_v4__range_state": 1,
+        "bucket_bucket_raw_v4__state": 5,
+        "bucket_bucket_raw_v4__pullback_severity": 5,
+        "bucket_bucket_raw_v4__label_combined": 1,
+        "bucket_bucket_raw_v4__trend_direction": 5,
+        "bucket_bucket_raw_v4__maturity_name": 5,
+        "bucket_bucket_raw_v4__vol_level_pct60d_ord": 1,
+        "bucket_bucket_raw_v4__Volume_Quality": 1,
+        "bucket_bucket_raw_v4__vwap_microstructure": 5,
+        "bucket_bucket_raw_v4__bar_range": 5,
+        "bucket_bucket_raw_v4__atr_prev": 5,
+        "bucket_bucket_raw_v4__significance": 5,
+        "bucket_bucket_raw_v4__clv": 5,
+        "bucket_bucket_raw_v4__direction": 5,
+        "bucket_bucket_raw_v4__signed_body": 5,
+        "bucket_bucket_raw_v4__f_body": 5,
+        "bucket_bucket_raw_v4__f_range": 5,
+        "bucket_bucket_raw_v4__force_count": 5,
+        "bucket_bucket_raw_v4__conviction_score": 5,
+        "bucket_bucket_raw_v4__dom_resistance": 5,
+        "bucket_bucket_raw_v4__dom_support": 5,
+        "bucket_bucket_raw_v4__dist_to_res_atr": 5,
+        "bucket_bucket_raw_v4__dist_to_sup_atr": 5,
+        "bucket_bucket_raw_v4__atr14": 5,
+        "bucket_bucket_raw_v4__brk_level": 5,
+        "bucket_bucket_raw_v4__stop_level": 5,
+        "bucket_bucket_raw_v4__mfe_atr": 5,
+        "bucket_bucket_raw_v4__mae_atr": 5,
+        "bucket_bucket_raw_v4__atr_ratio": 5,
+        "bucket_bucket_raw_v4__bars_since_bo": 5,
+        "bucket_bucket_raw_v4__is_confirmed": 5,
+        "bucket_bucket_raw_v4__is_survived": 5,
+        "bucket_bucket_raw_v4__mark_bo": 5,
+        "bucket_bucket_raw_v4__mark_fail": 5,
+        "bucket_bucket_raw_v4__mark_fade": 5,
+        "bucket_bucket_raw_v4__mark_conf": 5,
+        "bucket_bucket_raw_v4__mark_surv": 5,
+        "bucket_bucket_raw_v4__mark_upgrade": 5,
+        "bucket_bucket_raw_v4__mark_rt": 5,
+        "bucket_bucket_raw_v4__mark_lost": 5,
+        "bucket_bucket_raw_v4__is_green": 1,
+        "bucket_bucket_raw_v4__total_range": 1,
+        "bucket_bucket_raw_v4__body_perc": 1,
+        "bucket_bucket_raw_v4__upper_wick_perc": 1,
+        "bucket_bucket_raw_v4__lower_wick_perc": 1,
+        "bucket_bucket_raw_v4__atr_14": 1,
+        "bucket_bucket_raw_v4__ema_5": 1,
+        "bucket_bucket_raw_v4__ema_20": 1,
+        "bucket_bucket_raw_v4__ema_diff": 1,
+        "bucket_bucket_raw_v4__vwap": 1,
+        "bucket_bucket_raw_v4__vwap_slope": 1,
+        "bucket_bucket_raw_v4__rsi_14": 1,
+        "bucket_bucket_raw_v4__vote_ema": 1,
+        "bucket_bucket_raw_v4__vote_vwap": 1,
+        "bucket_bucket_raw_v4__vote_rsi": 1,
+        "bucket_bucket_raw_v4__vote_sum": 1,
+        "bucket_bucket_raw_v4__label_1min": 1,
+        "bucket_bucket_raw_v4__label_streak": 1,
+        "bucket_bucket_raw_v4__is_uptrend": 1,
+        "bucket_bucket_raw_v4__is_downtrend": 1,
+        "bucket_bucket_raw_v4__bullish_engulfing": 1,
+        "bucket_bucket_raw_v4__morning_star": 1,
+        "bucket_bucket_raw_v4__abandoned_baby_bull": 1,
+        "bucket_bucket_raw_v4__piercing_line": 1,
+        "bucket_bucket_raw_v4__three_white_soldiers": 1,
+        "bucket_bucket_raw_v4__marubozu_green": 1,
+        "bucket_bucket_raw_v4__kicker_bullish": 1,
+        "bucket_bucket_raw_v4__hammer": 1,
+        "bucket_bucket_raw_v4__inverted_hammer": 1,
+        "bucket_bucket_raw_v4__bullish_harami": 1,
+        "bucket_bucket_raw_v4__confirmed_dragonfly": 1,
+        "bucket_bucket_raw_v4__tweezer_bottom": 1,
+        "bucket_bucket_raw_v4__confirmed_bullish_doji": 1,
+        "bucket_bucket_raw_v4__confirmed_bullish_spinning_top": 1,
+        "bucket_bucket_raw_v4__bearish_engulfing": 1,
+        "bucket_bucket_raw_v4__evening_star": 1,
+        "bucket_bucket_raw_v4__abandoned_baby_bear": 60,
+        "bucket_bucket_raw_v4__dark_cloud_cover": 1,
+        "bucket_bucket_raw_v4__three_black_crows": 1,
+        "bucket_bucket_raw_v4__marubozu_red": 1,
+        "bucket_bucket_raw_v4__shooting_star": 1,
+        "bucket_bucket_raw_v4__hanging_man": 1,
+        "bucket_bucket_raw_v4__bearish_harami": 1,
+        "bucket_bucket_raw_v4__confirmed_gravestone": 1,
+        "bucket_bucket_raw_v4__tweezer_top": 1,
+        "bucket_bucket_raw_v4__confirmed_bearish_doji": 1,
+        "bucket_bucket_raw_v4__confirmed_bearish_spinning_top": 1,
+        "bucket_bucket_raw_v4__bull_strength_raw": 1,
+        "bucket_bucket_raw_v4__bear_strength_raw": 1,
+        "bucket_bucket_raw_v4__bars_since_bull_signal": 1,
+        "bucket_bucket_raw_v4__bars_since_bear_signal": 1,
+        "bucket_bucket_raw_v4__verification_event": 1,
+        "bucket_bucket_raw_v4__verification_active": 1,
+        "bucket_bucket_raw_v4__verification_armed": 1,
+        "bucket_bucket_raw_v4__verification_lock_level": 1,
+        "bucket_bucket_raw_v4__verification_arm_thresh": 1,
+        "bucket_bucket_raw_v4__verification_conf_thresh": 1,
+        "bucket_bucket_raw_v4__bars_in_verification": 1,
+        "bucket_bucket_raw_v4__n_confirmation_events": 1,
+        "bucket_bucket_raw_v4__n_false_events": 1,
+        "bucket_bucket_raw_v4__n_verifications_active": 1,
+        "bucket_bucket_raw_v4__n_verifications_armed": 1,
+        "bucket_bucket_raw_v4__atr14__fade_risk_raw": 5,
+        "bucket_bucket_raw_v4__ema9": 5,
+        "bucket_bucket_raw_v4__ema_gap_pct": 5,
+        "bucket_bucket_raw_v4__trend_state": 5,
+        "bucket_bucket_raw_v4__clue_score": 5,
+        "bucket_bucket_raw_v4__leg_atr": 5,
+        "bucket_bucket_raw_v4__trigger": 5,
+        "bucket_bucket_raw_v4__fade_dir": 5,
+        "bucket_bucket_raw_v4__episode_len": 5,
+        "bucket_bucket_raw_v4__anchored_high": 1,
+        "bucket_bucket_raw_v4__anchored_low": 1,
+        "bucket_bucket_raw_v4__frozen_high": 5,
+        "bucket_bucket_raw_v4__frozen_low": 5,
+        "bucket_bucket_raw_v4__same_slot_vol_ratio": 1,
+        "bucket_bucket_raw_v4__window_vol_ratio": 1,
+        "bucket_bucket_raw_v4__window_rng_ratio": 1,
+        "bucket_bucket_raw_v4__absorption_score": 1,
+        "bucket_bucket_raw_v4__efficiency_ratio": 1,
+        "bucket_bucket_raw_v4__inside_share": 1,
+        "bucket_bucket_raw_v4__box_width_slot_norm": 1,
+        "bucket_bucket_raw_v4__prior_leg_in_atr": 1,
+        "bucket_bucket_raw_v4__volatility_regime": 1,
+        "bucket_bucket_raw_v4__dyn_vol_thr": 1,
+        "bucket_bucket_raw_v4__dyn_rng_thr": 1,
+        "bucket_bucket_raw_v4__dyn_box_thr": 1,
+        "bucket_bucket_raw_v4__dyn_abs_thr": 1,
+        "bucket_bucket_raw_v4__sell_footprints": 1,
+        "bucket_bucket_raw_v4__buy_footprints": 1,
+        "bucket_bucket_raw_v4__raw_accumulation": 1,
+        "bucket_bucket_raw_v4__raw_distribution": 1,
+        "bucket_bucket_raw_v4__phase_state_raw": 1,
+        "bucket_bucket_raw_v4__phase_age": 1,
+        "bucket_bucket_raw_v4__acc_confirmed": 1,
+        "bucket_bucket_raw_v4__dist_confirmed": 1,
+        "bucket_bucket_raw_v4__acc_resolved_up": 1,
+        "bucket_bucket_raw_v4__acc_failed_down": 1,
+        "bucket_bucket_raw_v4__dist_resolved_dn": 1,
+        "bucket_bucket_raw_v4__dist_failed_up": 1,
+        "bucket_bucket_raw_v4__Flow_State": 1,
+        "bucket_bucket_raw_v4__has_gap_up_below": 1,
+        "bucket_bucket_raw_v4__has_gap_down_above": 1,
+        "bucket_bucket_raw_v4__up_unfilled_count": 1,
+        "bucket_bucket_raw_v4__down_unfilled_count": 1,
+        "bucket_bucket_raw_v4__total_unfilled_count": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_low": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_high": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_size": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_size_atr": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_distance": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_distance_atr": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_ratio": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_age": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_low": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_high": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_size": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_size_atr": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_distance": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_distance_atr": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_ratio": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_age": 1,
+        "bucket_bucket_raw_v4__total_up_gap_area": 1,
+        "bucket_bucket_raw_v4__total_down_gap_area": 1,
+        "bucket_bucket_raw_v4__total_gap_area": 1,
+        "bucket_bucket_raw_v4__total_up_gap_area_atr": 1,
+        "bucket_bucket_raw_v4__total_down_gap_area_atr": 1,
+        "bucket_bucket_raw_v4__total_gap_area_atr": 1,
+        "bucket_bucket_raw_v4__gap_fill_ratio": 1,
+        "bucket_bucket_raw_v4__gap_up_stack": 1,
+        "bucket_bucket_raw_v4__gap_down_stack": 1,
+        "bucket_bucket_raw_v4__gap_up_total_unfilled_pts": 1,
+        "bucket_bucket_raw_v4__gap_down_total_unfilled_pts": 1,
+        "bucket_bucket_raw_v4__minute_of_session": 1,
+        "bucket_bucket_raw_v4__zone_id": 1,
+        "bucket_bucket_raw_v4__dist_from_prev_day_high": 1,
+        "bucket_bucket_raw_v4__dist_from_prev_day_low": 1,
+        "bucket_bucket_raw_v4__distance_from_3d_high": 1,
+        "bucket_bucket_raw_v4__distance_from_3d_low": 1,
+        "bucket_bucket_raw_v4__distance_from_10d_high": 1,
+        "bucket_bucket_raw_v4__distance_from_10d_low": 1,
+        "bucket_bucket_raw_v4__atr_20": 1,
+        "bucket_bucket_raw_v4__res_level_name": 1,
+        "bucket_bucket_raw_v4__res_level_tf": 1,
+        "bucket_bucket_raw_v4__res_polarity": 1,
+        "bucket_bucket_raw_v4__res_distance_atr": 1,
+        "bucket_bucket_raw_v4__res_weighted_score": 1,
+        "bucket_bucket_raw_v4__res_weight": 1,
+        "bucket_bucket_raw_v4__bars_in_res_zone": 1,
+        "bucket_bucket_raw_v4__sup_level_name": 1,
+        "bucket_bucket_raw_v4__sup_level_tf": 1,
+        "bucket_bucket_raw_v4__sup_polarity": 1,
+        "bucket_bucket_raw_v4__sup_distance_atr": 1,
+        "bucket_bucket_raw_v4__sup_weighted_score": 1,
+        "bucket_bucket_raw_v4__sup_weight": 1,
+        "bucket_bucket_raw_v4__bars_in_sup_zone": 1,
+        "bucket_bucket_raw_v4__sma_1m": 5,
+        "bucket_bucket_raw_v4__sma_1m_slope": 5,
+        "bucket_bucket_raw_v4__atr": 5,
+        "bucket_bucket_raw_v4__speed": 5,
+        "bucket_bucket_raw_v4__prev_speed": 5,
+        "bucket_bucket_raw_v4__abs_speed": 5,
+        "bucket_bucket_raw_v4__abs_prev_spd": 5,
+        "bucket_bucket_raw_v4__delta_speed": 5,
+        "bucket_bucket_raw_v4__same_dir": 5,
+        "bucket_bucket_raw_v4__is_bullish": 5,
+        "bucket_bucket_raw_v4__is_bearish": 5,
+        "bucket_bucket_raw_v4__range_atr": 5,
+        "bucket_bucket_raw_v4__range_atr_sma_prev": 5,
+        "bucket_bucket_raw_v4__range_expanding": 5,
+        "bucket_bucket_raw_v4__range_contracting": 5,
+        "bucket_bucket_raw_v4__er": 5,
+        "bucket_bucket_raw_v4__fast_er": 5,
+        "bucket_bucket_raw_v4__er_falling_fast": 5,
+        "bucket_bucket_raw_v4__er_noisy": 5,
+        "bucket_bucket_raw_v4__er_supports_accel": 5,
+        "bucket_bucket_raw_v4__close_position": 5,
+        "bucket_bucket_raw_v4__bull_close_qual": 5,
+        "bucket_bucket_raw_v4__bear_close_qual": 5,
+        "bucket_bucket_raw_v4__bull_close_weak": 5,
+        "bucket_bucket_raw_v4__bear_close_weak": 5,
+        "bucket_bucket_raw_v4__bull_sma_support": 5,
+        "bucket_bucket_raw_v4__bear_sma_support": 5,
+        "bucket_bucket_raw_v4__bull_sma_weak": 5,
+        "bucket_bucket_raw_v4__bear_sma_weak": 5,
+        "bucket_bucket_raw_v4__bull_score": 5,
+        "bucket_bucket_raw_v4__bear_score": 5,
+        "bucket_bucket_raw_v4__active_score": 5,
+        "bucket_bucket_raw_v4__active_c1": 5,
+        "bucket_bucket_raw_v4__active_c2": 5,
+        "bucket_bucket_raw_v4__active_c3": 5,
+        "bucket_bucket_raw_v4__active_c4": 5,
+        "bucket_bucket_raw_v4__active_c5": 5,
+        "bucket_bucket_raw_v4__speed_dropping_fast": 5,
+        "bucket_bucket_raw_v4__accel_score_weak": 5,
+        "bucket_bucket_raw_v4__range_weak": 5,
+        "bucket_bucket_raw_v4__close_weak": 5,
+        "bucket_bucket_raw_v4__sma_weak": 5,
+        "bucket_bucket_raw_v4__decel_score": 5,
+        "bucket_bucket_raw_v4__immediate_decel": 5,
+        "bucket_bucket_raw_v4__raw_state": 5,
+        "bucket_bucket_raw_v4__pending_state": 5,
+        "bucket_bucket_raw_v4__pending_count": 5,
+        "bucket_bucket_raw_v4__bars_in_state": 5,
+        "bucket_bucket_raw_v4__accel_memory": 5,
+        "bucket_bucket_raw_v4__weak_accel_bars": 5,
+        "bucket_bucket_raw_v4__allowed_raw_state": 5,
+        "bucket_bucket_raw_v4__is_accel": 5,
+        "bucket_bucket_raw_v4__is_decel": 5,
+        "bucket_bucket_raw_v4__is_steady": 5,
+        "bucket_bucket_raw_v4__state_dir": 5,
+        "bucket_bucket_raw_v4__ema": 5,
+        "bucket_bucket_raw_v4__body_ratio": 5,
+        "bucket_bucket_raw_v4__above_ema": 5,
+        "bucket_bucket_raw_v4__bull_run_count": 5,
+        "bucket_bucket_raw_v4__sustained_run": 5,
+        "bucket_bucket_raw_v4__has_clearance": 5,
+        "bucket_bucket_raw_v4__clearance_count": 5,
+        "bucket_bucket_raw_v4__clearance_ok": 5,
+        "bucket_bucket_raw_v4__body_ok": 5,
+        "bucket_bucket_raw_v4__is_trend": 5,
+        "bucket_bucket_raw_v4__locked": 5,
+        "bucket_bucket_raw_v4__atr__stress_signal_raw": 1,
+        "bucket_bucket_raw_v4__drawdown_big": 1,
+        "bucket_bucket_raw_v4__drawdown_fast": 1,
+        "bucket_bucket_raw_v4__bars_underwater": 1,
+        "bucket_bucket_raw_v4__vol_scale": 60,
+        "bucket_bucket_raw_v4__state_big": 1,
+        "bucket_bucket_raw_v4__state_fast": 1,
+        "bucket_bucket_raw_v4__score": 1,
+        "bucket_bucket_raw_v4__riskScore": 1,
+        "bucket_bucket_raw_v4__ema_fast": 5,
+        "bucket_bucket_raw_v4__ema_slow": 5,
+        "bucket_bucket_raw_v4__ema_sep": 5,
+        "bucket_bucket_raw_v4__er__trend_direction_raw": 5,
+        "bucket_bucket_raw_v4__er_mean": 5,
+        "bucket_bucket_raw_v4__er_std": 5,
+        "bucket_bucket_raw_v4__er_downvol": 5,
+        "bucket_bucket_raw_v4__er_thr_dyn": 5,
+        "bucket_bucket_raw_v4__er_low": 5,
+        "bucket_bucket_raw_v4__weak_run": 5,
+        "bucket_bucket_raw_v4__label_int_raw": 5,
+        "bucket_bucket_raw_v4__atr__trend_maturity_raw": 5,
+        "bucket_bucket_raw_v4__vwap__trend_maturity_raw": 5,
+        "bucket_bucket_raw_v4__direction_score": 5,
+        "bucket_bucket_raw_v4__ema_pressure": 5,
+        "bucket_bucket_raw_v4__er__trend_maturity_raw": 5,
+        "bucket_bucket_raw_v4__state_name": 5,
+        "bucket_bucket_raw_v4__break_event": 5,
+        "bucket_bucket_raw_v4__maturity_code": 5,
+        "bucket_bucket_raw_v4__maturity_dir": 5,
+        "bucket_bucket_raw_v4__exhaustion_event": 5,
+        "bucket_bucket_raw_v4__extension_atr": 5,
+        "bucket_bucket_raw_v4__peak_ext_atr": 5,
+        "bucket_bucket_raw_v4__signed_di_gap": 5,
+        "bucket_bucket_raw_v4__mom_fade_frac": 5,
+        "bucket_bucket_raw_v4__giveback_atr": 5,
+        "bucket_bucket_raw_v4__mature_bars": 5,
+        "bucket_bucket_raw_v4__trend_age": 5,
+        "bucket_bucket_raw_v4__vwap_dist_atr": 5,
+        "bucket_bucket_raw_v4__bars_since_fresh": 5,
+        "bucket_bucket_raw_v4__bars_since_mature": 5,
+        "bucket_bucket_raw_v4__bars_since_exhausted": 5,
+        "bucket_bucket_raw_v4__rv_60": 1,
+        "bucket_bucket_raw_v4__atr_pct": 1,
+        "bucket_bucket_raw_v4__india_vix_zscore_20": 60,
+        "bucket_bucket_raw_v4__rv_rank_60": 1,
+        "bucket_bucket_raw_v4__atr_rank_60": 1,
+        "bucket_bucket_raw_v4__realized_60": 1,
+        "bucket_bucket_raw_v4__implied_vix": 60,
+        "bucket_bucket_raw_v4__rv_rank_60d": 1,
+        "bucket_bucket_raw_v4__atr_rank_60d": 1,
+        "bucket_bucket_raw_v4__vol_level_pct60d_score": 1,
+        "bucket_bucket_raw_v4__vol_level_ord": 1,
+        "bucket_bucket_raw_v4__vol_z": 1,
+        "bucket_bucket_raw_v4__range_z": 1,
+        "bucket_bucket_raw_v4__close_pos": 1,
+        "bucket_bucket_raw_v4__close_clean": 1,
+        "bucket_bucket_raw_v4__close_rejection": 1,
+        "bucket_bucket_raw_v4__close_messy": 1,
+        "bucket_bucket_raw_v4__minute_of_day": 1,
+        "bucket_bucket_raw_v4__session_phase": 1,
+        "bucket_bucket_raw_v4__vwap_band_state": 5,
+        "bucket_bucket_raw_v4__vwap_excursion_ratio": 5,
+        "bucket_bucket_raw_v4__reversion_strength": 5
+      },
+      "clock_minutes": 60,
+      "clock_source": "measured",
+      "clock_measured": {
+        "bucket_bucket_raw_v4__bar_conviction": 5,
+        "bucket_bucket_raw_v4__breakout_state": 5,
+        "bucket_bucket_raw_v4__live_label": 1,
+        "bucket_bucket_raw_v4__fade_risk": 5,
+        "bucket_bucket_raw_v4__gap_state": 60,
+        "bucket_bucket_raw_v4__Intraday_Positioning": 1,
+        "bucket_bucket_raw_v4__res_state": 1,
+        "bucket_bucket_raw_v4__sup_state": 1,
+        "bucket_bucket_raw_v4__range_state": 1,
+        "bucket_bucket_raw_v4__state": 5,
+        "bucket_bucket_raw_v4__pullback_severity": 5,
+        "bucket_bucket_raw_v4__label_combined": 1,
+        "bucket_bucket_raw_v4__trend_direction": 5,
+        "bucket_bucket_raw_v4__maturity_name": 5,
+        "bucket_bucket_raw_v4__vol_level_pct60d_ord": 1,
+        "bucket_bucket_raw_v4__Volume_Quality": 1,
+        "bucket_bucket_raw_v4__vwap_microstructure": 5,
+        "bucket_bucket_raw_v4__bar_range": 5,
+        "bucket_bucket_raw_v4__atr_prev": 5,
+        "bucket_bucket_raw_v4__significance": 5,
+        "bucket_bucket_raw_v4__clv": 5,
+        "bucket_bucket_raw_v4__direction": 5,
+        "bucket_bucket_raw_v4__signed_body": 5,
+        "bucket_bucket_raw_v4__f_body": 5,
+        "bucket_bucket_raw_v4__f_range": 5,
+        "bucket_bucket_raw_v4__force_count": 5,
+        "bucket_bucket_raw_v4__conviction_score": 5,
+        "bucket_bucket_raw_v4__dom_resistance": 5,
+        "bucket_bucket_raw_v4__dom_support": 5,
+        "bucket_bucket_raw_v4__dist_to_res_atr": 5,
+        "bucket_bucket_raw_v4__dist_to_sup_atr": 5,
+        "bucket_bucket_raw_v4__atr14": 5,
+        "bucket_bucket_raw_v4__brk_level": 5,
+        "bucket_bucket_raw_v4__stop_level": 5,
+        "bucket_bucket_raw_v4__mfe_atr": 5,
+        "bucket_bucket_raw_v4__mae_atr": 5,
+        "bucket_bucket_raw_v4__atr_ratio": 5,
+        "bucket_bucket_raw_v4__bars_since_bo": 5,
+        "bucket_bucket_raw_v4__is_confirmed": 5,
+        "bucket_bucket_raw_v4__is_survived": 5,
+        "bucket_bucket_raw_v4__mark_bo": 5,
+        "bucket_bucket_raw_v4__mark_fail": 5,
+        "bucket_bucket_raw_v4__mark_fade": 5,
+        "bucket_bucket_raw_v4__mark_conf": 5,
+        "bucket_bucket_raw_v4__mark_surv": 5,
+        "bucket_bucket_raw_v4__mark_upgrade": 5,
+        "bucket_bucket_raw_v4__mark_rt": 5,
+        "bucket_bucket_raw_v4__mark_lost": 5,
+        "bucket_bucket_raw_v4__is_green": 1,
+        "bucket_bucket_raw_v4__total_range": 1,
+        "bucket_bucket_raw_v4__body_perc": 1,
+        "bucket_bucket_raw_v4__upper_wick_perc": 1,
+        "bucket_bucket_raw_v4__lower_wick_perc": 1,
+        "bucket_bucket_raw_v4__atr_14": 1,
+        "bucket_bucket_raw_v4__ema_5": 1,
+        "bucket_bucket_raw_v4__ema_20": 1,
+        "bucket_bucket_raw_v4__ema_diff": 1,
+        "bucket_bucket_raw_v4__vwap": 1,
+        "bucket_bucket_raw_v4__vwap_slope": 1,
+        "bucket_bucket_raw_v4__rsi_14": 1,
+        "bucket_bucket_raw_v4__vote_ema": 1,
+        "bucket_bucket_raw_v4__vote_vwap": 1,
+        "bucket_bucket_raw_v4__vote_rsi": 1,
+        "bucket_bucket_raw_v4__vote_sum": 1,
+        "bucket_bucket_raw_v4__label_1min": 1,
+        "bucket_bucket_raw_v4__label_streak": 1,
+        "bucket_bucket_raw_v4__is_uptrend": 1,
+        "bucket_bucket_raw_v4__is_downtrend": 1,
+        "bucket_bucket_raw_v4__bullish_engulfing": 1,
+        "bucket_bucket_raw_v4__morning_star": 1,
+        "bucket_bucket_raw_v4__abandoned_baby_bull": 1,
+        "bucket_bucket_raw_v4__piercing_line": 1,
+        "bucket_bucket_raw_v4__three_white_soldiers": 1,
+        "bucket_bucket_raw_v4__marubozu_green": 1,
+        "bucket_bucket_raw_v4__kicker_bullish": 1,
+        "bucket_bucket_raw_v4__hammer": 1,
+        "bucket_bucket_raw_v4__inverted_hammer": 1,
+        "bucket_bucket_raw_v4__bullish_harami": 1,
+        "bucket_bucket_raw_v4__confirmed_dragonfly": 1,
+        "bucket_bucket_raw_v4__tweezer_bottom": 1,
+        "bucket_bucket_raw_v4__confirmed_bullish_doji": 1,
+        "bucket_bucket_raw_v4__confirmed_bullish_spinning_top": 1,
+        "bucket_bucket_raw_v4__bearish_engulfing": 1,
+        "bucket_bucket_raw_v4__evening_star": 1,
+        "bucket_bucket_raw_v4__abandoned_baby_bear": 60,
+        "bucket_bucket_raw_v4__dark_cloud_cover": 1,
+        "bucket_bucket_raw_v4__three_black_crows": 1,
+        "bucket_bucket_raw_v4__marubozu_red": 1,
+        "bucket_bucket_raw_v4__shooting_star": 1,
+        "bucket_bucket_raw_v4__hanging_man": 1,
+        "bucket_bucket_raw_v4__bearish_harami": 1,
+        "bucket_bucket_raw_v4__confirmed_gravestone": 1,
+        "bucket_bucket_raw_v4__tweezer_top": 1,
+        "bucket_bucket_raw_v4__confirmed_bearish_doji": 1,
+        "bucket_bucket_raw_v4__confirmed_bearish_spinning_top": 1,
+        "bucket_bucket_raw_v4__bull_strength_raw": 1,
+        "bucket_bucket_raw_v4__bear_strength_raw": 1,
+        "bucket_bucket_raw_v4__bars_since_bull_signal": 1,
+        "bucket_bucket_raw_v4__bars_since_bear_signal": 1,
+        "bucket_bucket_raw_v4__verification_event": 1,
+        "bucket_bucket_raw_v4__verification_active": 1,
+        "bucket_bucket_raw_v4__verification_armed": 1,
+        "bucket_bucket_raw_v4__verification_lock_level": 1,
+        "bucket_bucket_raw_v4__verification_arm_thresh": 1,
+        "bucket_bucket_raw_v4__verification_conf_thresh": 1,
+        "bucket_bucket_raw_v4__bars_in_verification": 1,
+        "bucket_bucket_raw_v4__n_confirmation_events": 1,
+        "bucket_bucket_raw_v4__n_false_events": 1,
+        "bucket_bucket_raw_v4__n_verifications_active": 1,
+        "bucket_bucket_raw_v4__n_verifications_armed": 1,
+        "bucket_bucket_raw_v4__atr14__fade_risk_raw": 5,
+        "bucket_bucket_raw_v4__ema9": 5,
+        "bucket_bucket_raw_v4__ema_gap_pct": 5,
+        "bucket_bucket_raw_v4__trend_state": 5,
+        "bucket_bucket_raw_v4__clue_score": 5,
+        "bucket_bucket_raw_v4__leg_atr": 5,
+        "bucket_bucket_raw_v4__trigger": 5,
+        "bucket_bucket_raw_v4__fade_dir": 5,
+        "bucket_bucket_raw_v4__episode_len": 5,
+        "bucket_bucket_raw_v4__anchored_high": 1,
+        "bucket_bucket_raw_v4__anchored_low": 1,
+        "bucket_bucket_raw_v4__frozen_high": 5,
+        "bucket_bucket_raw_v4__frozen_low": 5,
+        "bucket_bucket_raw_v4__same_slot_vol_ratio": 1,
+        "bucket_bucket_raw_v4__window_vol_ratio": 1,
+        "bucket_bucket_raw_v4__window_rng_ratio": 1,
+        "bucket_bucket_raw_v4__absorption_score": 1,
+        "bucket_bucket_raw_v4__efficiency_ratio": 1,
+        "bucket_bucket_raw_v4__inside_share": 1,
+        "bucket_bucket_raw_v4__box_width_slot_norm": 1,
+        "bucket_bucket_raw_v4__prior_leg_in_atr": 1,
+        "bucket_bucket_raw_v4__volatility_regime": 1,
+        "bucket_bucket_raw_v4__dyn_vol_thr": 1,
+        "bucket_bucket_raw_v4__dyn_rng_thr": 1,
+        "bucket_bucket_raw_v4__dyn_box_thr": 1,
+        "bucket_bucket_raw_v4__dyn_abs_thr": 1,
+        "bucket_bucket_raw_v4__sell_footprints": 1,
+        "bucket_bucket_raw_v4__buy_footprints": 1,
+        "bucket_bucket_raw_v4__raw_accumulation": 1,
+        "bucket_bucket_raw_v4__raw_distribution": 1,
+        "bucket_bucket_raw_v4__phase_state_raw": 1,
+        "bucket_bucket_raw_v4__phase_age": 1,
+        "bucket_bucket_raw_v4__acc_confirmed": 1,
+        "bucket_bucket_raw_v4__dist_confirmed": 1,
+        "bucket_bucket_raw_v4__acc_resolved_up": 1,
+        "bucket_bucket_raw_v4__acc_failed_down": 1,
+        "bucket_bucket_raw_v4__dist_resolved_dn": 1,
+        "bucket_bucket_raw_v4__dist_failed_up": 1,
+        "bucket_bucket_raw_v4__Flow_State": 1,
+        "bucket_bucket_raw_v4__has_gap_up_below": 1,
+        "bucket_bucket_raw_v4__has_gap_down_above": 1,
+        "bucket_bucket_raw_v4__up_unfilled_count": 1,
+        "bucket_bucket_raw_v4__down_unfilled_count": 1,
+        "bucket_bucket_raw_v4__total_unfilled_count": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_low": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_high": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_size": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_size_atr": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_distance": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_distance_atr": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_ratio": 1,
+        "bucket_bucket_raw_v4__nearest_up_gap_age": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_low": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_high": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_size": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_size_atr": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_distance": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_distance_atr": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_ratio": 1,
+        "bucket_bucket_raw_v4__nearest_down_gap_age": 1,
+        "bucket_bucket_raw_v4__total_up_gap_area": 1,
+        "bucket_bucket_raw_v4__total_down_gap_area": 1,
+        "bucket_bucket_raw_v4__total_gap_area": 1,
+        "bucket_bucket_raw_v4__total_up_gap_area_atr": 1,
+        "bucket_bucket_raw_v4__total_down_gap_area_atr": 1,
+        "bucket_bucket_raw_v4__total_gap_area_atr": 1,
+        "bucket_bucket_raw_v4__gap_fill_ratio": 1,
+        "bucket_bucket_raw_v4__gap_up_stack": 1,
+        "bucket_bucket_raw_v4__gap_down_stack": 1,
+        "bucket_bucket_raw_v4__gap_up_total_unfilled_pts": 1,
+        "bucket_bucket_raw_v4__gap_down_total_unfilled_pts": 1,
+        "bucket_bucket_raw_v4__minute_of_session": 1,
+        "bucket_bucket_raw_v4__zone_id": 1,
+        "bucket_bucket_raw_v4__dist_from_prev_day_high": 1,
+        "bucket_bucket_raw_v4__dist_from_prev_day_low": 1,
+        "bucket_bucket_raw_v4__distance_from_3d_high": 1,
+        "bucket_bucket_raw_v4__distance_from_3d_low": 1,
+        "bucket_bucket_raw_v4__distance_from_10d_high": 1,
+        "bucket_bucket_raw_v4__distance_from_10d_low": 1,
+        "bucket_bucket_raw_v4__atr_20": 1,
+        "bucket_bucket_raw_v4__res_level_name": 1,
+        "bucket_bucket_raw_v4__res_level_tf": 1,
+        "bucket_bucket_raw_v4__res_polarity": 1,
+        "bucket_bucket_raw_v4__res_distance_atr": 1,
+        "bucket_bucket_raw_v4__res_weighted_score": 1,
+        "bucket_bucket_raw_v4__res_weight": 1,
+        "bucket_bucket_raw_v4__bars_in_res_zone": 1,
+        "bucket_bucket_raw_v4__sup_level_name": 1,
+        "bucket_bucket_raw_v4__sup_level_tf": 1,
+        "bucket_bucket_raw_v4__sup_polarity": 1,
+        "bucket_bucket_raw_v4__sup_distance_atr": 1,
+        "bucket_bucket_raw_v4__sup_weighted_score": 1,
+        "bucket_bucket_raw_v4__sup_weight": 1,
+        "bucket_bucket_raw_v4__bars_in_sup_zone": 1,
+        "bucket_bucket_raw_v4__sma_1m": 5,
+        "bucket_bucket_raw_v4__sma_1m_slope": 5,
+        "bucket_bucket_raw_v4__atr": 5,
+        "bucket_bucket_raw_v4__speed": 5,
+        "bucket_bucket_raw_v4__prev_speed": 5,
+        "bucket_bucket_raw_v4__abs_speed": 5,
+        "bucket_bucket_raw_v4__abs_prev_spd": 5,
+        "bucket_bucket_raw_v4__delta_speed": 5,
+        "bucket_bucket_raw_v4__same_dir": 5,
+        "bucket_bucket_raw_v4__is_bullish": 5,
+        "bucket_bucket_raw_v4__is_bearish": 5,
+        "bucket_bucket_raw_v4__range_atr": 5,
+        "bucket_bucket_raw_v4__range_atr_sma_prev": 5,
+        "bucket_bucket_raw_v4__range_expanding": 5,
+        "bucket_bucket_raw_v4__range_contracting": 5,
+        "bucket_bucket_raw_v4__er": 5,
+        "bucket_bucket_raw_v4__fast_er": 5,
+        "bucket_bucket_raw_v4__er_falling_fast": 5,
+        "bucket_bucket_raw_v4__er_noisy": 5,
+        "bucket_bucket_raw_v4__er_supports_accel": 5,
+        "bucket_bucket_raw_v4__close_position": 5,
+        "bucket_bucket_raw_v4__bull_close_qual": 5,
+        "bucket_bucket_raw_v4__bear_close_qual": 5,
+        "bucket_bucket_raw_v4__bull_close_weak": 5,
+        "bucket_bucket_raw_v4__bear_close_weak": 5,
+        "bucket_bucket_raw_v4__bull_sma_support": 5,
+        "bucket_bucket_raw_v4__bear_sma_support": 5,
+        "bucket_bucket_raw_v4__bull_sma_weak": 5,
+        "bucket_bucket_raw_v4__bear_sma_weak": 5,
+        "bucket_bucket_raw_v4__bull_score": 5,
+        "bucket_bucket_raw_v4__bear_score": 5,
+        "bucket_bucket_raw_v4__active_score": 5,
+        "bucket_bucket_raw_v4__active_c1": 5,
+        "bucket_bucket_raw_v4__active_c2": 5,
+        "bucket_bucket_raw_v4__active_c3": 5,
+        "bucket_bucket_raw_v4__active_c4": 5,
+        "bucket_bucket_raw_v4__active_c5": 5,
+        "bucket_bucket_raw_v4__speed_dropping_fast": 5,
+        "bucket_bucket_raw_v4__accel_score_weak": 5,
+        "bucket_bucket_raw_v4__range_weak": 5,
+        "bucket_bucket_raw_v4__close_weak": 5,
+        "bucket_bucket_raw_v4__sma_weak": 5,
+        "bucket_bucket_raw_v4__decel_score": 5,
+        "bucket_bucket_raw_v4__immediate_decel": 5,
+        "bucket_bucket_raw_v4__raw_state": 5,
+        "bucket_bucket_raw_v4__pending_state": 5,
+        "bucket_bucket_raw_v4__pending_count": 5,
+        "bucket_bucket_raw_v4__bars_in_state": 5,
+        "bucket_bucket_raw_v4__accel_memory": 5,
+        "bucket_bucket_raw_v4__weak_accel_bars": 5,
+        "bucket_bucket_raw_v4__allowed_raw_state": 5,
+        "bucket_bucket_raw_v4__is_accel": 5,
+        "bucket_bucket_raw_v4__is_decel": 5,
+        "bucket_bucket_raw_v4__is_steady": 5,
+        "bucket_bucket_raw_v4__state_dir": 5,
+        "bucket_bucket_raw_v4__ema": 5,
+        "bucket_bucket_raw_v4__body_ratio": 5,
+        "bucket_bucket_raw_v4__above_ema": 5,
+        "bucket_bucket_raw_v4__bull_run_count": 5,
+        "bucket_bucket_raw_v4__sustained_run": 5,
+        "bucket_bucket_raw_v4__has_clearance": 5,
+        "bucket_bucket_raw_v4__clearance_count": 5,
+        "bucket_bucket_raw_v4__clearance_ok": 5,
+        "bucket_bucket_raw_v4__body_ok": 5,
+        "bucket_bucket_raw_v4__is_trend": 5,
+        "bucket_bucket_raw_v4__locked": 5,
+        "bucket_bucket_raw_v4__atr__stress_signal_raw": 1,
+        "bucket_bucket_raw_v4__drawdown_big": 1,
+        "bucket_bucket_raw_v4__drawdown_fast": 1,
+        "bucket_bucket_raw_v4__bars_underwater": 1,
+        "bucket_bucket_raw_v4__vol_scale": 60,
+        "bucket_bucket_raw_v4__state_big": 1,
+        "bucket_bucket_raw_v4__state_fast": 1,
+        "bucket_bucket_raw_v4__score": 1,
+        "bucket_bucket_raw_v4__riskScore": 1,
+        "bucket_bucket_raw_v4__ema_fast": 5,
+        "bucket_bucket_raw_v4__ema_slow": 5,
+        "bucket_bucket_raw_v4__ema_sep": 5,
+        "bucket_bucket_raw_v4__er__trend_direction_raw": 5,
+        "bucket_bucket_raw_v4__er_mean": 5,
+        "bucket_bucket_raw_v4__er_std": 5,
+        "bucket_bucket_raw_v4__er_downvol": 5,
+        "bucket_bucket_raw_v4__er_thr_dyn": 5,
+        "bucket_bucket_raw_v4__er_low": 5,
+        "bucket_bucket_raw_v4__weak_run": 5,
+        "bucket_bucket_raw_v4__label_int_raw": 5,
+        "bucket_bucket_raw_v4__atr__trend_maturity_raw": 5,
+        "bucket_bucket_raw_v4__vwap__trend_maturity_raw": 5,
+        "bucket_bucket_raw_v4__direction_score": 5,
+        "bucket_bucket_raw_v4__ema_pressure": 5,
+        "bucket_bucket_raw_v4__er__trend_maturity_raw": 5,
+        "bucket_bucket_raw_v4__state_name": 5,
+        "bucket_bucket_raw_v4__break_event": 5,
+        "bucket_bucket_raw_v4__maturity_code": 5,
+        "bucket_bucket_raw_v4__maturity_dir": 5,
+        "bucket_bucket_raw_v4__exhaustion_event": 5,
+        "bucket_bucket_raw_v4__extension_atr": 5,
+        "bucket_bucket_raw_v4__peak_ext_atr": 5,
+        "bucket_bucket_raw_v4__signed_di_gap": 5,
+        "bucket_bucket_raw_v4__mom_fade_frac": 5,
+        "bucket_bucket_raw_v4__giveback_atr": 5,
+        "bucket_bucket_raw_v4__mature_bars": 5,
+        "bucket_bucket_raw_v4__trend_age": 5,
+        "bucket_bucket_raw_v4__vwap_dist_atr": 5,
+        "bucket_bucket_raw_v4__bars_since_fresh": 5,
+        "bucket_bucket_raw_v4__bars_since_mature": 5,
+        "bucket_bucket_raw_v4__bars_since_exhausted": 5,
+        "bucket_bucket_raw_v4__rv_60": 1,
+        "bucket_bucket_raw_v4__atr_pct": 1,
+        "bucket_bucket_raw_v4__india_vix_zscore_20": 60,
+        "bucket_bucket_raw_v4__rv_rank_60": 1,
+        "bucket_bucket_raw_v4__atr_rank_60": 1,
+        "bucket_bucket_raw_v4__realized_60": 1,
+        "bucket_bucket_raw_v4__implied_vix": 60,
+        "bucket_bucket_raw_v4__rv_rank_60d": 1,
+        "bucket_bucket_raw_v4__atr_rank_60d": 1,
+        "bucket_bucket_raw_v4__vol_level_pct60d_score": 1,
+        "bucket_bucket_raw_v4__vol_level_ord": 1,
+        "bucket_bucket_raw_v4__vol_z": 1,
+        "bucket_bucket_raw_v4__range_z": 1,
+        "bucket_bucket_raw_v4__close_pos": 1,
+        "bucket_bucket_raw_v4__close_clean": 1,
+        "bucket_bucket_raw_v4__close_rejection": 1,
+        "bucket_bucket_raw_v4__close_messy": 1,
+        "bucket_bucket_raw_v4__minute_of_day": 1,
+        "bucket_bucket_raw_v4__session_phase": 1,
+        "bucket_bucket_raw_v4__vwap_band_state": 5,
+        "bucket_bucket_raw_v4__vwap_excursion_ratio": 5,
+        "bucket_bucket_raw_v4__reversion_strength": 5
+      },
+      "clock_overrides": {},
+      "na_policy": "sentinel",
+      "na_treatment": {
+        "policy": "sentinel",
+        "for_model": "native",
+        "columns": {
+          "bar_conviction": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "live_label": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "Intraday_Positioning": {
+            "filled": "MISSING",
+            "n": 315
+          },
+          "range_state": {
+            "filled": "MISSING",
+            "n": 375
+          },
+          "state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "pullback_severity": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "trend_direction": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "maturity_name": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "Volume_Quality": {
+            "filled": "MISSING",
+            "n": 7815
+          },
+          "is_confirmed": {
+            "filled": "MISSING",
+            "n": 6880
+          },
+          "is_survived": {
+            "filled": "MISSING",
+            "n": 6880
+          },
+          "is_green": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "label_1min": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "is_uptrend": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "is_downtrend": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "bullish_engulfing": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "morning_star": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "abandoned_baby_bull": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "piercing_line": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "three_white_soldiers": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "marubozu_green": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "kicker_bullish": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "hammer": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "inverted_hammer": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "bullish_harami": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "confirmed_dragonfly": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "tweezer_bottom": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "confirmed_bullish_doji": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "confirmed_bullish_spinning_top": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "bearish_engulfing": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "evening_star": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "abandoned_baby_bear": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "dark_cloud_cover": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "three_black_crows": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "marubozu_red": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "shooting_star": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "hanging_man": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "bearish_harami": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "confirmed_gravestone": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "tweezer_top": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "confirmed_bearish_doji": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "confirmed_bearish_spinning_top": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "verification_event": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "verification_active": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "verification_armed": {
+            "filled": "MISSING",
+            "n": 316
+          },
+          "trigger": {
+            "filled": "MISSING",
+            "n": 315
+          },
+          "same_dir": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "is_bullish": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "is_bearish": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "range_expanding": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "range_contracting": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "er_falling_fast": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "er_noisy": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "er_supports_accel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bull_close_qual": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bear_close_qual": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bull_close_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bear_close_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bull_sma_support": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bear_sma_support": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bull_sma_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bear_sma_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "active_c1": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "active_c2": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "active_c3": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "active_c4": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "active_c5": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "speed_dropping_fast": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "accel_score_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "range_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "close_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "sma_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "immediate_decel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "raw_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "pending_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "allowed_raw_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "is_accel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "is_decel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "is_steady": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "state_dir": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "er_low": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "state_name": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "fade_risk": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "vol_level_pct60d_ord": {
+            "fixed_sentinel": -999.0,
+            "n": 4059
+          },
+          "bar_range": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "atr_prev": {
+            "fixed_sentinel": -999.0,
+            "n": 75
+          },
+          "significance": {
+            "fixed_sentinel": -999.0,
+            "n": 75
+          },
+          "clv": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "direction": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "signed_body": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "f_body": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "f_range": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "force_count": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "conviction_score": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "dom_resistance": {
+            "fixed_sentinel": -999.0,
+            "n": 33869
+          },
+          "dom_support": {
+            "fixed_sentinel": -999.0,
+            "n": 28176
+          },
+          "dist_to_res_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 33869
+          },
+          "dist_to_sup_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 28176
+          },
+          "atr14": {
+            "fixed_sentinel": -999.0,
+            "n": 6945
+          },
+          "brk_level": {
+            "fixed_sentinel": -999.0,
+            "n": 379137
+          },
+          "stop_level": {
+            "fixed_sentinel": -999.0,
+            "n": 379137
+          },
+          "mfe_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 379137
+          },
+          "mae_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 379137
+          },
+          "atr_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 379137
+          },
+          "bars_since_bo": {
+            "fixed_sentinel": -999.0,
+            "n": 379137
+          },
+          "mark_bo": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_fail": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_fade": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_conf": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_surv": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_upgrade": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_rt": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "mark_lost": {
+            "fixed_sentinel": -999.0,
+            "n": 6880
+          },
+          "total_range": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "body_perc": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "upper_wick_perc": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "lower_wick_perc": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "atr_14": {
+            "fixed_sentinel": -999.0,
+            "n": 329
+          },
+          "ema_5": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "ema_20": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "ema_diff": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "vwap": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "vwap_slope": {
+            "fixed_sentinel": -999.0,
+            "n": 7176
+          },
+          "rsi_14": {
+            "fixed_sentinel": -999.0,
+            "n": 317
+          },
+          "vote_ema": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "vote_vwap": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "vote_rsi": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "vote_sum": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "label_streak": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "bull_strength_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "bear_strength_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "bars_since_bull_signal": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "bars_since_bear_signal": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "verification_lock_level": {
+            "fixed_sentinel": -999.0,
+            "n": 264300
+          },
+          "verification_arm_thresh": {
+            "fixed_sentinel": -999.0,
+            "n": 264300
+          },
+          "verification_conf_thresh": {
+            "fixed_sentinel": -999.0,
+            "n": 264300
+          },
+          "bars_in_verification": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "n_confirmation_events": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "n_false_events": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "n_verifications_active": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "n_verifications_armed": {
+            "fixed_sentinel": -999.0,
+            "n": 316
+          },
+          "atr14__fade_risk_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 7240
+          },
+          "ema9": {
+            "fixed_sentinel": -999.0,
+            "n": 7175
+          },
+          "ema_gap_pct": {
+            "fixed_sentinel": -999.0,
+            "n": 7175
+          },
+          "trend_state": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "clue_score": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "leg_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 139878
+          },
+          "fade_dir": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "episode_len": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "anchored_high": {
+            "fixed_sentinel": -999.0,
+            "n": 30
+          },
+          "anchored_low": {
+            "fixed_sentinel": -999.0,
+            "n": 30
+          },
+          "frozen_high": {
+            "fixed_sentinel": -999.0,
+            "n": 481890
+          },
+          "frozen_low": {
+            "fixed_sentinel": -999.0,
+            "n": 481890
+          },
+          "same_slot_vol_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 4065
+          },
+          "window_vol_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 4209
+          },
+          "window_rng_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 4209
+          },
+          "absorption_score": {
+            "fixed_sentinel": -999.0,
+            "n": 4209
+          },
+          "inside_share": {
+            "fixed_sentinel": -999.0,
+            "n": 24
+          },
+          "box_width_slot_norm": {
+            "fixed_sentinel": -999.0,
+            "n": 621
+          },
+          "prior_leg_in_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 60
+          },
+          "dyn_vol_thr": {
+            "fixed_sentinel": -999.0,
+            "n": 4804
+          },
+          "dyn_rng_thr": {
+            "fixed_sentinel": -999.0,
+            "n": 4804
+          },
+          "dyn_box_thr": {
+            "fixed_sentinel": -999.0,
+            "n": 1018
+          },
+          "dyn_abs_thr": {
+            "fixed_sentinel": -999.0,
+            "n": 4804
+          },
+          "sell_footprints": {
+            "fixed_sentinel": -999.0,
+            "n": 24
+          },
+          "buy_footprints": {
+            "fixed_sentinel": -999.0,
+            "n": 24
+          },
+          "nearest_up_gap_low": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_high": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_size": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_size_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_distance": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_distance_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_up_gap_age": {
+            "fixed_sentinel": -999.0,
+            "n": 29621
+          },
+          "nearest_down_gap_low": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_high": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_size": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_size_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_distance": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_distance_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "nearest_down_gap_age": {
+            "fixed_sentinel": -999.0,
+            "n": 268267
+          },
+          "total_up_gap_area_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 375
+          },
+          "total_down_gap_area_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 375
+          },
+          "total_gap_area_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 375
+          },
+          "gap_fill_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 7213
+          },
+          "minute_of_session": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "zone_id": {
+            "fixed_sentinel": -999.0,
+            "n": 315
+          },
+          "dist_from_prev_day_high": {
+            "fixed_sentinel": -999.0,
+            "n": 375
+          },
+          "dist_from_prev_day_low": {
+            "fixed_sentinel": -999.0,
+            "n": 375
+          },
+          "distance_from_3d_high": {
+            "fixed_sentinel": -999.0,
+            "n": 1125
+          },
+          "distance_from_3d_low": {
+            "fixed_sentinel": -999.0,
+            "n": 1125
+          },
+          "distance_from_10d_high": {
+            "fixed_sentinel": -999.0,
+            "n": 3750
+          },
+          "distance_from_10d_low": {
+            "fixed_sentinel": -999.0,
+            "n": 3750
+          },
+          "atr_20": {
+            "fixed_sentinel": -999.0,
+            "n": 19
+          },
+          "res_distance_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 374406
+          },
+          "res_weighted_score": {
+            "fixed_sentinel": -999.0,
+            "n": 374406
+          },
+          "res_weight": {
+            "fixed_sentinel": -999.0,
+            "n": 374406
+          },
+          "sup_distance_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 373603
+          },
+          "sup_weighted_score": {
+            "fixed_sentinel": -999.0,
+            "n": 373603
+          },
+          "sup_weight": {
+            "fixed_sentinel": -999.0,
+            "n": 373603
+          },
+          "sma_1m": {
+            "fixed_sentinel": -999.0,
+            "n": 10
+          },
+          "sma_1m_slope": {
+            "fixed_sentinel": -999.0,
+            "n": 15
+          },
+          "atr": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "speed": {
+            "fixed_sentinel": -999.0,
+            "n": 50
+          },
+          "prev_speed": {
+            "fixed_sentinel": -999.0,
+            "n": 95
+          },
+          "abs_speed": {
+            "fixed_sentinel": -999.0,
+            "n": 50
+          },
+          "abs_prev_spd": {
+            "fixed_sentinel": -999.0,
+            "n": 95
+          },
+          "delta_speed": {
+            "fixed_sentinel": -999.0,
+            "n": 95
+          },
+          "range_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "range_atr_sma_prev": {
+            "fixed_sentinel": -999.0,
+            "n": 30
+          },
+          "er": {
+            "fixed_sentinel": -999.0,
+            "n": 80
+          },
+          "fast_er": {
+            "fixed_sentinel": -999.0,
+            "n": 105
+          },
+          "close_position": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "bull_score": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "bear_score": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "active_score": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "decel_score": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "pending_count": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "bars_in_state": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "accel_memory": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "weak_accel_bars": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "ema": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "body_ratio": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "above_ema": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "bull_run_count": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "sustained_run": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "has_clearance": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "clearance_count": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "clearance_ok": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "body_ok": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "is_trend": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "locked": {
+            "fixed_sentinel": -999.0,
+            "n": 360498
+          },
+          "atr__stress_signal_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 13
+          },
+          "score": {
+            "fixed_sentinel": -999.0,
+            "n": 3000
+          },
+          "ema_fast": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "ema_slow": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "ema_sep": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "er__trend_direction_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 125
+          },
+          "er_mean": {
+            "fixed_sentinel": -999.0,
+            "n": 160
+          },
+          "er_std": {
+            "fixed_sentinel": -999.0,
+            "n": 160
+          },
+          "er_downvol": {
+            "fixed_sentinel": -999.0,
+            "n": 165
+          },
+          "er_thr_dyn": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "weak_run": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "label_int_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "atr__trend_maturity_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 10
+          },
+          "vwap__trend_maturity_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "direction_score": {
+            "fixed_sentinel": -999.0,
+            "n": 10
+          },
+          "ema_pressure": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "er__trend_maturity_raw": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "break_event": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "maturity_code": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "maturity_dir": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "exhaustion_event": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "extension_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 291767
+          },
+          "peak_ext_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 291767
+          },
+          "signed_di_gap": {
+            "fixed_sentinel": -999.0,
+            "n": 291767
+          },
+          "mom_fade_frac": {
+            "fixed_sentinel": -999.0,
+            "n": 291767
+          },
+          "giveback_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 291767
+          },
+          "mature_bars": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "trend_age": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "vwap_dist_atr": {
+            "fixed_sentinel": -999.0,
+            "n": 10
+          },
+          "bars_since_fresh": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "bars_since_mature": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "bars_since_exhausted": {
+            "fixed_sentinel": -999.0,
+            "n": 5
+          },
+          "rv_60": {
+            "fixed_sentinel": -999.0,
+            "n": 60
+          },
+          "atr_pct": {
+            "fixed_sentinel": -999.0,
+            "n": 13
+          },
+          "india_vix_zscore_20": {
+            "fixed_sentinel": -999.0,
+            "n": 7500
+          },
+          "rv_rank_60": {
+            "fixed_sentinel": -999.0,
+            "n": 119
+          },
+          "atr_rank_60": {
+            "fixed_sentinel": -999.0,
+            "n": 72
+          },
+          "realized_60": {
+            "fixed_sentinel": -999.0,
+            "n": 119
+          },
+          "implied_vix": {
+            "fixed_sentinel": -999.0,
+            "n": 7500
+          },
+          "rv_rank_60d": {
+            "fixed_sentinel": -999.0,
+            "n": 4059
+          },
+          "atr_rank_60d": {
+            "fixed_sentinel": -999.0,
+            "n": 4012
+          },
+          "vol_level_pct60d_score": {
+            "fixed_sentinel": -999.0,
+            "n": 4059
+          },
+          "vol_level_ord": {
+            "fixed_sentinel": -999.0,
+            "n": 7500
+          },
+          "vol_z": {
+            "fixed_sentinel": -999.0,
+            "n": 7815
+          },
+          "range_z": {
+            "fixed_sentinel": -999.0,
+            "n": 7815
+          }
+        },
+        "na_in_built_output": {}
+      },
+      "categorical": [
+        "bucket_bucket_raw_v4__bar_conviction",
+        "bucket_bucket_raw_v4__breakout_state",
+        "bucket_bucket_raw_v4__live_label",
+        "bucket_bucket_raw_v4__gap_state",
+        "bucket_bucket_raw_v4__Intraday_Positioning",
+        "bucket_bucket_raw_v4__res_state",
+        "bucket_bucket_raw_v4__sup_state",
+        "bucket_bucket_raw_v4__range_state",
+        "bucket_bucket_raw_v4__state",
+        "bucket_bucket_raw_v4__pullback_severity",
+        "bucket_bucket_raw_v4__label_combined",
+        "bucket_bucket_raw_v4__trend_direction",
+        "bucket_bucket_raw_v4__maturity_name",
+        "bucket_bucket_raw_v4__Volume_Quality",
+        "bucket_bucket_raw_v4__vwap_microstructure",
+        "bucket_bucket_raw_v4__is_confirmed",
+        "bucket_bucket_raw_v4__is_survived",
+        "bucket_bucket_raw_v4__is_green",
+        "bucket_bucket_raw_v4__label_1min",
+        "bucket_bucket_raw_v4__is_uptrend",
+        "bucket_bucket_raw_v4__is_downtrend",
+        "bucket_bucket_raw_v4__bullish_engulfing",
+        "bucket_bucket_raw_v4__morning_star",
+        "bucket_bucket_raw_v4__abandoned_baby_bull",
+        "bucket_bucket_raw_v4__piercing_line",
+        "bucket_bucket_raw_v4__three_white_soldiers",
+        "bucket_bucket_raw_v4__marubozu_green",
+        "bucket_bucket_raw_v4__kicker_bullish",
+        "bucket_bucket_raw_v4__hammer",
+        "bucket_bucket_raw_v4__inverted_hammer",
+        "bucket_bucket_raw_v4__bullish_harami",
+        "bucket_bucket_raw_v4__confirmed_dragonfly",
+        "bucket_bucket_raw_v4__tweezer_bottom",
+        "bucket_bucket_raw_v4__confirmed_bullish_doji",
+        "bucket_bucket_raw_v4__confirmed_bullish_spinning_top",
+        "bucket_bucket_raw_v4__bearish_engulfing",
+        "bucket_bucket_raw_v4__evening_star",
+        "bucket_bucket_raw_v4__abandoned_baby_bear",
+        "bucket_bucket_raw_v4__dark_cloud_cover",
+        "bucket_bucket_raw_v4__three_black_crows",
+        "bucket_bucket_raw_v4__marubozu_red",
+        "bucket_bucket_raw_v4__shooting_star",
+        "bucket_bucket_raw_v4__hanging_man",
+        "bucket_bucket_raw_v4__bearish_harami",
+        "bucket_bucket_raw_v4__confirmed_gravestone",
+        "bucket_bucket_raw_v4__tweezer_top",
+        "bucket_bucket_raw_v4__confirmed_bearish_doji",
+        "bucket_bucket_raw_v4__confirmed_bearish_spinning_top",
+        "bucket_bucket_raw_v4__verification_event",
+        "bucket_bucket_raw_v4__verification_active",
+        "bucket_bucket_raw_v4__verification_armed",
+        "bucket_bucket_raw_v4__trigger",
+        "bucket_bucket_raw_v4__raw_accumulation",
+        "bucket_bucket_raw_v4__raw_distribution",
+        "bucket_bucket_raw_v4__acc_confirmed",
+        "bucket_bucket_raw_v4__dist_confirmed",
+        "bucket_bucket_raw_v4__acc_resolved_up",
+        "bucket_bucket_raw_v4__acc_failed_down",
+        "bucket_bucket_raw_v4__dist_resolved_dn",
+        "bucket_bucket_raw_v4__dist_failed_up",
+        "bucket_bucket_raw_v4__res_level_name",
+        "bucket_bucket_raw_v4__res_level_tf",
+        "bucket_bucket_raw_v4__res_polarity",
+        "bucket_bucket_raw_v4__sup_level_name",
+        "bucket_bucket_raw_v4__sup_level_tf",
+        "bucket_bucket_raw_v4__sup_polarity",
+        "bucket_bucket_raw_v4__same_dir",
+        "bucket_bucket_raw_v4__is_bullish",
+        "bucket_bucket_raw_v4__is_bearish",
+        "bucket_bucket_raw_v4__range_expanding",
+        "bucket_bucket_raw_v4__range_contracting",
+        "bucket_bucket_raw_v4__er_falling_fast",
+        "bucket_bucket_raw_v4__er_noisy",
+        "bucket_bucket_raw_v4__er_supports_accel",
+        "bucket_bucket_raw_v4__bull_close_qual",
+        "bucket_bucket_raw_v4__bear_close_qual",
+        "bucket_bucket_raw_v4__bull_close_weak",
+        "bucket_bucket_raw_v4__bear_close_weak",
+        "bucket_bucket_raw_v4__bull_sma_support",
+        "bucket_bucket_raw_v4__bear_sma_support",
+        "bucket_bucket_raw_v4__bull_sma_weak",
+        "bucket_bucket_raw_v4__bear_sma_weak",
+        "bucket_bucket_raw_v4__active_c1",
+        "bucket_bucket_raw_v4__active_c2",
+        "bucket_bucket_raw_v4__active_c3",
+        "bucket_bucket_raw_v4__active_c4",
+        "bucket_bucket_raw_v4__active_c5",
+        "bucket_bucket_raw_v4__speed_dropping_fast",
+        "bucket_bucket_raw_v4__accel_score_weak",
+        "bucket_bucket_raw_v4__range_weak",
+        "bucket_bucket_raw_v4__close_weak",
+        "bucket_bucket_raw_v4__sma_weak",
+        "bucket_bucket_raw_v4__immediate_decel",
+        "bucket_bucket_raw_v4__raw_state",
+        "bucket_bucket_raw_v4__pending_state",
+        "bucket_bucket_raw_v4__allowed_raw_state",
+        "bucket_bucket_raw_v4__is_accel",
+        "bucket_bucket_raw_v4__is_decel",
+        "bucket_bucket_raw_v4__is_steady",
+        "bucket_bucket_raw_v4__state_dir",
+        "bucket_bucket_raw_v4__er_low",
+        "bucket_bucket_raw_v4__state_name",
+        "bucket_bucket_raw_v4__close_clean",
+        "bucket_bucket_raw_v4__close_rejection",
+        "bucket_bucket_raw_v4__close_messy",
+        "bucket_bucket_raw_v4__session_phase",
+        "bucket_bucket_raw_v4__vwap_band_state"
+      ],
+      "parquet_sha256": "b73ffcbf851e7b7df33707444ef62991e6b6d9a0a9b346c67de9399b2261170b",
+      "columns": [
+        "bucket_bucket_raw_v4__bar_conviction",
+        "bucket_bucket_raw_v4__breakout_state",
+        "bucket_bucket_raw_v4__live_label",
+        "bucket_bucket_raw_v4__fade_risk",
+        "bucket_bucket_raw_v4__gap_state",
+        "bucket_bucket_raw_v4__Intraday_Positioning",
+        "bucket_bucket_raw_v4__res_state",
+        "bucket_bucket_raw_v4__sup_state",
+        "bucket_bucket_raw_v4__range_state",
+        "bucket_bucket_raw_v4__state",
+        "bucket_bucket_raw_v4__pullback_severity",
+        "bucket_bucket_raw_v4__label_combined",
+        "bucket_bucket_raw_v4__trend_direction",
+        "bucket_bucket_raw_v4__maturity_name",
+        "bucket_bucket_raw_v4__vol_level_pct60d_ord",
+        "bucket_bucket_raw_v4__Volume_Quality",
+        "bucket_bucket_raw_v4__vwap_microstructure",
+        "bucket_bucket_raw_v4__bar_range",
+        "bucket_bucket_raw_v4__atr_prev",
+        "bucket_bucket_raw_v4__significance",
+        "bucket_bucket_raw_v4__clv",
+        "bucket_bucket_raw_v4__direction",
+        "bucket_bucket_raw_v4__signed_body",
+        "bucket_bucket_raw_v4__f_body",
+        "bucket_bucket_raw_v4__f_range",
+        "bucket_bucket_raw_v4__force_count",
+        "bucket_bucket_raw_v4__conviction_score",
+        "bucket_bucket_raw_v4__dom_resistance",
+        "bucket_bucket_raw_v4__dom_support",
+        "bucket_bucket_raw_v4__dist_to_res_atr",
+        "bucket_bucket_raw_v4__dist_to_sup_atr",
+        "bucket_bucket_raw_v4__atr14",
+        "bucket_bucket_raw_v4__brk_level",
+        "bucket_bucket_raw_v4__stop_level",
+        "bucket_bucket_raw_v4__mfe_atr",
+        "bucket_bucket_raw_v4__mae_atr",
+        "bucket_bucket_raw_v4__atr_ratio",
+        "bucket_bucket_raw_v4__bars_since_bo",
+        "bucket_bucket_raw_v4__is_confirmed",
+        "bucket_bucket_raw_v4__is_survived",
+        "bucket_bucket_raw_v4__mark_bo",
+        "bucket_bucket_raw_v4__mark_fail",
+        "bucket_bucket_raw_v4__mark_fade",
+        "bucket_bucket_raw_v4__mark_conf",
+        "bucket_bucket_raw_v4__mark_surv",
+        "bucket_bucket_raw_v4__mark_upgrade",
+        "bucket_bucket_raw_v4__mark_rt",
+        "bucket_bucket_raw_v4__mark_lost",
+        "bucket_bucket_raw_v4__is_green",
+        "bucket_bucket_raw_v4__total_range",
+        "bucket_bucket_raw_v4__body_perc",
+        "bucket_bucket_raw_v4__upper_wick_perc",
+        "bucket_bucket_raw_v4__lower_wick_perc",
+        "bucket_bucket_raw_v4__atr_14",
+        "bucket_bucket_raw_v4__ema_5",
+        "bucket_bucket_raw_v4__ema_20",
+        "bucket_bucket_raw_v4__ema_diff",
+        "bucket_bucket_raw_v4__vwap",
+        "bucket_bucket_raw_v4__vwap_slope",
+        "bucket_bucket_raw_v4__rsi_14",
+        "bucket_bucket_raw_v4__vote_ema",
+        "bucket_bucket_raw_v4__vote_vwap",
+        "bucket_bucket_raw_v4__vote_rsi",
+        "bucket_bucket_raw_v4__vote_sum",
+        "bucket_bucket_raw_v4__label_1min",
+        "bucket_bucket_raw_v4__label_streak",
+        "bucket_bucket_raw_v4__is_uptrend",
+        "bucket_bucket_raw_v4__is_downtrend",
+        "bucket_bucket_raw_v4__bullish_engulfing",
+        "bucket_bucket_raw_v4__morning_star",
+        "bucket_bucket_raw_v4__abandoned_baby_bull",
+        "bucket_bucket_raw_v4__piercing_line",
+        "bucket_bucket_raw_v4__three_white_soldiers",
+        "bucket_bucket_raw_v4__marubozu_green",
+        "bucket_bucket_raw_v4__kicker_bullish",
+        "bucket_bucket_raw_v4__hammer",
+        "bucket_bucket_raw_v4__inverted_hammer",
+        "bucket_bucket_raw_v4__bullish_harami",
+        "bucket_bucket_raw_v4__confirmed_dragonfly",
+        "bucket_bucket_raw_v4__tweezer_bottom",
+        "bucket_bucket_raw_v4__confirmed_bullish_doji",
+        "bucket_bucket_raw_v4__confirmed_bullish_spinning_top",
+        "bucket_bucket_raw_v4__bearish_engulfing",
+        "bucket_bucket_raw_v4__evening_star",
+        "bucket_bucket_raw_v4__abandoned_baby_bear",
+        "bucket_bucket_raw_v4__dark_cloud_cover",
+        "bucket_bucket_raw_v4__three_black_crows",
+        "bucket_bucket_raw_v4__marubozu_red",
+        "bucket_bucket_raw_v4__shooting_star",
+        "bucket_bucket_raw_v4__hanging_man",
+        "bucket_bucket_raw_v4__bearish_harami",
+        "bucket_bucket_raw_v4__confirmed_gravestone",
+        "bucket_bucket_raw_v4__tweezer_top",
+        "bucket_bucket_raw_v4__confirmed_bearish_doji",
+        "bucket_bucket_raw_v4__confirmed_bearish_spinning_top",
+        "bucket_bucket_raw_v4__bull_strength_raw",
+        "bucket_bucket_raw_v4__bear_strength_raw",
+        "bucket_bucket_raw_v4__bars_since_bull_signal",
+        "bucket_bucket_raw_v4__bars_since_bear_signal",
+        "bucket_bucket_raw_v4__verification_event",
+        "bucket_bucket_raw_v4__verification_active",
+        "bucket_bucket_raw_v4__verification_armed",
+        "bucket_bucket_raw_v4__verification_lock_level",
+        "bucket_bucket_raw_v4__verification_arm_thresh",
+        "bucket_bucket_raw_v4__verification_conf_thresh",
+        "bucket_bucket_raw_v4__bars_in_verification",
+        "bucket_bucket_raw_v4__n_confirmation_events",
+        "bucket_bucket_raw_v4__n_false_events",
+        "bucket_bucket_raw_v4__n_verifications_active",
+        "bucket_bucket_raw_v4__n_verifications_armed",
+        "bucket_bucket_raw_v4__atr14__fade_risk_raw",
+        "bucket_bucket_raw_v4__ema9",
+        "bucket_bucket_raw_v4__ema_gap_pct",
+        "bucket_bucket_raw_v4__trend_state",
+        "bucket_bucket_raw_v4__clue_score",
+        "bucket_bucket_raw_v4__leg_atr",
+        "bucket_bucket_raw_v4__trigger",
+        "bucket_bucket_raw_v4__fade_dir",
+        "bucket_bucket_raw_v4__episode_len",
+        "bucket_bucket_raw_v4__anchored_high",
+        "bucket_bucket_raw_v4__anchored_low",
+        "bucket_bucket_raw_v4__frozen_high",
+        "bucket_bucket_raw_v4__frozen_low",
+        "bucket_bucket_raw_v4__same_slot_vol_ratio",
+        "bucket_bucket_raw_v4__window_vol_ratio",
+        "bucket_bucket_raw_v4__window_rng_ratio",
+        "bucket_bucket_raw_v4__absorption_score",
+        "bucket_bucket_raw_v4__efficiency_ratio",
+        "bucket_bucket_raw_v4__inside_share",
+        "bucket_bucket_raw_v4__box_width_slot_norm",
+        "bucket_bucket_raw_v4__prior_leg_in_atr",
+        "bucket_bucket_raw_v4__volatility_regime",
+        "bucket_bucket_raw_v4__dyn_vol_thr",
+        "bucket_bucket_raw_v4__dyn_rng_thr",
+        "bucket_bucket_raw_v4__dyn_box_thr",
+        "bucket_bucket_raw_v4__dyn_abs_thr",
+        "bucket_bucket_raw_v4__sell_footprints",
+        "bucket_bucket_raw_v4__buy_footprints",
+        "bucket_bucket_raw_v4__raw_accumulation",
+        "bucket_bucket_raw_v4__raw_distribution",
+        "bucket_bucket_raw_v4__phase_state_raw",
+        "bucket_bucket_raw_v4__phase_age",
+        "bucket_bucket_raw_v4__acc_confirmed",
+        "bucket_bucket_raw_v4__dist_confirmed",
+        "bucket_bucket_raw_v4__acc_resolved_up",
+        "bucket_bucket_raw_v4__acc_failed_down",
+        "bucket_bucket_raw_v4__dist_resolved_dn",
+        "bucket_bucket_raw_v4__dist_failed_up",
+        "bucket_bucket_raw_v4__Flow_State",
+        "bucket_bucket_raw_v4__has_gap_up_below",
+        "bucket_bucket_raw_v4__has_gap_down_above",
+        "bucket_bucket_raw_v4__up_unfilled_count",
+        "bucket_bucket_raw_v4__down_unfilled_count",
+        "bucket_bucket_raw_v4__total_unfilled_count",
+        "bucket_bucket_raw_v4__nearest_up_gap_low",
+        "bucket_bucket_raw_v4__nearest_up_gap_high",
+        "bucket_bucket_raw_v4__nearest_up_gap_size",
+        "bucket_bucket_raw_v4__nearest_up_gap_size_atr",
+        "bucket_bucket_raw_v4__nearest_up_gap_distance",
+        "bucket_bucket_raw_v4__nearest_up_gap_distance_atr",
+        "bucket_bucket_raw_v4__nearest_up_gap_ratio",
+        "bucket_bucket_raw_v4__nearest_up_gap_age",
+        "bucket_bucket_raw_v4__nearest_down_gap_low",
+        "bucket_bucket_raw_v4__nearest_down_gap_high",
+        "bucket_bucket_raw_v4__nearest_down_gap_size",
+        "bucket_bucket_raw_v4__nearest_down_gap_size_atr",
+        "bucket_bucket_raw_v4__nearest_down_gap_distance",
+        "bucket_bucket_raw_v4__nearest_down_gap_distance_atr",
+        "bucket_bucket_raw_v4__nearest_down_gap_ratio",
+        "bucket_bucket_raw_v4__nearest_down_gap_age",
+        "bucket_bucket_raw_v4__total_up_gap_area",
+        "bucket_bucket_raw_v4__total_down_gap_area",
+        "bucket_bucket_raw_v4__total_gap_area",
+        "bucket_bucket_raw_v4__total_up_gap_area_atr",
+        "bucket_bucket_raw_v4__total_down_gap_area_atr",
+        "bucket_bucket_raw_v4__total_gap_area_atr",
+        "bucket_bucket_raw_v4__gap_fill_ratio",
+        "bucket_bucket_raw_v4__gap_up_stack",
+        "bucket_bucket_raw_v4__gap_down_stack",
+        "bucket_bucket_raw_v4__gap_up_total_unfilled_pts",
+        "bucket_bucket_raw_v4__gap_down_total_unfilled_pts",
+        "bucket_bucket_raw_v4__minute_of_session",
+        "bucket_bucket_raw_v4__zone_id",
+        "bucket_bucket_raw_v4__dist_from_prev_day_high",
+        "bucket_bucket_raw_v4__dist_from_prev_day_low",
+        "bucket_bucket_raw_v4__distance_from_3d_high",
+        "bucket_bucket_raw_v4__distance_from_3d_low",
+        "bucket_bucket_raw_v4__distance_from_10d_high",
+        "bucket_bucket_raw_v4__distance_from_10d_low",
+        "bucket_bucket_raw_v4__atr_20",
+        "bucket_bucket_raw_v4__res_level_name",
+        "bucket_bucket_raw_v4__res_level_tf",
+        "bucket_bucket_raw_v4__res_polarity",
+        "bucket_bucket_raw_v4__res_distance_atr",
+        "bucket_bucket_raw_v4__res_weighted_score",
+        "bucket_bucket_raw_v4__res_weight",
+        "bucket_bucket_raw_v4__bars_in_res_zone",
+        "bucket_bucket_raw_v4__sup_level_name",
+        "bucket_bucket_raw_v4__sup_level_tf",
+        "bucket_bucket_raw_v4__sup_polarity",
+        "bucket_bucket_raw_v4__sup_distance_atr",
+        "bucket_bucket_raw_v4__sup_weighted_score",
+        "bucket_bucket_raw_v4__sup_weight",
+        "bucket_bucket_raw_v4__bars_in_sup_zone",
+        "bucket_bucket_raw_v4__sma_1m",
+        "bucket_bucket_raw_v4__sma_1m_slope",
+        "bucket_bucket_raw_v4__atr",
+        "bucket_bucket_raw_v4__speed",
+        "bucket_bucket_raw_v4__prev_speed",
+        "bucket_bucket_raw_v4__abs_speed",
+        "bucket_bucket_raw_v4__abs_prev_spd",
+        "bucket_bucket_raw_v4__delta_speed",
+        "bucket_bucket_raw_v4__same_dir",
+        "bucket_bucket_raw_v4__is_bullish",
+        "bucket_bucket_raw_v4__is_bearish",
+        "bucket_bucket_raw_v4__range_atr",
+        "bucket_bucket_raw_v4__range_atr_sma_prev",
+        "bucket_bucket_raw_v4__range_expanding",
+        "bucket_bucket_raw_v4__range_contracting",
+        "bucket_bucket_raw_v4__er",
+        "bucket_bucket_raw_v4__fast_er",
+        "bucket_bucket_raw_v4__er_falling_fast",
+        "bucket_bucket_raw_v4__er_noisy",
+        "bucket_bucket_raw_v4__er_supports_accel",
+        "bucket_bucket_raw_v4__close_position",
+        "bucket_bucket_raw_v4__bull_close_qual",
+        "bucket_bucket_raw_v4__bear_close_qual",
+        "bucket_bucket_raw_v4__bull_close_weak",
+        "bucket_bucket_raw_v4__bear_close_weak",
+        "bucket_bucket_raw_v4__bull_sma_support",
+        "bucket_bucket_raw_v4__bear_sma_support",
+        "bucket_bucket_raw_v4__bull_sma_weak",
+        "bucket_bucket_raw_v4__bear_sma_weak",
+        "bucket_bucket_raw_v4__bull_score",
+        "bucket_bucket_raw_v4__bear_score",
+        "bucket_bucket_raw_v4__active_score",
+        "bucket_bucket_raw_v4__active_c1",
+        "bucket_bucket_raw_v4__active_c2",
+        "bucket_bucket_raw_v4__active_c3",
+        "bucket_bucket_raw_v4__active_c4",
+        "bucket_bucket_raw_v4__active_c5",
+        "bucket_bucket_raw_v4__speed_dropping_fast",
+        "bucket_bucket_raw_v4__accel_score_weak",
+        "bucket_bucket_raw_v4__range_weak",
+        "bucket_bucket_raw_v4__close_weak",
+        "bucket_bucket_raw_v4__sma_weak",
+        "bucket_bucket_raw_v4__decel_score",
+        "bucket_bucket_raw_v4__immediate_decel",
+        "bucket_bucket_raw_v4__raw_state",
+        "bucket_bucket_raw_v4__pending_state",
+        "bucket_bucket_raw_v4__pending_count",
+        "bucket_bucket_raw_v4__bars_in_state",
+        "bucket_bucket_raw_v4__accel_memory",
+        "bucket_bucket_raw_v4__weak_accel_bars",
+        "bucket_bucket_raw_v4__allowed_raw_state",
+        "bucket_bucket_raw_v4__is_accel",
+        "bucket_bucket_raw_v4__is_decel",
+        "bucket_bucket_raw_v4__is_steady",
+        "bucket_bucket_raw_v4__state_dir",
+        "bucket_bucket_raw_v4__ema",
+        "bucket_bucket_raw_v4__body_ratio",
+        "bucket_bucket_raw_v4__above_ema",
+        "bucket_bucket_raw_v4__bull_run_count",
+        "bucket_bucket_raw_v4__sustained_run",
+        "bucket_bucket_raw_v4__has_clearance",
+        "bucket_bucket_raw_v4__clearance_count",
+        "bucket_bucket_raw_v4__clearance_ok",
+        "bucket_bucket_raw_v4__body_ok",
+        "bucket_bucket_raw_v4__is_trend",
+        "bucket_bucket_raw_v4__locked",
+        "bucket_bucket_raw_v4__atr__stress_signal_raw",
+        "bucket_bucket_raw_v4__drawdown_big",
+        "bucket_bucket_raw_v4__drawdown_fast",
+        "bucket_bucket_raw_v4__bars_underwater",
+        "bucket_bucket_raw_v4__vol_scale",
+        "bucket_bucket_raw_v4__state_big",
+        "bucket_bucket_raw_v4__state_fast",
+        "bucket_bucket_raw_v4__score",
+        "bucket_bucket_raw_v4__riskScore",
+        "bucket_bucket_raw_v4__ema_fast",
+        "bucket_bucket_raw_v4__ema_slow",
+        "bucket_bucket_raw_v4__ema_sep",
+        "bucket_bucket_raw_v4__er__trend_direction_raw",
+        "bucket_bucket_raw_v4__er_mean",
+        "bucket_bucket_raw_v4__er_std",
+        "bucket_bucket_raw_v4__er_downvol",
+        "bucket_bucket_raw_v4__er_thr_dyn",
+        "bucket_bucket_raw_v4__er_low",
+        "bucket_bucket_raw_v4__weak_run",
+        "bucket_bucket_raw_v4__label_int_raw",
+        "bucket_bucket_raw_v4__atr__trend_maturity_raw",
+        "bucket_bucket_raw_v4__vwap__trend_maturity_raw",
+        "bucket_bucket_raw_v4__direction_score",
+        "bucket_bucket_raw_v4__ema_pressure",
+        "bucket_bucket_raw_v4__er__trend_maturity_raw",
+        "bucket_bucket_raw_v4__state_name",
+        "bucket_bucket_raw_v4__break_event",
+        "bucket_bucket_raw_v4__maturity_code",
+        "bucket_bucket_raw_v4__maturity_dir",
+        "bucket_bucket_raw_v4__exhaustion_event",
+        "bucket_bucket_raw_v4__extension_atr",
+        "bucket_bucket_raw_v4__peak_ext_atr",
+        "bucket_bucket_raw_v4__signed_di_gap",
+        "bucket_bucket_raw_v4__mom_fade_frac",
+        "bucket_bucket_raw_v4__giveback_atr",
+        "bucket_bucket_raw_v4__mature_bars",
+        "bucket_bucket_raw_v4__trend_age",
+        "bucket_bucket_raw_v4__vwap_dist_atr",
+        "bucket_bucket_raw_v4__bars_since_fresh",
+        "bucket_bucket_raw_v4__bars_since_mature",
+        "bucket_bucket_raw_v4__bars_since_exhausted",
+        "bucket_bucket_raw_v4__rv_60",
+        "bucket_bucket_raw_v4__atr_pct",
+        "bucket_bucket_raw_v4__india_vix_zscore_20",
+        "bucket_bucket_raw_v4__rv_rank_60",
+        "bucket_bucket_raw_v4__atr_rank_60",
+        "bucket_bucket_raw_v4__realized_60",
+        "bucket_bucket_raw_v4__implied_vix",
+        "bucket_bucket_raw_v4__rv_rank_60d",
+        "bucket_bucket_raw_v4__atr_rank_60d",
+        "bucket_bucket_raw_v4__vol_level_pct60d_score",
+        "bucket_bucket_raw_v4__vol_level_ord",
+        "bucket_bucket_raw_v4__vol_z",
+        "bucket_bucket_raw_v4__range_z",
+        "bucket_bucket_raw_v4__close_pos",
+        "bucket_bucket_raw_v4__close_clean",
+        "bucket_bucket_raw_v4__close_rejection",
+        "bucket_bucket_raw_v4__close_messy",
+        "bucket_bucket_raw_v4__minute_of_day",
+        "bucket_bucket_raw_v4__session_phase",
+        "bucket_bucket_raw_v4__vwap_band_state",
+        "bucket_bucket_raw_v4__vwap_excursion_ratio",
+        "bucket_bucket_raw_v4__reversion_strength"
+      ]
+    }
+  ],
+  "labels_name": "labels_1min_A20_Ex_z2_En_zNA_anchor_7class",
+  "labels_sha256": "0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce",
+  "class_distribution": {},
+  "zero_weight_classes": [],
+  "no_peek": {
+    "applied": true,
+    "rule": "bar_close",
+    "tolerance_bars": 3
+  },
+  "built_by": "megaserve",
+  "status": "ready"
+}

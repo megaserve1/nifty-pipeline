@@ -71,6 +71,7 @@ def apply_policy(
     tolerance_bars: int = 3,
     sentinel_margin: float = 1.0,
     categorical_na_label: str = "MISSING",
+    fixed_sentinel: float | None = None,
 ) -> tuple[pd.DataFrame, dict]:
     """apply one feature's NaN policy. returns (frame, what_we_did).
 
@@ -134,7 +135,16 @@ def apply_policy(
         note["unusable_index"] = out.index[bad]        # build_dataset drops THESE label minutes
 
     else:  # 'sentinel' -- the NaN is REAL INFORMATION
-        if for_model == "native":
+        if fixed_sentinel is not None:
+            # a FLAT sentinel for every model (project decision). one value, no per-column math,
+            # and NO NaN left -- so xgboost/catboost also see the fill instead of NaN. simpler to
+            # explain than the computed sentinel, at the cost of the (here-impossible) collision.
+            for c in num_cols:
+                n = int(out[c].isna().sum())
+                if n:
+                    out[c] = out[c].fillna(fixed_sentinel)
+                    note["columns"][c] = {"fixed_sentinel": fixed_sentinel, "n": n}
+        elif for_model == "native":
             # xgboost / catboost: leave the NaN exactly as it is. they learn a branch for it.
             for c in num_cols:
                 n = int(out[c].isna().sum())
