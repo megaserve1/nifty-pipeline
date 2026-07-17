@@ -1,15 +1,15 @@
 {
   "manifest_schema_version": 1,
-  "built_at": "2026-07-17T10:06:45+00:00",
+  "built_at": "2026-07-17T10:41:50+00:00",
   "version": "v4",
   "recipe_sha256": "667ce0fcc3498ef1e45c1874f28cb4036af77eff40b34c1972ccc382a010d4ea",
-  "parquet_sha256": "2e1dbd070c12f2fbf4eea788dd51b755c3f1cd086906bd5672f5d2dae67f7d3e",
-  "rows": 0,
+  "parquet_sha256": "d0ba56e01382d84dab12799be5226ca6014a33a8dfd81c78f89077001cbe1844",
+  "rows": 513611,
   "n_features": 333,
   "schema": [
     {
       "col": "timestamp",
-      "dtype": "datetime64[ms]"
+      "dtype": "datetime64[us]"
     },
     {
       "col": "primary_label",
@@ -25,7 +25,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__bar_conviction",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__breakout_state",
@@ -33,7 +33,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__live_label",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__fade_risk",
@@ -45,7 +45,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__Intraday_Positioning",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__res_state",
@@ -57,15 +57,15 @@
     },
     {
       "col": "bucket_bucket_raw_v4__range_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__pullback_severity",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__label_combined",
@@ -73,11 +73,11 @@
     },
     {
       "col": "bucket_bucket_raw_v4__trend_direction",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__maturity_name",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__vol_level_pct60d_ord",
@@ -85,7 +85,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__Volume_Quality",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__vwap_microstructure",
@@ -177,11 +177,11 @@
     },
     {
       "col": "bucket_bucket_raw_v4__is_confirmed",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_survived",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__mark_bo",
@@ -217,7 +217,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__is_green",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__total_range",
@@ -281,7 +281,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__label_1min",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__label_streak",
@@ -289,119 +289,119 @@
     },
     {
       "col": "bucket_bucket_raw_v4__is_uptrend",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_downtrend",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bullish_engulfing",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__morning_star",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__abandoned_baby_bull",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__piercing_line",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__three_white_soldiers",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__marubozu_green",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__kicker_bullish",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__hammer",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__inverted_hammer",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bullish_harami",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__confirmed_dragonfly",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__tweezer_bottom",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__confirmed_bullish_doji",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__confirmed_bullish_spinning_top",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bearish_engulfing",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__evening_star",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__abandoned_baby_bear",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__dark_cloud_cover",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__three_black_crows",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__marubozu_red",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__shooting_star",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__hanging_man",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bearish_harami",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__confirmed_gravestone",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__tweezer_top",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__confirmed_bearish_doji",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__confirmed_bearish_spinning_top",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bull_strength_raw",
@@ -421,15 +421,15 @@
     },
     {
       "col": "bucket_bucket_raw_v4__verification_event",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__verification_active",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__verification_armed",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__verification_lock_level",
@@ -489,7 +489,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__trigger",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__fade_dir",
@@ -577,67 +577,67 @@
     },
     {
       "col": "bucket_bucket_raw_v4__raw_accumulation",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__raw_distribution",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__phase_state_raw",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__phase_age",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__acc_confirmed",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__dist_confirmed",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__acc_resolved_up",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__acc_failed_down",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__dist_resolved_dn",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__dist_failed_up",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__Flow_State",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__has_gap_up_below",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__has_gap_down_above",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__up_unfilled_count",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__down_unfilled_count",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__total_unfilled_count",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__nearest_up_gap_low",
@@ -733,11 +733,11 @@
     },
     {
       "col": "bucket_bucket_raw_v4__gap_up_stack",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__gap_down_stack",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__gap_up_total_unfilled_pts",
@@ -809,7 +809,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__bars_in_res_zone",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__sup_level_name",
@@ -837,7 +837,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__bars_in_sup_zone",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__sma_1m",
@@ -873,15 +873,15 @@
     },
     {
       "col": "bucket_bucket_raw_v4__same_dir",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_bullish",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_bearish",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__range_atr",
@@ -893,11 +893,11 @@
     },
     {
       "col": "bucket_bucket_raw_v4__range_expanding",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__range_contracting",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__er",
@@ -909,15 +909,15 @@
     },
     {
       "col": "bucket_bucket_raw_v4__er_falling_fast",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__er_noisy",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__er_supports_accel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__close_position",
@@ -925,35 +925,35 @@
     },
     {
       "col": "bucket_bucket_raw_v4__bull_close_qual",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bear_close_qual",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bull_close_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bear_close_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bull_sma_support",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bear_sma_support",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bull_sma_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bear_sma_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__bull_score",
@@ -969,43 +969,43 @@
     },
     {
       "col": "bucket_bucket_raw_v4__active_c1",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__active_c2",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__active_c3",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__active_c4",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__active_c5",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__speed_dropping_fast",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__accel_score_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__range_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__close_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__sma_weak",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__decel_score",
@@ -1013,15 +1013,15 @@
     },
     {
       "col": "bucket_bucket_raw_v4__immediate_decel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__raw_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__pending_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__pending_count",
@@ -1041,23 +1041,23 @@
     },
     {
       "col": "bucket_bucket_raw_v4__allowed_raw_state",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_accel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_decel",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__is_steady",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__state_dir",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__ema",
@@ -1117,7 +1117,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__bars_underwater",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__vol_scale",
@@ -1125,11 +1125,11 @@
     },
     {
       "col": "bucket_bucket_raw_v4__state_big",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__state_fast",
-      "dtype": "int64"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__score",
@@ -1173,7 +1173,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__er_low",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__weak_run",
@@ -1205,7 +1205,7 @@
     },
     {
       "col": "bucket_bucket_raw_v4__state_name",
-      "dtype": "object"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__break_event",
@@ -1325,19 +1325,19 @@
     },
     {
       "col": "bucket_bucket_raw_v4__close_clean",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__close_rejection",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__close_messy",
-      "dtype": "bool"
+      "dtype": "str"
     },
     {
       "col": "bucket_bucket_raw_v4__minute_of_day",
-      "dtype": "int32"
+      "dtype": "float64"
     },
     {
       "col": "bucket_bucket_raw_v4__session_phase",
@@ -3600,7 +3600,341 @@
             "n": 7815
           }
         },
-        "na_in_built_output": {}
+        "na_in_built_output": {
+          "bucket_bucket_raw_v4__bar_conviction": 6870,
+          "bucket_bucket_raw_v4__breakout_state": 6870,
+          "bucket_bucket_raw_v4__live_label": 1376,
+          "bucket_bucket_raw_v4__fade_risk": 6870,
+          "bucket_bucket_raw_v4__gap_state": 82284,
+          "bucket_bucket_raw_v4__Intraday_Positioning": 1376,
+          "bucket_bucket_raw_v4__res_state": 1376,
+          "bucket_bucket_raw_v4__sup_state": 1376,
+          "bucket_bucket_raw_v4__range_state": 1376,
+          "bucket_bucket_raw_v4__state": 6870,
+          "bucket_bucket_raw_v4__pullback_severity": 6870,
+          "bucket_bucket_raw_v4__label_combined": 1376,
+          "bucket_bucket_raw_v4__trend_direction": 6870,
+          "bucket_bucket_raw_v4__maturity_name": 6870,
+          "bucket_bucket_raw_v4__vol_level_pct60d_ord": 1376,
+          "bucket_bucket_raw_v4__Volume_Quality": 1376,
+          "bucket_bucket_raw_v4__vwap_microstructure": 6870,
+          "bucket_bucket_raw_v4__bar_range": 6870,
+          "bucket_bucket_raw_v4__atr_prev": 6870,
+          "bucket_bucket_raw_v4__significance": 6870,
+          "bucket_bucket_raw_v4__clv": 6870,
+          "bucket_bucket_raw_v4__direction": 6870,
+          "bucket_bucket_raw_v4__signed_body": 6870,
+          "bucket_bucket_raw_v4__f_body": 6870,
+          "bucket_bucket_raw_v4__f_range": 6870,
+          "bucket_bucket_raw_v4__force_count": 6870,
+          "bucket_bucket_raw_v4__conviction_score": 6870,
+          "bucket_bucket_raw_v4__dom_resistance": 6870,
+          "bucket_bucket_raw_v4__dom_support": 6870,
+          "bucket_bucket_raw_v4__dist_to_res_atr": 6870,
+          "bucket_bucket_raw_v4__dist_to_sup_atr": 6870,
+          "bucket_bucket_raw_v4__atr14": 6870,
+          "bucket_bucket_raw_v4__brk_level": 6870,
+          "bucket_bucket_raw_v4__stop_level": 6870,
+          "bucket_bucket_raw_v4__mfe_atr": 6870,
+          "bucket_bucket_raw_v4__mae_atr": 6870,
+          "bucket_bucket_raw_v4__atr_ratio": 6870,
+          "bucket_bucket_raw_v4__bars_since_bo": 6870,
+          "bucket_bucket_raw_v4__is_confirmed": 6870,
+          "bucket_bucket_raw_v4__is_survived": 6870,
+          "bucket_bucket_raw_v4__mark_bo": 6870,
+          "bucket_bucket_raw_v4__mark_fail": 6870,
+          "bucket_bucket_raw_v4__mark_fade": 6870,
+          "bucket_bucket_raw_v4__mark_conf": 6870,
+          "bucket_bucket_raw_v4__mark_surv": 6870,
+          "bucket_bucket_raw_v4__mark_upgrade": 6870,
+          "bucket_bucket_raw_v4__mark_rt": 6870,
+          "bucket_bucket_raw_v4__mark_lost": 6870,
+          "bucket_bucket_raw_v4__is_green": 1376,
+          "bucket_bucket_raw_v4__total_range": 1376,
+          "bucket_bucket_raw_v4__body_perc": 1376,
+          "bucket_bucket_raw_v4__upper_wick_perc": 1376,
+          "bucket_bucket_raw_v4__lower_wick_perc": 1376,
+          "bucket_bucket_raw_v4__atr_14": 1376,
+          "bucket_bucket_raw_v4__ema_5": 1376,
+          "bucket_bucket_raw_v4__ema_20": 1376,
+          "bucket_bucket_raw_v4__ema_diff": 1376,
+          "bucket_bucket_raw_v4__vwap": 1376,
+          "bucket_bucket_raw_v4__vwap_slope": 1376,
+          "bucket_bucket_raw_v4__rsi_14": 1376,
+          "bucket_bucket_raw_v4__vote_ema": 1376,
+          "bucket_bucket_raw_v4__vote_vwap": 1376,
+          "bucket_bucket_raw_v4__vote_rsi": 1376,
+          "bucket_bucket_raw_v4__vote_sum": 1376,
+          "bucket_bucket_raw_v4__label_1min": 1376,
+          "bucket_bucket_raw_v4__label_streak": 1376,
+          "bucket_bucket_raw_v4__is_uptrend": 1376,
+          "bucket_bucket_raw_v4__is_downtrend": 1376,
+          "bucket_bucket_raw_v4__bullish_engulfing": 1376,
+          "bucket_bucket_raw_v4__morning_star": 1376,
+          "bucket_bucket_raw_v4__abandoned_baby_bull": 1376,
+          "bucket_bucket_raw_v4__piercing_line": 1376,
+          "bucket_bucket_raw_v4__three_white_soldiers": 1376,
+          "bucket_bucket_raw_v4__marubozu_green": 1376,
+          "bucket_bucket_raw_v4__kicker_bullish": 1376,
+          "bucket_bucket_raw_v4__hammer": 1376,
+          "bucket_bucket_raw_v4__inverted_hammer": 1376,
+          "bucket_bucket_raw_v4__bullish_harami": 1376,
+          "bucket_bucket_raw_v4__confirmed_dragonfly": 1376,
+          "bucket_bucket_raw_v4__tweezer_bottom": 1376,
+          "bucket_bucket_raw_v4__confirmed_bullish_doji": 1376,
+          "bucket_bucket_raw_v4__confirmed_bullish_spinning_top": 1376,
+          "bucket_bucket_raw_v4__bearish_engulfing": 1376,
+          "bucket_bucket_raw_v4__evening_star": 1376,
+          "bucket_bucket_raw_v4__abandoned_baby_bear": 82284,
+          "bucket_bucket_raw_v4__dark_cloud_cover": 1376,
+          "bucket_bucket_raw_v4__three_black_crows": 1376,
+          "bucket_bucket_raw_v4__marubozu_red": 1376,
+          "bucket_bucket_raw_v4__shooting_star": 1376,
+          "bucket_bucket_raw_v4__hanging_man": 1376,
+          "bucket_bucket_raw_v4__bearish_harami": 1376,
+          "bucket_bucket_raw_v4__confirmed_gravestone": 1376,
+          "bucket_bucket_raw_v4__tweezer_top": 1376,
+          "bucket_bucket_raw_v4__confirmed_bearish_doji": 1376,
+          "bucket_bucket_raw_v4__confirmed_bearish_spinning_top": 1376,
+          "bucket_bucket_raw_v4__bull_strength_raw": 1376,
+          "bucket_bucket_raw_v4__bear_strength_raw": 1376,
+          "bucket_bucket_raw_v4__bars_since_bull_signal": 1376,
+          "bucket_bucket_raw_v4__bars_since_bear_signal": 1376,
+          "bucket_bucket_raw_v4__verification_event": 1376,
+          "bucket_bucket_raw_v4__verification_active": 1376,
+          "bucket_bucket_raw_v4__verification_armed": 1376,
+          "bucket_bucket_raw_v4__verification_lock_level": 1376,
+          "bucket_bucket_raw_v4__verification_arm_thresh": 1376,
+          "bucket_bucket_raw_v4__verification_conf_thresh": 1376,
+          "bucket_bucket_raw_v4__bars_in_verification": 1376,
+          "bucket_bucket_raw_v4__n_confirmation_events": 1376,
+          "bucket_bucket_raw_v4__n_false_events": 1376,
+          "bucket_bucket_raw_v4__n_verifications_active": 1376,
+          "bucket_bucket_raw_v4__n_verifications_armed": 1376,
+          "bucket_bucket_raw_v4__atr14__fade_risk_raw": 6870,
+          "bucket_bucket_raw_v4__ema9": 6870,
+          "bucket_bucket_raw_v4__ema_gap_pct": 6870,
+          "bucket_bucket_raw_v4__trend_state": 6870,
+          "bucket_bucket_raw_v4__clue_score": 6870,
+          "bucket_bucket_raw_v4__leg_atr": 6870,
+          "bucket_bucket_raw_v4__trigger": 6870,
+          "bucket_bucket_raw_v4__fade_dir": 6870,
+          "bucket_bucket_raw_v4__episode_len": 6870,
+          "bucket_bucket_raw_v4__anchored_high": 1376,
+          "bucket_bucket_raw_v4__anchored_low": 1376,
+          "bucket_bucket_raw_v4__frozen_high": 6870,
+          "bucket_bucket_raw_v4__frozen_low": 6870,
+          "bucket_bucket_raw_v4__same_slot_vol_ratio": 1376,
+          "bucket_bucket_raw_v4__window_vol_ratio": 1376,
+          "bucket_bucket_raw_v4__window_rng_ratio": 1376,
+          "bucket_bucket_raw_v4__absorption_score": 1376,
+          "bucket_bucket_raw_v4__efficiency_ratio": 1376,
+          "bucket_bucket_raw_v4__inside_share": 1376,
+          "bucket_bucket_raw_v4__box_width_slot_norm": 1376,
+          "bucket_bucket_raw_v4__prior_leg_in_atr": 1376,
+          "bucket_bucket_raw_v4__volatility_regime": 1376,
+          "bucket_bucket_raw_v4__dyn_vol_thr": 1376,
+          "bucket_bucket_raw_v4__dyn_rng_thr": 1376,
+          "bucket_bucket_raw_v4__dyn_box_thr": 1376,
+          "bucket_bucket_raw_v4__dyn_abs_thr": 1376,
+          "bucket_bucket_raw_v4__sell_footprints": 1376,
+          "bucket_bucket_raw_v4__buy_footprints": 1376,
+          "bucket_bucket_raw_v4__raw_accumulation": 1376,
+          "bucket_bucket_raw_v4__raw_distribution": 1376,
+          "bucket_bucket_raw_v4__phase_state_raw": 1376,
+          "bucket_bucket_raw_v4__phase_age": 1376,
+          "bucket_bucket_raw_v4__acc_confirmed": 1376,
+          "bucket_bucket_raw_v4__dist_confirmed": 1376,
+          "bucket_bucket_raw_v4__acc_resolved_up": 1376,
+          "bucket_bucket_raw_v4__acc_failed_down": 1376,
+          "bucket_bucket_raw_v4__dist_resolved_dn": 1376,
+          "bucket_bucket_raw_v4__dist_failed_up": 1376,
+          "bucket_bucket_raw_v4__Flow_State": 1376,
+          "bucket_bucket_raw_v4__has_gap_up_below": 1376,
+          "bucket_bucket_raw_v4__has_gap_down_above": 1376,
+          "bucket_bucket_raw_v4__up_unfilled_count": 1376,
+          "bucket_bucket_raw_v4__down_unfilled_count": 1376,
+          "bucket_bucket_raw_v4__total_unfilled_count": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_low": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_high": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_size": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_size_atr": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_distance": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_distance_atr": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_ratio": 1376,
+          "bucket_bucket_raw_v4__nearest_up_gap_age": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_low": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_high": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_size": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_size_atr": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_distance": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_distance_atr": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_ratio": 1376,
+          "bucket_bucket_raw_v4__nearest_down_gap_age": 1376,
+          "bucket_bucket_raw_v4__total_up_gap_area": 1376,
+          "bucket_bucket_raw_v4__total_down_gap_area": 1376,
+          "bucket_bucket_raw_v4__total_gap_area": 1376,
+          "bucket_bucket_raw_v4__total_up_gap_area_atr": 1376,
+          "bucket_bucket_raw_v4__total_down_gap_area_atr": 1376,
+          "bucket_bucket_raw_v4__total_gap_area_atr": 1376,
+          "bucket_bucket_raw_v4__gap_fill_ratio": 1376,
+          "bucket_bucket_raw_v4__gap_up_stack": 1376,
+          "bucket_bucket_raw_v4__gap_down_stack": 1376,
+          "bucket_bucket_raw_v4__gap_up_total_unfilled_pts": 1376,
+          "bucket_bucket_raw_v4__gap_down_total_unfilled_pts": 1376,
+          "bucket_bucket_raw_v4__minute_of_session": 1376,
+          "bucket_bucket_raw_v4__zone_id": 1376,
+          "bucket_bucket_raw_v4__dist_from_prev_day_high": 1376,
+          "bucket_bucket_raw_v4__dist_from_prev_day_low": 1376,
+          "bucket_bucket_raw_v4__distance_from_3d_high": 1376,
+          "bucket_bucket_raw_v4__distance_from_3d_low": 1376,
+          "bucket_bucket_raw_v4__distance_from_10d_high": 1376,
+          "bucket_bucket_raw_v4__distance_from_10d_low": 1376,
+          "bucket_bucket_raw_v4__atr_20": 1376,
+          "bucket_bucket_raw_v4__res_level_name": 1376,
+          "bucket_bucket_raw_v4__res_level_tf": 1376,
+          "bucket_bucket_raw_v4__res_polarity": 1376,
+          "bucket_bucket_raw_v4__res_distance_atr": 1376,
+          "bucket_bucket_raw_v4__res_weighted_score": 1376,
+          "bucket_bucket_raw_v4__res_weight": 1376,
+          "bucket_bucket_raw_v4__bars_in_res_zone": 1376,
+          "bucket_bucket_raw_v4__sup_level_name": 1376,
+          "bucket_bucket_raw_v4__sup_level_tf": 1376,
+          "bucket_bucket_raw_v4__sup_polarity": 1376,
+          "bucket_bucket_raw_v4__sup_distance_atr": 1376,
+          "bucket_bucket_raw_v4__sup_weighted_score": 1376,
+          "bucket_bucket_raw_v4__sup_weight": 1376,
+          "bucket_bucket_raw_v4__bars_in_sup_zone": 1376,
+          "bucket_bucket_raw_v4__sma_1m": 6870,
+          "bucket_bucket_raw_v4__sma_1m_slope": 6870,
+          "bucket_bucket_raw_v4__atr": 6870,
+          "bucket_bucket_raw_v4__speed": 6870,
+          "bucket_bucket_raw_v4__prev_speed": 6870,
+          "bucket_bucket_raw_v4__abs_speed": 6870,
+          "bucket_bucket_raw_v4__abs_prev_spd": 6870,
+          "bucket_bucket_raw_v4__delta_speed": 6870,
+          "bucket_bucket_raw_v4__same_dir": 6870,
+          "bucket_bucket_raw_v4__is_bullish": 6870,
+          "bucket_bucket_raw_v4__is_bearish": 6870,
+          "bucket_bucket_raw_v4__range_atr": 6870,
+          "bucket_bucket_raw_v4__range_atr_sma_prev": 6870,
+          "bucket_bucket_raw_v4__range_expanding": 6870,
+          "bucket_bucket_raw_v4__range_contracting": 6870,
+          "bucket_bucket_raw_v4__er": 6870,
+          "bucket_bucket_raw_v4__fast_er": 6870,
+          "bucket_bucket_raw_v4__er_falling_fast": 6870,
+          "bucket_bucket_raw_v4__er_noisy": 6870,
+          "bucket_bucket_raw_v4__er_supports_accel": 6870,
+          "bucket_bucket_raw_v4__close_position": 6870,
+          "bucket_bucket_raw_v4__bull_close_qual": 6870,
+          "bucket_bucket_raw_v4__bear_close_qual": 6870,
+          "bucket_bucket_raw_v4__bull_close_weak": 6870,
+          "bucket_bucket_raw_v4__bear_close_weak": 6870,
+          "bucket_bucket_raw_v4__bull_sma_support": 6870,
+          "bucket_bucket_raw_v4__bear_sma_support": 6870,
+          "bucket_bucket_raw_v4__bull_sma_weak": 6870,
+          "bucket_bucket_raw_v4__bear_sma_weak": 6870,
+          "bucket_bucket_raw_v4__bull_score": 6870,
+          "bucket_bucket_raw_v4__bear_score": 6870,
+          "bucket_bucket_raw_v4__active_score": 6870,
+          "bucket_bucket_raw_v4__active_c1": 6870,
+          "bucket_bucket_raw_v4__active_c2": 6870,
+          "bucket_bucket_raw_v4__active_c3": 6870,
+          "bucket_bucket_raw_v4__active_c4": 6870,
+          "bucket_bucket_raw_v4__active_c5": 6870,
+          "bucket_bucket_raw_v4__speed_dropping_fast": 6870,
+          "bucket_bucket_raw_v4__accel_score_weak": 6870,
+          "bucket_bucket_raw_v4__range_weak": 6870,
+          "bucket_bucket_raw_v4__close_weak": 6870,
+          "bucket_bucket_raw_v4__sma_weak": 6870,
+          "bucket_bucket_raw_v4__decel_score": 6870,
+          "bucket_bucket_raw_v4__immediate_decel": 6870,
+          "bucket_bucket_raw_v4__raw_state": 6870,
+          "bucket_bucket_raw_v4__pending_state": 6870,
+          "bucket_bucket_raw_v4__pending_count": 6870,
+          "bucket_bucket_raw_v4__bars_in_state": 6870,
+          "bucket_bucket_raw_v4__accel_memory": 6870,
+          "bucket_bucket_raw_v4__weak_accel_bars": 6870,
+          "bucket_bucket_raw_v4__allowed_raw_state": 6870,
+          "bucket_bucket_raw_v4__is_accel": 6870,
+          "bucket_bucket_raw_v4__is_decel": 6870,
+          "bucket_bucket_raw_v4__is_steady": 6870,
+          "bucket_bucket_raw_v4__state_dir": 6870,
+          "bucket_bucket_raw_v4__ema": 6870,
+          "bucket_bucket_raw_v4__body_ratio": 6870,
+          "bucket_bucket_raw_v4__above_ema": 6870,
+          "bucket_bucket_raw_v4__bull_run_count": 6870,
+          "bucket_bucket_raw_v4__sustained_run": 6870,
+          "bucket_bucket_raw_v4__has_clearance": 6870,
+          "bucket_bucket_raw_v4__clearance_count": 6870,
+          "bucket_bucket_raw_v4__clearance_ok": 6870,
+          "bucket_bucket_raw_v4__body_ok": 6870,
+          "bucket_bucket_raw_v4__is_trend": 6870,
+          "bucket_bucket_raw_v4__locked": 6870,
+          "bucket_bucket_raw_v4__atr__stress_signal_raw": 1376,
+          "bucket_bucket_raw_v4__drawdown_big": 1376,
+          "bucket_bucket_raw_v4__drawdown_fast": 1376,
+          "bucket_bucket_raw_v4__bars_underwater": 1376,
+          "bucket_bucket_raw_v4__vol_scale": 82284,
+          "bucket_bucket_raw_v4__state_big": 1376,
+          "bucket_bucket_raw_v4__state_fast": 1376,
+          "bucket_bucket_raw_v4__score": 1376,
+          "bucket_bucket_raw_v4__riskScore": 1376,
+          "bucket_bucket_raw_v4__ema_fast": 6870,
+          "bucket_bucket_raw_v4__ema_slow": 6870,
+          "bucket_bucket_raw_v4__ema_sep": 6870,
+          "bucket_bucket_raw_v4__er__trend_direction_raw": 6870,
+          "bucket_bucket_raw_v4__er_mean": 6870,
+          "bucket_bucket_raw_v4__er_std": 6870,
+          "bucket_bucket_raw_v4__er_downvol": 6870,
+          "bucket_bucket_raw_v4__er_thr_dyn": 6870,
+          "bucket_bucket_raw_v4__er_low": 6870,
+          "bucket_bucket_raw_v4__weak_run": 6870,
+          "bucket_bucket_raw_v4__label_int_raw": 6870,
+          "bucket_bucket_raw_v4__atr__trend_maturity_raw": 6870,
+          "bucket_bucket_raw_v4__vwap__trend_maturity_raw": 6870,
+          "bucket_bucket_raw_v4__direction_score": 6870,
+          "bucket_bucket_raw_v4__ema_pressure": 6870,
+          "bucket_bucket_raw_v4__er__trend_maturity_raw": 6870,
+          "bucket_bucket_raw_v4__state_name": 6870,
+          "bucket_bucket_raw_v4__break_event": 6870,
+          "bucket_bucket_raw_v4__maturity_code": 6870,
+          "bucket_bucket_raw_v4__maturity_dir": 6870,
+          "bucket_bucket_raw_v4__exhaustion_event": 6870,
+          "bucket_bucket_raw_v4__extension_atr": 6870,
+          "bucket_bucket_raw_v4__peak_ext_atr": 6870,
+          "bucket_bucket_raw_v4__signed_di_gap": 6870,
+          "bucket_bucket_raw_v4__mom_fade_frac": 6870,
+          "bucket_bucket_raw_v4__giveback_atr": 6870,
+          "bucket_bucket_raw_v4__mature_bars": 6870,
+          "bucket_bucket_raw_v4__trend_age": 6870,
+          "bucket_bucket_raw_v4__vwap_dist_atr": 6870,
+          "bucket_bucket_raw_v4__bars_since_fresh": 6870,
+          "bucket_bucket_raw_v4__bars_since_mature": 6870,
+          "bucket_bucket_raw_v4__bars_since_exhausted": 6870,
+          "bucket_bucket_raw_v4__rv_60": 1376,
+          "bucket_bucket_raw_v4__atr_pct": 1376,
+          "bucket_bucket_raw_v4__india_vix_zscore_20": 82284,
+          "bucket_bucket_raw_v4__rv_rank_60": 1376,
+          "bucket_bucket_raw_v4__atr_rank_60": 1376,
+          "bucket_bucket_raw_v4__realized_60": 1376,
+          "bucket_bucket_raw_v4__implied_vix": 82284,
+          "bucket_bucket_raw_v4__rv_rank_60d": 1376,
+          "bucket_bucket_raw_v4__atr_rank_60d": 1376,
+          "bucket_bucket_raw_v4__vol_level_pct60d_score": 1376,
+          "bucket_bucket_raw_v4__vol_level_ord": 1376,
+          "bucket_bucket_raw_v4__vol_z": 1376,
+          "bucket_bucket_raw_v4__range_z": 1376,
+          "bucket_bucket_raw_v4__close_pos": 1376,
+          "bucket_bucket_raw_v4__close_clean": 1376,
+          "bucket_bucket_raw_v4__close_rejection": 1376,
+          "bucket_bucket_raw_v4__close_messy": 1376,
+          "bucket_bucket_raw_v4__minute_of_day": 1376,
+          "bucket_bucket_raw_v4__session_phase": 1376,
+          "bucket_bucket_raw_v4__vwap_band_state": 6870,
+          "bucket_bucket_raw_v4__vwap_excursion_ratio": 6870,
+          "bucket_bucket_raw_v4__reversion_strength": 6870
+        }
       },
       "categorical": [
         "bucket_bucket_raw_v4__bar_conviction",
@@ -4051,7 +4385,15 @@
   ],
   "labels_name": "labels_1min_A20_Ex_z2_En_zNA_anchor_7class",
   "labels_sha256": "0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce",
-  "class_distribution": {},
+  "class_distribution": {
+    "NO_TRADE": 353407,
+    "EXIT_SUPER": 60942,
+    "EXIT_SMALL": 34830,
+    "EXIT_SUB": 25320,
+    "ENTRY_SUPER": 19603,
+    "ENTRY_SMALL": 13614,
+    "ENTRY_SUB": 5895
+  },
   "zero_weight_classes": [],
   "no_peek": {
     "applied": true,
