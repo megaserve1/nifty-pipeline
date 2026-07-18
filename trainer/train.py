@@ -90,6 +90,37 @@ def find_dataset_parquet(local, dataset_id: str):
     return max(files, key=lambda f: f.stat().st_size)       # the parquet is the biggest file
 
 
+def load_model_bundle(path):
+    """joblib.load a model bundle, REBUILDING the xgboost model from its portable UBJ.
+
+    WHY THIS EXISTS. XGBoost pickles its booster as a VERSION-SPECIFIC binary buffer. a bundle
+    pickled under one xgboost dies with "XGBoostError: input stream corrupted" the moment another
+    xgboost tries to unpickle it -- and clearml-agents build a FRESH venv per task, so the SHAP or
+    champion task easily resolves a different xgboost than the trainer did. pinning is fragile
+    against that. so the trainer no longer pickles the xgboost object at all: it stores the model's
+    NATIVE UBJ (cross-version-portable) under 'xgb_model_ubj' and leaves 'model' None. here we load
+    the (now version-safe) bundle and rebuild the classifier from that UBJ. non-xgboost bundles are
+    untouched. older bundles (no 'xgb_model_ubj') load exactly as before.
+    """
+    import joblib, tempfile, pathlib
+    b = joblib.load(path)
+    if b.get("model") is None and b.get("xgb_model_ubj") is not None:
+        import xgboost as xgb
+        tf = tempfile.NamedTemporaryFile(suffix=".ubj", delete=False); tf.write(b["xgb_model_ubj"]); tf.close()
+        clf = xgb.XGBClassifier()
+        clf.load_model(tf.name)                 # restores num_class/objective -> predict_proba works
+        pathlib.Path(tf.name).unlink()
+        b["model"] = clf
+    elif b.get("model") is None and b.get("cb_model_cbm") is not None:
+        from catboost import CatBoostClassifier
+        tf = tempfile.NamedTemporaryFile(suffix=".cbm", delete=False); tf.write(b["cb_model_cbm"]); tf.close()
+        clf = CatBoostClassifier()
+        clf.load_model(tf.name, format="cbm")   # restores classes + cat features -> ShapValues works
+        pathlib.Path(tf.name).unlink()
+        b["model"] = clf
+    return b
+
+
 # ------------------------------------------------------------------ the models
 def parse_max_features(v):
     """the forest's max_features arrives as a STRING, because "sqrt" and "0.3" travel down the
@@ -108,9 +139,9 @@ def parse_max_features(v):
 def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has_val: bool = False):
     """make one model. each library gets the settings that suit it.
 
-    has_val: whether a validation split exists. early stopping (xgboost/catboost) needs an
-    eval_set at fit time, so we only ARM it when there is a val split to stop against -- otherwise
-    the library raises 'need at least one validation set'.
+    has_val: whether a validation split exists. early stopping (xgboost/catboost) needs an eval_set
+    at fit time, so it is only ARMED when there is a val split -- otherwise the library raises
+    'need at least one validation set'. with early stopping on, n_estimators is a CEILING.
     """
     if model_type == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
@@ -160,8 +191,8 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
             n_jobs=-1,
             random_state=params["seed"],
             eval_metric="mlogloss",
-            # stop early once val mlogloss stops improving -- essential at n_estimators=6000.
-            # only ARMED when a val split exists (fit passes eval_set); else None = train all trees.
+            # stop early once val mlogloss stops improving. only ARMED when a val split exists
+            # (the fit passes eval_set); else None = train all n_estimators.
             early_stopping_rounds=(int(params["early_stopping_rounds"])
                                    if has_val and params.get("early_stopping_rounds") else None),
             verbosity=0,
@@ -367,7 +398,23 @@ def main():
     feat_cols = man["feature_columns"] if man else [c for c in df.columns if "__" in c]
     cat_cols = (man or {}).get("categorical_columns", [])
     y_raw = df[C.LABEL_COL].astype(str)
-    w = df[C.WEIGHT_COL].fillna(0.0) if C.WEIGHT_COL in df.columns else pd.Series(1.0, index=df.index)
+    # THE ROW WEIGHTS. two sources, config decides which:
+    #   config.CLASS_WEIGHTS set -> a fixed weight per CLASS, mapped BY NAME (never by class index:
+    #                               LabelEncoder sorts alphabetically, so an index-keyed dict would
+    #                               hand NO_TRADE the top weight and the entries the bottom).
+    #   otherwise                -> the labels file's own per-row `weight` column.
+    if getattr(C, "CLASS_WEIGHTS", None):
+        w = y_raw.map(C.CLASS_WEIGHTS)
+        unmapped = sorted(set(y_raw[w.isna()]))
+        if unmapped:
+            raise SystemExit(f"config.CLASS_WEIGHTS has no weight for {unmapped}. every class in "
+                             f"the labels needs one, or those rows would train at weight NaN.")
+        w = w.astype(float)
+        print(f"[2/6] weights <- config.CLASS_WEIGHTS (per class, by name): {C.CLASS_WEIGHTS}")
+    else:
+        w = (df[C.WEIGHT_COL].fillna(0.0) if C.WEIGHT_COL in df.columns
+             else pd.Series(1.0, index=df.index))
+        print(f"[2/6] weights <- the labels file's per-row '{C.WEIGHT_COL}' column")
 
     # ---- 3. split by time: TRAIN | embargo | VAL | embargo | TEST -------------
     # VAL is what hpo.py tunes on. TEST is opened once, at the end. see objective.py.
@@ -387,8 +434,10 @@ def main():
     print(f"      thrown away in the embargo(es) {split_info['n_embargoed']:,}")
 
     # ---- 4. the weight problem, said out loud -------------------------------
-    by_class = df.loc[tr].groupby(C.LABEL_COL)[C.WEIGHT_COL].mean() if C.WEIGHT_COL in df else None
-    dead = sorted(c for c, m in by_class.items() if float(m) == 0.0) if by_class is not None else []
+    # computed from the weights ACTUALLY being used (class-weights or the labels column), so this
+    # guard cannot look at one source while the model trains on the other.
+    by_class = w[tr].groupby(y_raw[tr]).mean()
+    dead = sorted(c for c, m in by_class.items() if float(m) == 0.0)
     zero_pct = float((w[tr] == 0).mean() * 100)
     print(f"[4/6] sample_weight: {zero_pct:.1f}% of training rows have weight 0")
     if dead:
@@ -521,8 +570,34 @@ def main():
     # contract. an early trainer once set output_uri but never actually saved a model -- the
     # task looked green and the "production" model had no file in it. so we save, then check.
     out = pathlib.Path(f"model_{a.model_type}.joblib")
+    # XGBoost's pickled booster is a VERSION-SPECIFIC binary buffer -- a bundle saved under one
+    # xgboost dies with "input stream corrupted" when an agent-built venv on a different xgboost
+    # tries to unpickle it (which just happened, twice). so keep the xgboost OBJECT OUT of the
+    # pickle and store its NATIVE, cross-version-portable UBJ instead; load_model_bundle rebuilds
+    # it. everything else in the bundle pickles fine across versions.
+    # BOTH xgboost AND catboost pickle a version-specific binary buffer -- a bundle saved under one
+    # version dies with a corrupted-load when an agent-built venv on a different version unpickles
+    # it. so we keep those objects OUT of the pickle and store each library's NATIVE, portable
+    # format instead (xgboost UBJ, catboost CBM); load_model_bundle rebuilds them. random_forest is
+    # pure sklearn/numpy and pickles fine across versions, so it stays as-is.
+    import tempfile
+    model_field, xgb_ubj, cb_cbm = model, None, None
+    if a.model_type == "xgboost":
+        _tf = tempfile.NamedTemporaryFile(suffix=".ubj", delete=False); _tf.close()
+        model.save_model(_tf.name)              # sklearn wrapper: preserves num_class/objective
+        xgb_ubj = pathlib.Path(_tf.name).read_bytes()
+        pathlib.Path(_tf.name).unlink()
+        model_field = None
+    elif a.model_type == "catboost":
+        _tf = tempfile.NamedTemporaryFile(suffix=".cbm", delete=False); _tf.close()
+        model.save_model(_tf.name, format="cbm")   # catboost native format -- portable across versions
+        cb_cbm = pathlib.Path(_tf.name).read_bytes()
+        pathlib.Path(_tf.name).unlink()
+        model_field = None
     joblib.dump({
-        "model": model,
+        "model": model_field,
+        "xgb_model_ubj": xgb_ubj,               # portable formats; None for the models not using them
+        "cb_model_cbm": cb_cbm,
         "label_encoder": le,
         "features": feat_cols,
         "categorical": cat_cols,

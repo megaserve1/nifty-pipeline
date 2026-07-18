@@ -259,6 +259,46 @@ WEIGHT_COL      = "weight"
 WEIGHT_RAW_COL  = "weight_raw"
 LABEL_TS_FORMAT = "%d-%m-%Y %H:%M"      # e.g. 01-01-2020 09:15
 
+# ---- CLASS WEIGHTS: a fixed weight per class, instead of the labels' per-row `weight` ---------
+#
+# Set to a dict -> every row is weighted by its CLASS (these numbers).
+# Set to None    -> fall back to the labels file's per-row `weight` column.
+#
+# >>> KEYED BY CLASS NAME ON PURPOSE. THIS IS NOT A STYLE CHOICE. <<<
+# The feature team's version used integer keys 0..6 in THEIR ordering (0 = No Trade). But sklearn's
+# LabelEncoder sorts the class names ALPHABETICALLY, so in this pipeline:
+#       0=ENTRY_SMALL 1=ENTRY_SUB 2=ENTRY_SUPER 3=EXIT_SMALL 4=EXIT_SUB 5=EXIT_SUPER 6=NO_TRADE
+# Feeding their integer dict in directly would have given NO_TRADE the TOP weight (1.00) and the
+# entries the BOTTOM (0.05) -- the exact opposite of the intent -- and nothing would have errored.
+# A name -> weight map cannot be silently reordered, so that class of bug is impossible here.
+# THESE ARE BALANCED (INVERSE-FREQUENCY) WEIGHTS -- sklearn's class_weight="balanced" formula:
+#
+#         weight_i = N / (K * n_i)        N = 513,611 rows, K = 7 classes, n_i = rows in class i
+#
+# computed on the anchor labels and rounded to 2dp. the property that makes them worth using:
+# weight_i * n_i is CONSTANT, so every class commands the SAME ~14.3% share of the loss. that lifts
+# the ENTRY classes from ~20% of the loss (under conviction weights) to 42.9% -- the rare classes
+# the models were completely blind to.
+#
+# >>> DO NOT ROUND THESE TO INTEGERS. <<<  NO_TRADE (0.21) would round to 0, and 353,407 rows --
+# 69% of the dataset -- would contribute NOTHING to the loss. the model could then never learn
+# "don't trade" and would try to trade every minute. 2dp is the floor.
+#
+# NOTE: derived from the CURRENT label counts. if the labels change, recompute:
+#         weight_i = len(labels) / (7 * rows_in_class_i)
+CLASS_WEIGHTS = {
+    "ENTRY_SUB":   12,      # rarest      (5,895 rows)   exact 12.4466
+    "ENTRY_SMALL":  5,      #            (13,614 rows)   exact  5.3895
+    "ENTRY_SUPER":  4,      #            (19,603 rows)   exact  3.7429
+    "EXIT_SUB":     3,      #            (25,320 rows)   exact  2.8978
+    "EXIT_SMALL":   2,      #            (34,830 rows)   exact  2.1066
+    "EXIT_SUPER":   1,      #            (60,942 rows)   exact  1.2040
+    "NO_TRADE":     0.2,    # most common (353,407 rows) exact  0.2076
+                            # ^ STAYS DECIMAL ON PURPOSE. rounded to 0 it would delete 353,407 rows
+                            #   (69% of the data) from the loss and the model could never learn
+                            #   "don't trade". every other class is a whole number; this one is not.
+}
+
 # ---- what a feature's NaN MEANS ------------------------------------------------
 # NaN does not mean the same thing in every feature, so there is no blanket rule. The team
 # that wrote the feature declares its policy in registry.yaml. We obey it and record what we did.

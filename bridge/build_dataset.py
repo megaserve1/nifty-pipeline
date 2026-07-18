@@ -63,8 +63,25 @@ def load_labels() -> pd.DataFrame:
     """the spine. one row per minute. every feature gets bent to fit THIS."""
     labels_path = C.labels_csv()       # resolved HERE, the one place that needs it
     lab = pd.read_csv(labels_path, low_memory=False)
-    lab[C.LABEL_TS_COL] = pd.to_datetime(lab[C.LABEL_TS_COL], format=C.LABEL_TS_FORMAT,
-                                         errors="coerce")
+    raw_ts = lab[C.LABEL_TS_COL]
+    ts = pd.to_datetime(raw_ts, format=C.LABEL_TS_FORMAT, errors="coerce")
+    # THE FIXED FORMAT IS FOR ONE LABELLING RUN, AND A NEW LABELS FILE CAN USE A DIFFERENT ONE.
+    # the earlier set was %d-%m-%Y; the anchor set is ISO (2020-01-01 09:15:00). parsed with the
+    # WRONG fixed format, every timestamp became NaT and the next line dropped ALL 513k rows --
+    # then the build wrote a 0-row parquet that PASSED the manifest check ("OK 0 rows") and was
+    # one dry-run away from training three models on nothing. so: if the fixed format fails to
+    # parse most rows, fall back to inference; and if inference ALSO can't, STOP loudly instead of
+    # silently dropping the dataset to nothing.
+    if ts.isna().mean() > 0.01:
+        ts = pd.to_datetime(raw_ts, errors="coerce")
+    bad = int(ts.isna().sum())
+    if bad and bad / max(len(lab), 1) > 0.01:
+        raise SystemExit(
+            f"{bad:,} of {len(lab):,} label timestamps ({bad / len(lab) * 100:.1f}%) could not be "
+            f"parsed. neither C.LABEL_TS_FORMAT={C.LABEL_TS_FORMAT!r} nor inference matched them. "
+            f"first raw values: {list(raw_ts.head(3))}. fix the format or the labels file -- "
+            f"refusing to build a dataset that silently drops most of its rows.")
+    lab[C.LABEL_TS_COL] = ts
     lab = lab.dropna(subset=[C.LABEL_TS_COL])
     # 6 of the 7 label strings carry a trailing space in the raw file. strip them, or every
     # equality check and the label encoder break in a way that is very hard to see.

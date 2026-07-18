@@ -65,3 +65,13 @@ nohup.out
 
 # the ballot is a scratch pad; the FROZEN recipe in versions/ is the record
 selection_sheet.yaml
+
+# catboost drops a scratch folder wherever it trains -- training artefacts, not source
+catboost_info/
+
+# editor swap files (a stray .swp also means an editor may still have the file open)
+*.swp
+*.swo
+
+# the labels arrive as .csv OR .zip -- both are DATA, both belong in DVC, never in git
+/data/labels/*.zip

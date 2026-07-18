@@ -32,11 +32,11 @@ random_forest:
     # feature-team proposed set (2026-07-17). class weighting is NOT here: the pipeline already
     # weights per-row via the labels `weight` column (NO_TRADE 0.064, SUPER 0.91 ...), which
     # matches the team's class_weight dict but finer-grained -- so class_weight stays None.
-    n_estimators: 1000
-    max_depth: 11                # was 22, then 15
-    min_samples_leaf: 15         # was 30
-    max_features: "0.7"          # was 0.22  (fraction of features per split)
-    max_samples: 0.7             # bootstrap 70% of the rows per tree (sklearn max_samples)
+    n_estimators: 3000
+    max_depth: 40                # was 22, then 15
+    min_samples_leaf: 10         # was 30
+    max_features: "0.8"          # was 0.22  (fraction of features per split)
+    max_samples: 0.8             # bootstrap 70% of the rows per tree (sklearn max_samples)
     seed: 42
   search:
     max_depth: [0, 16, 24, 32]          # 0 = unlimited. the rungs let us SEE if unlimited wins.
@@ -50,18 +50,19 @@ xgboost:
   # code (the pdf's binary:logistic / aucpr are 2-class; we have 7 classes). device stays CPU
   # (no GPU on this box -- cuda would crash). run WITHOUT --tune to use these directly.
   default:
-    # feature-team proposed set (2026-07-17): DEEP trees + HEAVY regularisation + early stopping.
-    # a big change from the old shallow (depth 4) strategy -- watch the train-vs-test gap.
-    n_estimators: 6000           # a ceiling; early_stopping_rounds cuts it off when val plateaus
-    max_depth: 11                # was 4, then 15  (still deep; the regularisation below holds it)
-    learning_rate: 0.1           # was 0.03
-    subsample: 0.7
-    colsample_bytree: 0.7
-    min_child_weight: 15.0       # was 10  (float: search list has 0.5, must stay float)
-    reg_lambda: 10.0             # was 1.5  (strong L2)
-    reg_alpha: 0.2               # was 0.1  (L1)
-    gamma: 0.3                   # was 0.2  (min loss drop to split)
-    early_stopping_rounds: 200   # stop when val mlogloss hasn't improved for 200 rounds
+    # feature-team proposed set. DEEP trees + HEAVY regularisation. NO early stopping (removed
+    # 2026-07-18), so n_estimators is a HARD tree count -- every tree is built. the regularisation
+    # below is what holds a depth-11 model back; watch the train-vs-test gap.
+    n_estimators: 6000           # hard count -- all 2000 trees are built (no early stopping)
+    early_stopping_rounds: 200
+    max_depth: 11
+    learning_rate: 0.03
+    subsample: 0.6
+    colsample_bytree: 0.6
+    min_child_weight: 15.0       # float: the search list has 0.5, so the default must stay float
+    reg_lambda: 5.0             # strong L2
+    reg_alpha: 0.2               # L1
+    gamma: 0.3                   # min loss drop to make a split
     seed: 42
   search:
     max_depth: {min: 3, max: 10}
@@ -79,20 +80,20 @@ catboost:
   # your values had ALL THREE overfit-brakes set to their loosest -- backwards for noisy 7-class
   # 1-min data, where overfitting = losing money live.
   default:
-    # feature-team proposed set (2026-07-17). NOTE: catboost builds OBLIVIOUS trees, so depth 15
-    # = 2^15 = 32,768 leaves per tree -- FAR heavier than xgboost depth 15. With 6000 iterations
-    # this is SLOW (early_stopping_rounds cuts it, but each iteration is still big). See the time
-    # warning handed over with this change.
-    n_estimators: 6000           # iterations -- a ceiling; early stopping cuts it off
-    max_depth: 11                # was 8, then 15  (2^11 = 2048 leaves -- FAR faster than depth 15)
-    learning_rate: 0.1           # was 0.05
-    l2_leaf_reg: 10.0            # was 3.0  (strong L2)
-    min_data_in_leaf: 15         # minimum rows in a leaf
-    rsm: 0.7                     # column sampling (= xgboost colsample_bytree)
-    subsample: 0.7               # row sampling -- REQUIRES a non-Bayesian bootstrap (below)
+    # feature-team proposed set. catboost builds OBLIVIOUS trees -- depth 11 = 2^11 = 2048 leaves
+    # per tree. NO early stopping (removed 2026-07-18), so n_estimators is a HARD count: EVERY
+    # iteration is built. 6000 at depth 11 with no early stopping would run for HOURS, so it is set
+    # to 2000 here -- a fixed, reproducible count. raise it only if you have the time budget.
+    n_estimators: 6000           # was 6000 (a ceiling under early stopping) -> a hard count now
+    max_depth: 11                # oblivious trees: 2^11 = 2048 leaves per tree
+    early_stopping_rounds: 200
+    learning_rate: 0.03
+    l2_leaf_reg: 5.0            # strong L2
+    min_data_in_leaf: 15
+    rsm: 0.6                     # column sampling (= xgboost colsample_bytree)
+    subsample: 0.6               # row sampling -- REQUIRES a non-Bayesian bootstrap (below)
     bootstrap_type: "MVS"        # feature-team confirmed. MVS uses `subsample` (Bayesian ignores it)
-    random_strength: 1.0         # noise when scoring splits -- keep on for noisy data
-    early_stopping_rounds: 200   # stop when val loss hasn't improved for 200 rounds
+    random_strength: 1.0         # noise when scoring splits
     seed: 42
   search:
     # catboost builds OBLIVIOUS trees (the same split on every node of a level), so its depth is

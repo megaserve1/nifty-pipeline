@@ -1,38 +1,72 @@
-# final_pipeline dependencies
-#   pip install -r requirements.txt
+# ============================================================================
+#  final_pipeline / requirements.txt
+#  THE reference dependency set. EVERY machine in the fleet installs exactly this.
+# ============================================================================
 #
-# FLOOR PINS, NOT EXACT PINS -- but the pandas MAJOR is load-bearing and pinned hard:
-# the certified manifests record pandas-3 dtypes ('str'); a pandas-2 machine reads the same
-# parquet as 'object' and is REFUSED by its own certificate (assert_schema, correctly). every
-# machine in the fleet must sit on the same pandas major, or the contract cannot hold.
+#  install (every machine):
+#      python3.12 -m venv final_venv
+#      final_venv/bin/pip install -r requirements.txt
+#
+#  PYTHON: use 3.12.x on EVERY machine. a mixed fleet (some PCs on 3.13) risks pickle / ABI
+#          mismatches between agents -- keep the Python minor version identical across all PCs.
+#
+#  PIN POLICY (why the versions look the way they do):
+#      ==    HARD PIN    the model/data stack. version drift here changed the trees AND corrupted
+#                        cross-machine model loads, so it is pinned -- all machines build IDENTICAL
+#                        models from IDENTICAL bytes.
+#      <,>=  CONSTRAINED a compatibility bound a dependency itself requires.
+#      >=    FLOOR       tooling where a newer patch is safe.
+#
+#  versions below are the known-good controller set (2026-07-18). bump them ONE fleet-wide step at
+#  a time -- never let a single machine drift, that is what caused the "input stream corrupted" and
+#  the "SCHEMA DRIFT" failures.
+# ============================================================================
 
-# --- core: versioning, publishing, orchestration ---
-pyyaml>=6.0
-dvc[gs]>=3.0            # DVC with Google Cloud Storage support
-clearml>=2.1,<3
+# --- data --------------------------------------------------------------------
+# pandas MAJOR 3 is load-bearing: the manifest certifies pandas-3 dtypes ('str'); a pandas-2
+# machine reads the same parquet as 'object' and its OWN certificate refuses it. pinned exact so
+# every machine agrees on dtypes.
+pandas==3.0.3
+numpy==2.4.6
+pyarrow==24.0.0
 
-# --- data ---
-pandas>=3.0,<4          # MAJOR pinned: the manifest dtype contract depends on it (see above)
-pyarrow>=15
-numpy>=1.26
+# --- models + artifacts ------------------------------------------------------
+# PINNED EXACT, for two reasons:
+#   1. different xgboost/catboost versions build different trees -> a loose pin makes the 7
+#      machines disagree on results.
+#   2. models are stored in each library's PORTABLE native format (xgboost UBJ, catboost CBM), so
+#      LOADING is already version-safe -- but reproducible TRAINING still needs one version fleet-wide.
+scikit-learn==1.9.0
+xgboost==3.3.0
+catboost==1.2.10
+joblib==1.5.3
 
-# --- training + model artifacts ---
-scikit-learn>=1.5
-xgboost>=2.0
-catboost>=1.2
-joblib>=1.3
+# --- orchestration / versioning / publishing --------------------------------
+clearml==2.1.10          # tracking + dataset versions + agents/queues + triggers. the
+                         # finalize()->publish() trigger contract is verified on the 2.1.x line.
+dvc[gs]==3.67.1          # content-addressed data layer, on your own GCS bucket
+pyyaml==6.0.3
+requests>=2.20,<2.33     # clearml-agent 3.0.x REQUIRES requests<2.33; pip otherwise pulls 2.34+
+                         # and the agent warns "incompatible". this cap keeps the agent happy.
 
-# --- explainability ---
-shap>=0.46
-matplotlib>=3.8         # shap_explain draws waterfall PNGs on a HEADLESS agent. this was
-                        # missing, so every SHAP task on a fresh machine died at import.
+# --- explainability ----------------------------------------------------------
+shap==0.52.0
+matplotlib==3.11.0       # SHAP draws waterfall PNGs on a HEADLESS agent -- without it every SHAP
+                         # task dies at import.
 
-# --- tests ---
+# --- tests -------------------------------------------------------------------
 pytest>=8
 
-# (jupyter + papermill removed 2026-07-15: the notebook-execution path is dead -- the feature
-#  team hands over parquets now. they were 200+ MB of venv for a code path nothing calls.)
+# --- WORKERS: the agent daemon ----------------------------------------------
+# every training PC runs `clearml-agent daemon --queue training`. pinned here so the whole fleet
+# runs the same agent (and so the requests<2.33 cap above is the one it needs). harmless on the
+# controller, which just won't start a daemon.
+clearml-agent==3.0.3
 
-# --- reserved: add these when their gates/monitors are implemented ---
-# deepchecks            # pre-deploy validation gate
-# evidently             # live drift monitoring
+# ----------------------------------------------------------------------------
+# NOT dependencies yet -- planned, add each when its gate/monitor is built:
+#   deepchecks   # pre-deploy validation gate (leakage / overfit / beats-a-baseline)
+#   evidently    # live drift monitoring (keeps history -> flash-crash vs real regime shift)
+# jupyter + papermill were removed 2026-07-15: the notebook-execution path is dead (the feature
+# team hands over parquets now), and they were 200+ MB of venv nothing calls.
+# ----------------------------------------------------------------------------

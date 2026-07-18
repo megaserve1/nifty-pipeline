@@ -91,7 +91,8 @@ def main():
     if "model" not in src.artifacts:
         raise SystemExit(f"task {a.model_task_id} has no 'model' artifact -- it either failed "
                          f"or never saved one. nothing to explain.")
-    bundle = joblib.load(src.artifacts["model"].get_local_copy())
+    from trainer.train import load_model_bundle   # rebuilds xgboost from portable UBJ (version-safe)
+    bundle = load_model_bundle(src.artifacts["model"].get_local_copy())
     model = bundle["model"]
     le = bundle["label_encoder"]
     feats = bundle["features"]
