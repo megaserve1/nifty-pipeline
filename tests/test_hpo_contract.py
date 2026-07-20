@@ -450,3 +450,85 @@ def test_every_search_space_pins_the_seed_free_knobs_only():
     for model_type in ("random_forest", "xgboost", "catboost"):
         names = [p.name for p in search_space(model_type)]
         assert "Args/seed" not in names, f"{model_type} is searching the random seed"
+
+
+# =====================================================================================
+# 5. EVERY STRATEGY MUST GET EVERY ARGUMENT IT REQUIRES
+# =====================================================================================
+def test_hpo_passes_every_argument_each_strategy_REQUIRES():
+    """THE 2026-07-20 CRASH, PINNED. offline -- signatures only, no server.
+
+    hpo.py forwards **optimizer_kwargs, unchecked, to whichever SearchStrategy was chosen. that
+    is fine until the strategies disagree about what is REQUIRED:
+
+        RandomSearch.__init__     5 required args
+        GridSearch.__init__       5 required args
+        OptimizerOptuna.__init__  7 -- it ALSO demands max_iteration_per_job and total_max_jobs,
+                                  positional, no defaults
+
+    HyperParameterOptimizer supplies the first five itself. everything beyond them has to come
+    from the kwargs hpo.py writes. hpo.py deliberately omitted max_iteration_per_job -- correct
+    reasoning (our objective is one value stamped iteration=-2**31, so an iteration budget is
+    meaningless) and correct for RandomSearch, which does not require it. the moment optuna
+    became the default, every run died before launching a single trial:
+
+        TypeError: OptimizerOptuna.__init__() missing 1 required positional argument:
+                   'max_iteration_per_job'
+
+    nothing caught it: every other hpo test here inspects the SEARCH SPACE, and constructing a
+    real optimizer needs a live base task on the server. so this reads hpo.py's actual call site
+    and checks it against each strategy's real signature.
+    """
+    import ast
+    from clearml.automation import RandomSearch, GridSearch
+    from clearml.automation.optuna import OptimizerOptuna
+
+    # what hpo.py actually passes to HyperParameterOptimizer(...)
+    tree = ast.parse((C.ROOT / "trainer" / "hpo.py").read_text())
+    call = next(n for n in ast.walk(tree)
+                if isinstance(n, ast.Call)
+                and getattr(n.func, "id", None) == "HyperParameterOptimizer")
+    passed = {kw.arg for kw in call.keywords if kw.arg}
+
+    # HyperParameterOptimizer builds these five itself and hands them to the strategy
+    SUPPLIED_BY_HPO = {"base_task_id", "hyper_parameters", "objective_metric",
+                       "execution_queue", "num_concurrent_workers"}
+
+    for cls in (RandomSearch, GridSearch, OptimizerOptuna):
+        sig = inspect.signature(cls.__init__)
+        required = {n for n, p in sig.parameters.items()
+                    if n != "self"
+                    and p.default is inspect.Parameter.empty
+                    and p.kind not in (inspect.Parameter.VAR_POSITIONAL,
+                                       inspect.Parameter.VAR_KEYWORD)}
+        missing = required - SUPPLIED_BY_HPO - passed
+        assert not missing, (
+            f"{cls.__name__} requires {sorted(missing)}, and hpo.py does not pass "
+            f"{'it' if len(missing) == 1 else 'them'}. every --strategy {cls.__name__} run "
+            f"would die with TypeError before a single trial launched.")
+
+
+def test_max_iteration_per_job_is_passed_but_is_None():
+    """passing it is not enough -- the VALUE has to stay None, and that is not cosmetic.
+
+    our objective is reported once via report_single_value, which stamps iteration = -(2**31).
+    an iteration budget compared against that number is nonsense. clearml guards both uses --
+
+        if self.max_iteration_per_job and iteration >= self.max_iteration_per_job
+        if not self.min_iteration_per_job or iteration >= self.min_iteration_per_job
+
+    -- so None cleanly means "no budget". set it to a real number and optuna would start pruning
+    trials by comparing a real iteration count against -2147483648. jobs are bounded by
+    time_limit_per_job instead.
+    """
+    import ast
+    tree = ast.parse((C.ROOT / "trainer" / "hpo.py").read_text())
+    call = next(n for n in ast.walk(tree)
+                if isinstance(n, ast.Call)
+                and getattr(n.func, "id", None) == "HyperParameterOptimizer")
+    kw = {k.arg: k.value for k in call.keywords if k.arg}
+    assert "max_iteration_per_job" in kw, "optuna requires it -- see the test above"
+    assert isinstance(kw["max_iteration_per_job"], ast.Constant) and \
+        kw["max_iteration_per_job"].value is None, (
+        "max_iteration_per_job must be None: our objective carries iteration=-2**31, so any "
+        "real budget would be compared against a nonsense number.")

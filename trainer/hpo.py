@@ -288,10 +288,26 @@ def main():
         total_max_jobs=a.trials,
         time_limit_per_job=a.job_minutes,
         pool_period_min=1.0,                         # how often to ask clearml "are they done?"
-        # min_iteration_per_job / max_iteration_per_job are deliberately NOT set. our objective is
-        # a SINGLE value reported once at the end of the run, and report_single_value stamps it
-        # with iteration = -(2**31). any iteration-based budget would be reasoning about a
-        # nonsense iteration number. jobs are bounded by time_limit_per_job instead.
+        # max_iteration_per_job MUST BE PASSED, AND MUST BE None. those are two separate facts.
+        #
+        # WHY None: our objective is a SINGLE value reported once at the end of the run, and
+        # report_single_value stamps it with iteration = -(2**31). any iteration-based budget
+        # would be reasoning about a nonsense iteration number, so there must not be one. jobs
+        # are bounded by time_limit_per_job instead. (verified in clearml 2.1.10
+        # automation/optuna/optuna.py: both uses are guarded --
+        #     if self.max_iteration_per_job and iteration >= self.max_iteration_per_job
+        #     if not self.min_iteration_per_job or iteration >= self.min_iteration_per_job
+        # -- so None cleanly means "no budget". it does not mean zero.)
+        #
+        # WHY IT MUST BE PASSED AT ALL: it was previously omitted, which was correct for
+        # RandomSearch -- its __init__ requires only 5 arguments. OptimizerOptuna's signature
+        # requires SEVEN; max_iteration_per_job and total_max_jobs are positional-required with
+        # no default. so the moment optuna became the default strategy (2026-07-20) every run
+        # died before launching a single trial:
+        #     TypeError: OptimizerOptuna.__init__() missing 1 required positional argument:
+        #                'max_iteration_per_job'
+        # RandomSearch and GridSearch both accept the name too, so passing it always is safe.
+        max_iteration_per_job=None,
     )
 
     print(f"[3/4] {a.trials} trials, {a.concurrent} at a time, on queue '{a.queue}'")
