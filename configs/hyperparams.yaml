@@ -33,7 +33,10 @@
 #
 # a human can forget to bump it, so train.py ALSO records a short hash of the actual values
 # (params_sha). if the label says h2 but the hash moved, the numbers changed and the label lied.
-hyperparams_version: h1
+# h1-smoke = A DELIBERATELY TINY RANDOM FOREST, FOR PROVING THE PLUMBING ONLY.
+# it is NOT a result. the name is in every ClearML tag on purpose, so a 5-minute smoke run can
+# never be mistaken for a real one on the board. the real set becomes h2.
+hyperparams_version: h1-smoke
 
 random_forest:
   # DEFAULTS = the proposed-hyperparameter PDF, 1-MIN column (our v3 is 1-minute data).
@@ -42,11 +45,39 @@ random_forest:
     # feature-team proposed set (2026-07-17). class weighting is NOT here: the pipeline already
     # weights per-row via the labels `weight` column (NO_TRADE 0.064, SUPER 0.91 ...), which
     # matches the team's class_weight dict but finer-grained -- so class_weight stays None.
-    n_estimators: 3000
-    max_depth: 40                # was 22, then 15
-    min_samples_leaf: 10         # was 30
-    max_features: "0.8"          # was 0.22  (fraction of features per split)
-    max_samples: 0.8             # bootstrap 70% of the rows per tree (sklearn max_samples)
+    #
+    # ---- SMOKE-TEST SIZE (h1-smoke). THROWAWAY. see the note at the top of this file. ----
+    # target: the whole task -- pull 240 MB from GCS, fit, score, save, upload -- inside ~10 min,
+    # so the wiring can be watched end to end before real numbers are spent on it.
+    #
+    # what it was, and why that could not be watched:
+    #     n_estimators 3000, max_depth 40, max_features "0.8", max_samples 0.8
+    #     = 3000 trees x ~410,000 rows x ~266 of 333 features considered at EVERY split.
+    #     that is hours. it is also why SHAP on the forest ran 3-4 hours -- TreeExplainer walks
+    #     every node of every tree, so the forest's SIZE was the slow part, not shap itself.
+    #
+    # the four knobs that buy the time back, in order of effect:
+    #     n_estimators  3000 -> 40     75x fewer trees
+    #     max_features  "0.8" -> sqrt  ~266 -> 18 features per split, ~15x
+    #     max_samples   0.8 -> 0.25    410k -> ~128k rows per tree
+    #     max_depth     40 -> 12       shallower trees, and a much cheaper SHAP pass
+    #
+    # PUT THE REAL NUMBERS BACK BEFORE ANY RESULT IS REPORTED. a 40-tree depth-12 forest on 7
+    # imbalanced classes will score badly, and it SHOULD -- this is the plumbing, not the model.
+    # MEASURED on the real v4 parquet (359,527 train rows, 226 numeric features, 16 cores):
+    #     fit                     108 s   (1.8 min), avg 967 leaves/tree
+    #     SHAP, 300 rows x 6      ~3.3 min
+    #     -> train task ~5-7 min incl. the GCS pull. that is the whole point of this set.
+    # a first cut at 40 trees / sqrt / 0.25 fit in 2.9 s -- too trivial to prove anything, so
+    # these numbers are deliberately the LARGEST that still fit the 10-minute budget.
+    n_estimators: 200            # was 3000
+    # 16, not 12, only to keep clear daylight between the forest and the booster's 11 -- the
+    # "forest deep, booster shallow" guard is what caught the original crippled-forest bug and it
+    # should not pass by one.
+    max_depth: 16                # was 40 (and 22, and 15 before that)
+    min_samples_leaf: 100        # was 10
+    max_features: "0.3"          # was "0.8" (fraction of features per split)
+    max_samples: 0.5             # was 0.8   (bootstrap fraction of rows per tree)
     seed: 42
   search:
     max_depth: [0, 16, 24, 32]          # 0 = unlimited. the rungs let us SEE if unlimited wins.

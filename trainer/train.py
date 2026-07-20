@@ -341,6 +341,14 @@ def main():
     ap.add_argument("--model_type", default="xgboost", choices=C.MODEL_TYPES)
     ap.add_argument("--dataset_id", default="", help="the EXACT ClearML dataset id to train on")
     ap.add_argument("--dataset_version", default="")
+    # THE LABEL MUST TRAVEL WITH THE VALUES, OR IT CAN LIE.
+    # the numeric params are resolved on the CONTROLLER (publish_version reads hyperparams.yaml
+    # and sets each one as Args/<name>) precisely so a stale file on the agent cannot change what
+    # gets trained. but the LABEL was still read from the agent's own copy of hyperparams.yaml --
+    # which is the file at the base task's git commit, not the one you just edited. so you could
+    # train with h2's numbers and have the run tagged h1, with nothing anywhere disagreeing.
+    # same shape as every silent bug in this project. the controller now sends the label too.
+    ap.add_argument("--hyperparams_version", default="")
 
     # ---- EVERY HYPERPARAMETER COMES FROM configs/hyperparams.yaml. NONE IS WRITTEN HERE. ----
     #
@@ -516,7 +524,10 @@ def main():
     # WHICH SETTINGS PRODUCED THIS RESULT. the dataset half was already tagged (v5); this adds the
     # hyperparameter half (h2), so the board reads "v5 + h2" and two runs are only comparable when
     # BOTH match. params_sha is measured from the values, so a stale hand-set label is detectable.
-    hp_version, hp_sha = hyperparams.version(), hyperparams.params_sha(a.model_type)
+    # prefer the label the controller sent (it read the same yaml it read the VALUES from).
+    # fall back to this machine's yaml for a plain local `python trainer/train.py` run.
+    hp_version = (a.hyperparams_version or "").strip() or hyperparams.version()
+    hp_sha = hyperparams.params_sha(a.model_type)
     print(f"      hyperparams set: {hp_version}   (values sha {hp_sha})")
     task.connect({**params, "model_type": a.model_type, "dataset_id": a.dataset_id,
                   "dataset_version": a.dataset_version or ds.version,

@@ -143,6 +143,11 @@ def enqueue_all(dataset_id: str, version: str, models: list) -> dict:
             # shipped "v3" here it would look for "train_ vv3" (double v), find nothing, and die
             # with a false deadlock after 10 min. same value in both places -> the names match.
             "Args/dataset_version": str(version).lstrip("v"),
+            # the LABEL for the values on the line above, read from the SAME yaml in the SAME
+            # breath. without this the agent labelled the run from its own (git-committed) copy
+            # of hyperparams.yaml, so an edited-but-not-pushed yaml trained with new numbers and
+            # tagged them with the old name.
+            "Args/hyperparams_version": H.version(),
         })
         run.set_parameters(params)
         Task.enqueue(run, queue_name=C.TRAIN_QUEUE)
