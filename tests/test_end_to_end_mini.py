@@ -21,6 +21,7 @@ It is also where the per-stage pins live that have no cheaper home:
 Everything under tmp_path. No network, no ClearML, no real dirs touched.
 """
 import json
+import os
 import pathlib
 import sys
 
@@ -364,7 +365,49 @@ def test_apply_hpo_refuses_a_range_edge_winner(tmp_path, monkeypatch):
     winner.write_text(json.dumps({"model_type": "xgboost", "dataset_version": "v3",
                                   "val_trading_cost": 30, "test_trading_cost": 33,
                                   "params": {"max_depth": edge}}))
+    # POINT THE SUBPROCESS AT A THROWAWAY TUNED DIR. monkeypatch cannot reach a subprocess -- it
+    # re-imports hyperparams in its own interpreter -- so when this test's winner was NOT refused
+    # (h2 turned max_depth 10 from a range edge into a middle rung), apply_hpo promoted it into
+    # the REAL configs/tuned/xgboost.json and every later run silently trained on it. the env var
+    # is inherited by the child, so this cannot happen again even if the assertion below fails.
+    env = {**os.environ, "NIFTY_TUNED_DIR": str(tmp_path / "tuned_isolated")}
     r = subprocess.run([str(ROOT / "final_venv/bin/python"), "trainer/apply_hpo.py", str(winner)],
-                       capture_output=True, text=True, cwd=str(ROOT))
+                       capture_output=True, text=True, cwd=str(ROOT), env=env)
     assert r.returncode != 0, "a range-edge winner must not promote without --force"
     assert "range" in (r.stdout + r.stderr).lower()
+
+
+def test_apply_hpo_never_writes_into_the_real_configs_tuned_dir(tmp_path):
+    """THE 2026-07-20 ACCIDENT, PINNED.
+
+    apply_hpo.py is exercised through a SUBPROCESS, and a subprocess does not see monkeypatch --
+    it re-imports trainer.hyperparams in a fresh interpreter. so on the day the xgboost search
+    space changed from {min: 3, max: 10} to the discrete list [3, 7, 10, 14], a winner of 10 went
+    from "range edge, refuse" to "middle rung, promote" -- and the test's promote landed in the
+    REAL configs/tuned/xgboost.json.
+
+    nothing failed. the file just sat there, and hyperparams.defaults() overlays it on every
+    later call, so xgboost would have trained at max_depth 10 while the manager's h2 set says 14
+    and the run was tagged h2. a wrong model, correctly labelled.
+
+    this proves the env override actually reaches the child, whatever the promote/refuse outcome.
+    """
+    import json, os, subprocess
+    real = C.CONFIGS_DIR / "tuned" / "xgboost.json"
+    before = real.read_bytes() if real.exists() else None
+
+    sandbox = tmp_path / "tuned_isolated"
+    winner = tmp_path / "best_params_xgboost.json"
+    # a MIDDLE rung -> apply_hpo promotes it, which is exactly the dangerous path
+    winner.write_text(json.dumps({"model_type": "xgboost", "dataset_version": "v3",
+                                  "val_trading_cost": 30, "test_trading_cost": 33,
+                                  "params": {"max_depth": 7}}))
+    subprocess.run([str(ROOT / "final_venv/bin/python"), "trainer/apply_hpo.py", str(winner)],
+                   capture_output=True, text=True, cwd=str(ROOT),
+                   env={**os.environ, "NIFTY_TUNED_DIR": str(sandbox)})
+
+    assert (sandbox / "xgboost.json").exists(), "the winner should have gone to the sandbox"
+    after = real.read_bytes() if real.exists() else None
+    assert after == before, (
+        f"apply_hpo wrote into the REAL {real} despite NIFTY_TUNED_DIR being set -- "
+        f"a test just changed what production trains on")

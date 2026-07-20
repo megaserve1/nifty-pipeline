@@ -27,6 +27,7 @@ AFTER
 """
 from __future__ import annotations
 
+import os
 import pathlib
 import sys
 
@@ -40,7 +41,15 @@ HP_FILE = C.CONFIGS_DIR / "hyperparams.yaml"
 # it is a SEPARATE file on purpose: hyperparams.yaml is the hand-authored baseline that lives
 # in git; the tuned file is a machine-found overlay a human chose to promote. keeping them apart
 # means you can always see, and diff, exactly what the search changed.
-TUNED_DIR = C.CONFIGS_DIR / "tuned"
+#
+# THE ENV OVERRIDE IS A SAFETY CATCH, NOT A FEATURE. tests exercise apply_hpo.py by running it in
+# a SUBPROCESS, and monkeypatching this module constant does not reach a subprocess -- it has its
+# own interpreter and re-imports this file fresh. so a test that expected apply_hpo to REFUSE a
+# winner, but did not, promoted that winner into the REAL configs/tuned/ and every later training
+# run silently picked it up. that happened on 2026-07-20: a stale v3 winner (xgboost max_depth 10)
+# landed here and would have overridden the manager's h2 value of 14, with the run still tagged h2.
+# a subprocess inherits the environment, so this is the one channel that does reach it.
+TUNED_DIR = pathlib.Path(os.environ.get("NIFTY_TUNED_DIR") or (C.CONFIGS_DIR / "tuned"))
 
 
 def _load() -> dict:

@@ -134,7 +134,28 @@ def enqueue_all(dataset_id: str, version: str, models: list) -> dict:
         # every one as Args/<name>. train.py's merge() then reads them from the task -- no file
         # dependency, works on every machine, and the exact params are visible in the ClearML UI.
         from trainer import hyperparams as H
-        params = {f"Args/{k}": v for k, v in H.defaults(mtype).items()}
+        # SAY OUT LOUD WHETHER THESE ARE BASELINE OR TUNED NUMBERS.
+        # H.defaults() overlays configs/tuned/<model>.json (a promoted HPO winner) on top of the
+        # yaml. that overlay is applied HERE, on the controller, and configs/tuned/ is NOT in git
+        # -- so the agent never has the file and its log cannot mention it. the numbers arrive
+        # baked into Args/*, indistinguishable from the yaml's own. a stale winner from an old
+        # dataset could therefore steer every future run with nothing anywhere saying so. (on
+        # 2026-07-20 exactly that happened: a v3 xgboost winner, max_depth 10, silently replacing
+        # the h2 value of 14.) one line of output is the whole defence.
+        import yaml as _yaml
+        _raw = (_yaml.safe_load(H.HP_FILE.read_text()) or {}).get(mtype, {}).get("default") or {}
+        eff = H.defaults(mtype)
+        overlay = {k: (_raw.get(k), v) for k, v in eff.items() if _raw.get(k) != v}
+        if overlay:
+            print(f"      !! {mtype}: TUNED params in effect from configs/tuned/{mtype}.json")
+            for k, (was, now) in overlay.items():
+                print(f"           {k}: yaml {was!r} -> tuned {now!r}")
+            print(f"         these OVERRIDE {H.HP_FILE.name}. delete that json to train the "
+                  f"hand-authored set.")
+        else:
+            print(f"      {mtype}: baseline params from {H.HP_FILE.name} "
+                  f"({H.version()}), no tuned overlay")
+        params = {f"Args/{k}": v for k, v in eff.items()}
         params.update({
             "Args/model_type": mtype,
             "Args/dataset_id": dataset_id,

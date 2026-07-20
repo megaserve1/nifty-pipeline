@@ -4,7 +4,7 @@ version: v4
 clearml_dataset_id: 53556d8907ce46e7b18e6ba72ddf89ee
 clearml_version: '4.0'
 gcs_url: gs://live-nifty-pipeline/final_pipeline/dvc/files/md5/e4/4a33647f251b70e6144328ffb9b2b5
-git_sha: 35a6f816e5945e2d2b8c1302bc10ddcef000a183
+git_sha: 8df3d9abbfd4fe968fb1a1bc50badc5a6642f09d
 parquet_sha256: d0ba56e01382d84dab12799be5226ca6014a33a8dfd81c78f89077001cbe1844
 recipe_sha256: 667ce0fcc3498ef1e45c1874f28cb4036af77eff40b34c1972ccc382a010d4ea
 labels_sha256: 0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce
@@ -2300,4 +2300,4 @@ per_feature:
   - bucket_bucket_raw_v4__vwap_band_state
   - bucket_bucket_raw_v4__vwap_excursion_ratio
   - bucket_bucket_raw_v4__reversion_strength
-published_at: '2026-07-18T11:28:58+00:00'
+published_at: '2026-07-20T12:38:15+00:00'
