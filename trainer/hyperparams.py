@@ -179,6 +179,19 @@ def version() -> str:
     return str(_load().get("hyperparams_version") or "h?")
 
 
+def sha_of(params: dict) -> str:
+    """a short hash of an ACTUAL parameter dict -- the one a run trained with.
+
+    params_sha() below reads the yaml, which is only the truth on the machine that HAS the
+    current yaml. an agent runs a code snapshot at the base task's commit while its values come
+    in as Args/*, so on an agent the file and the values can be different things. train.py hashes
+    the merged dict with this instead, so the recorded sha always describes the run.
+    """
+    import hashlib
+    blob = ";".join(f"{k}={params[k]!r}" for k in sorted(params))
+    return hashlib.sha256(blob.encode()).hexdigest()[:8]
+
+
 def params_sha(model_type: str) -> str:
     """a short hash of this model's EFFECTIVE settings (yaml defaults + any promoted tune).
 

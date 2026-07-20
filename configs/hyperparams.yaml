@@ -1,148 +1,103 @@
-# HYPERPARAMETERS -- the ONE place they live. Edit this file, never the code.
+# ============================================================================
+#  configs/hyperparams.yaml -- THE one source of every model setting.
+#  train.py reads `default:`.  hpo.py reads `search:`.  no number lives in python.
+# ============================================================================
 #
-# WHY THIS FILE EXISTS
-#   they used to be argparse defaults inside trainer/train.py. that is how the max_depth bug
-#   happened: ONE default (6) was shared by all three models, and 6 is a BOOSTING depth, so
-#   RandomForest was silently built as a depth-6 forest -- crippled. it took a day to find,
-#   because the number was buried in code that nobody reads.
-#
-#   the search space was hardcoded in a SECOND place (trainer/hpo.py), so the two could disagree
-#   with each other and nothing would notice.
-#
-#   now there is one file. defaults and search space, side by side, for each model.
-#
-# HOW IT IS USED
-#   trainer/train.py  reads `default:` -> those become the argparse defaults
-#   trainer/hpo.py    reads `search:`  -> that becomes the ClearML search space
-#
-#   argparse still exists, because ClearML's optimiser overrides parameters BY NAME (Args/...).
-#   but the VALUES come from here. you never edit Python to change a number.
-#
-# THE RULE FOR `search:`
-#   [a, b, c]           -> a discrete choice. tries exactly these values.
-#   {min, max, step}    -> a uniform range.
-#   {min, max, log: true} -> a LOG range, for anything spanning orders of magnitude
-#                            (learning_rate: 0.01 and 0.1 are one "step" apart in log space,
-#                             which is how you actually want to search it).
-
-# ---- THE HYPERPARAMETER SET LABEL -------------------------------------------------------------
-# datasets have versions (v4, v5, v6); hyperparameters did not -- so a result could never be traced
-# back to the numbers that produced it. this is that version. BUMP IT whenever you change any
-# `default:` value below (h1 -> h2 -> ...), and every training task gets tagged with it, so the
-# ClearML board reads "v5 + h2" and a comparison finally means something.
-#
-# a human can forget to bump it, so train.py ALSO records a short hash of the actual values
-# (params_sha). if the label says h2 but the hash moved, the numbers changed and the label lied.
-# h1-smoke = A DELIBERATELY TINY RANDOM FOREST, FOR PROVING THE PLUMBING ONLY.
-# it is NOT a result. the name is in every ClearML tag on purpose, so a 5-minute smoke run can
-# never be mistaken for a real one on the board. the real set becomes h2.
-hyperparams_version: h1-smoke
+# h2 = the manager's set, 2026-07-20 (file "hyperparameter 20072026").
+#      taken as given. THREE things were changed from the file as delivered, and each one is
+#      marked "CHANGED FROM THE DELIVERED FILE" below with the reason. nothing else was touched.
+hyperparams_version: h2
 
 random_forest:
-  # DEFAULTS = the proposed-hyperparameter PDF, 1-MIN column (our v3 is 1-minute data).
-  # run WITHOUT --tune and training uses these directly -- a fast single pass, no HPO search.
   default:
-    # feature-team proposed set (2026-07-17). class weighting is NOT here: the pipeline already
-    # weights per-row via the labels `weight` column (NO_TRADE 0.064, SUPER 0.91 ...), which
-    # matches the team's class_weight dict but finer-grained -- so class_weight stays None.
-    #
-    # ---- SMOKE-TEST SIZE (h1-smoke). THROWAWAY. see the note at the top of this file. ----
-    # target: the whole task -- pull 240 MB from GCS, fit, score, save, upload -- inside ~10 min,
-    # so the wiring can be watched end to end before real numbers are spent on it.
-    #
-    # what it was, and why that could not be watched:
-    #     n_estimators 3000, max_depth 40, max_features "0.8", max_samples 0.8
-    #     = 3000 trees x ~410,000 rows x ~266 of 333 features considered at EVERY split.
-    #     that is hours. it is also why SHAP on the forest ran 3-4 hours -- TreeExplainer walks
-    #     every node of every tree, so the forest's SIZE was the slow part, not shap itself.
-    #
-    # the four knobs that buy the time back, in order of effect:
-    #     n_estimators  3000 -> 40     75x fewer trees
-    #     max_features  "0.8" -> sqrt  ~266 -> 18 features per split, ~15x
-    #     max_samples   0.8 -> 0.25    410k -> ~128k rows per tree
-    #     max_depth     40 -> 12       shallower trees, and a much cheaper SHAP pass
-    #
-    # PUT THE REAL NUMBERS BACK BEFORE ANY RESULT IS REPORTED. a 40-tree depth-12 forest on 7
-    # imbalanced classes will score badly, and it SHOULD -- this is the plumbing, not the model.
-    # MEASURED on the real v4 parquet (359,527 train rows, 226 numeric features, 16 cores):
-    #     fit                     108 s   (1.8 min), avg 967 leaves/tree
-    #     SHAP, 300 rows x 6      ~3.3 min
-    #     -> train task ~5-7 min incl. the GCS pull. that is the whole point of this set.
-    # a first cut at 40 trees / sqrt / 0.25 fit in 2.9 s -- too trivial to prove anything, so
-    # these numbers are deliberately the LARGEST that still fit the 10-minute budget.
-    n_estimators: 200            # was 3000
-    # 16, not 12, only to keep clear daylight between the forest and the booster's 11 -- the
-    # "forest deep, booster shallow" guard is what caught the original crippled-forest bug and it
-    # should not pass by one.
-    max_depth: 16                # was 40 (and 22, and 15 before that)
-    min_samples_leaf: 100        # was 10
-    max_features: "0.3"          # was "0.8" (fraction of features per split)
-    max_samples: 0.5             # was 0.8   (bootstrap fraction of rows per tree)
+    n_estimators: 3000
+    max_depth: 20
+    min_samples_leaf: 10
+    max_features: "0.8"
+    max_samples: 0.8
     seed: 42
   search:
-    max_depth: [0, 16, 24, 32]          # 0 = unlimited. the rungs let us SEE if unlimited wins.
-    min_samples_leaf: [2, 5, 10, 25, 50, 100]
-    max_features: [sqrt, log2, "0.3", "0.5"]
-    n_estimators: {min: 300, max: 1500, step: 150}  # a BUDGET knob. more trees never overfits
-                                                    # a forest, it only costs time.
+    # Scale: [Conservative, Balanced/Actual, Extreme]
+    #
+    # CHANGED FROM THE DELIVERED FILE: the last rung was `None`, it is now `0`.
+    #   the delivered note said "max_depth uses `None` instead of `0` to properly trigger
+    #   scikit-learn's unlimited depth". that is right about sklearn and wrong about this file,
+    #   for two reasons:
+    #
+    #   1. YAML does not read `None` as null. `yaml.safe_load("[10, 20, 30, None]")` gives
+    #      [10, 20, 30, 'None'] -- the four-character STRING. (yaml's null is `null` or `~`.)
+    #   2. every hyperparameter reaches the trainer as a string, and merge() casts it using the
+    #      type of the default. max_depth's default is an int, so 'None' goes to int('None') and
+    #      the trial exits. verified:
+    #          H.merge("random_forest", {"max_depth": "None"})
+    #          -> SystemExit: --max_depth='None' is not a valid int
+    #      one rung in four = a quarter of every RF trial dead, and optuna would read those
+    #      crashes as "that region is bad" rather than "that rung is broken".
+    #
+    #   0 already IS this pipeline's unlimited: build_model does `max_depth=params["max_depth"]
+    #   or None`, so 0 -> None -> sklearn grows the tree out. same intent, and it survives the
+    #   round trip through ClearML.
+    max_depth: [10, 20, 30, 0]              # 0 = unlimited (NOT None -- see above)
+    min_samples_leaf: [50, 25, 10, 2]
+    max_features: ["0.2", "0.5", "0.8", "1.0"]
+    max_samples: [0.5, 0.7, 0.8, 1.0]
+    n_estimators: [500, 1500, 3000, 5000]   # Budget knob: higher only costs time, doesn't overfit
 
 xgboost:
-  # DEFAULTS = the proposed-hyperparameter PDF, 1-MIN column. objective stays multi:softprob in
-  # code (the pdf's binary:logistic / aucpr are 2-class; we have 7 classes). device stays CPU
-  # (no GPU on this box -- cuda would crash). run WITHOUT --tune to use these directly.
   default:
-    # feature-team proposed set. DEEP trees + HEAVY regularisation. NO early stopping (removed
-    # 2026-07-18), so n_estimators is a HARD tree count -- every tree is built. the regularisation
-    # below is what holds a depth-11 model back; watch the train-vs-test gap.
-    n_estimators: 6000           # hard count -- all 2000 trees are built (no early stopping)
+    n_estimators: 6000
+    # CHANGED FROM THE DELIVERED FILE: early_stopping_rounds was absent; it is restored at 200.
+    #   train.py reads it with params.get("early_stopping_rounds") -- absent means None means NO
+    #   early stopping, silently. with n_estimators 6000 at depth 14 that is all 6000 trees
+    #   built every time, and it contradicts the requirement you set on 2026-07-19 ("i want to
+    #   use params edited by manager so we need early stopping too"). delete this line only if
+    #   you mean to turn early stopping off.
     early_stopping_rounds: 200
-    max_depth: 11
-    learning_rate: 0.03
+    max_depth: 14
+    learning_rate: 0.02
     subsample: 0.6
     colsample_bytree: 0.6
-    min_child_weight: 15.0       # float: the search list has 0.5, so the default must stay float
-    reg_lambda: 5.0             # strong L2
-    reg_alpha: 0.2               # L1
-    gamma: 0.3                   # min loss drop to make a split
+    min_child_weight: 15.0
+    reg_lambda: 5.0
+    reg_alpha: 0.2
+    gamma: 0.3
     seed: 42
   search:
-    max_depth: {min: 3, max: 10}
-    learning_rate: {min: 0.01, max: 0.2, log: true}
-    n_estimators: {min: 200, max: 1500, step: 100}
-    subsample: {min: 0.6, max: 1.0, step: 0.1}
-    colsample_bytree: {min: 0.5, max: 1.0, step: 0.1}
-    min_child_weight: [0.5, 1, 3, 5, 10]
-    reg_lambda: [0.5, 1, 5, 20]
-    reg_alpha: [0, 0.1, 0.5, 1, 2]
-    gamma: [0, 0.1, 0.2, 0.3, 0.5]
+    # Scale: [Conservative, Balanced/Actual, Extreme]
+    max_depth: [3, 7, 10, 14]
+    learning_rate: [0.01, 0.02, 0.05, 0.1]
+    n_estimators: [500, 2000, 4000, 6000]
+    subsample: [0.5, 0.6, 0.8, 1.0]
+    colsample_bytree: [0.5, 0.6, 0.8, 1.0]
+    min_child_weight: [20.0, 15.0, 5.0, 1.0]
+    reg_lambda: [20.0, 5.0, 1.0, 0.1]       # L2 Regularization
+    reg_alpha: [5.0, 1.0, 0.2, 0.0]         # L1 Regularization
+    gamma: [1.0, 0.5, 0.3, 0.0]
 
 catboost:
-  # your proposed grid, WITH THE REGULARISATION FIXED (see the note below each changed line).
-  # your values had ALL THREE overfit-brakes set to their loosest -- backwards for noisy 7-class
-  # 1-min data, where overfitting = losing money live.
   default:
-    # feature-team proposed set. catboost builds OBLIVIOUS trees -- depth 11 = 2^11 = 2048 leaves
-    # per tree. NO early stopping (removed 2026-07-18), so n_estimators is a HARD count: EVERY
-    # iteration is built. 6000 at depth 11 with no early stopping would run for HOURS, so it is set
-    # to 2000 here -- a fixed, reproducible count. raise it only if you have the time budget.
-    n_estimators: 6000           # was 6000 (a ceiling under early stopping) -> a hard count now
-    max_depth: 11                # oblivious trees: 2^11 = 2048 leaves per tree
+    n_estimators: 6000
+    # CHANGED FROM THE DELIVERED FILE: same as xgboost -- restored, same reason.
     early_stopping_rounds: 200
-    learning_rate: 0.03
-    l2_leaf_reg: 5.0            # strong L2
+    max_depth: 11                           # Fixed to match the 2048 leaves comment
+    learning_rate: 0.02
+    l2_leaf_reg: 5.0
     min_data_in_leaf: 15
-    rsm: 0.6                     # column sampling (= xgboost colsample_bytree)
-    subsample: 0.6               # row sampling -- REQUIRES a non-Bayesian bootstrap (below)
-    bootstrap_type: "MVS"        # feature-team confirmed. MVS uses `subsample` (Bayesian ignores it)
-    random_strength: 1.0         # noise when scoring splits
+    rsm: 0.6
+    subsample: 0.6
+    bootstrap_type: "MVS"
+    random_strength: 1.0
     seed: 42
   search:
-    # catboost builds OBLIVIOUS trees (the same split on every node of a level), so its depth is
-    # NOT comparable to xgboost's. the library HARD CAPS depth at 16 -- you asked for 20, but
-    # catboost REFUSES depth > 16 ("depth should be in range [1, 16]"), so any trial sampling
-    # 17-20 would error and score nothing. capped at 16 (the real ceiling). NOTE: depth 12-16 on
-    # oblivious trees is already enormous (2^16 = 65k leaves) and very slow; expect long trials.
-    max_depth: {min: 4, max: 16}
-    learning_rate: {min: 0.01, max: 0.2, log: true}
-    n_estimators: {min: 200, max: 1500, step: 100}
-    l2_leaf_reg: [1, 3, 10, 30]
+    # Scale: [Conservative, Balanced/Actual, Extreme]
+    # Note: max_depth > 12 on oblivious trees is massive. 15 is highly extreme and slow.
+    # (kept as delivered. 2^15 = 32,768 leaves per tree x 6000 trees -- if a trial picks 15 it
+    #  will dominate the whole search. it is a real rung, just an expensive one.)
+    max_depth: [4, 8, 11, 15]
+    learning_rate: [0.01, 0.02, 0.05, 0.1]
+    n_estimators: [500, 2000, 4000, 6000]
+    l2_leaf_reg: [30.0, 10.0, 5.0, 1.0]
+    min_data_in_leaf: [50, 25, 15, 5]
+    rsm: [0.5, 0.6, 0.8, 1.0]               # Column sampling
+    subsample: [0.5, 0.6, 0.8, 1.0]         # Row sampling
+    random_strength: [5.0, 1.0, 0.5, 0.0]   # Scoring noise: high = conservative, 0 = extreme

@@ -351,11 +351,19 @@ def test_apply_hpo_refuses_a_range_edge_winner(tmp_path, monkeypatch):
     import json, subprocess
     from trainer import hyperparams as H
 
-    # max_depth range for xgboost is min 3..max 10; a winner AT 10 pins the edge
+    # READ THE EDGE OUT OF THE YAML -- do not hardcode it. this test used to pin max_depth=10,
+    # which was the top of the old {min: 3, max: 10} range. the h2 set (2026-07-20) made the
+    # space a discrete list [3, 7, 10, 14], so 10 became a MIDDLE rung and the test failed --
+    # not because the guard broke, but because the test knew a number the yaml no longer had.
+    # asking hyperparams for the current extreme means re-tuning can never break this again.
+    space = {p.name.split("/", 1)[1]: p for p in H.search_space("xgboost")}
+    md = space["max_depth"]
+    edge = getattr(md, "values", None)[-1] if getattr(md, "values", None) else md.max_value
+
     winner = tmp_path / "best_params_xgboost.json"
     winner.write_text(json.dumps({"model_type": "xgboost", "dataset_version": "v3",
                                   "val_trading_cost": 30, "test_trading_cost": 33,
-                                  "params": {"max_depth": 10}}))
+                                  "params": {"max_depth": edge}}))
     r = subprocess.run([str(ROOT / "final_venv/bin/python"), "trainer/apply_hpo.py", str(winner)],
                        capture_output=True, text=True, cwd=str(ROOT))
     assert r.returncode != 0, "a range-edge winner must not promote without --force"

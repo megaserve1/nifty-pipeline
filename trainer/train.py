@@ -527,7 +527,19 @@ def main():
     # prefer the label the controller sent (it read the same yaml it read the VALUES from).
     # fall back to this machine's yaml for a plain local `python trainer/train.py` run.
     hp_version = (a.hyperparams_version or "").strip() or hyperparams.version()
-    hp_sha = hyperparams.params_sha(a.model_type)
+    # MEASURE THE SHA FROM THE PARAMS ACTUALLY TRAINED WITH, not from this machine's yaml file.
+    #
+    # hyperparams.params_sha() re-reads configs/hyperparams.yaml -- but a clearml AGENT runs a
+    # code snapshot at the BASE TASK's git commit, so its yaml is whatever was committed then,
+    # while the VALUES arrive separately as Args/* resolved on the controller from the yaml as it
+    # is NOW. edit the yaml, publish without committing, and the two disagree: the run trains on
+    # h2's numbers, is labelled h2, and reports h1's sha. the one number whose whole job is to
+    # catch a lying label would itself be lying.
+    #
+    # `params` below is the merged, cast, final dict this run trains on. hashing THAT is true on
+    # every machine regardless of what any file says -- same principle as measuring a feature's
+    # clock instead of trusting registry.yaml's declaration.
+    hp_sha = hyperparams.sha_of(params)
     print(f"      hyperparams set: {hp_version}   (values sha {hp_sha})")
     task.connect({**params, "model_type": a.model_type, "dataset_id": a.dataset_id,
                   "dataset_version": a.dataset_version or ds.version,

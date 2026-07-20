@@ -37,20 +37,35 @@ def test_random_and_grid_search_need_no_extra_package():
     assert RandomSearch and GridSearch and HyperParameterOptimizer
 
 
-def test_optuna_and_bohb_are_NOT_available_and_fail_loudly():
-    """the good news buried in this test: these two fail with a real ImportError.
+def test_optuna_IS_available_and_bohb_still_is_not():
+    """THE DECISION WAS MADE. optuna is installed and is hpo.py's default strategy (2026-07-20).
 
-    that is the ONE failure in ClearML HPO that is not silent. so if someone copies an
-    optimizer_class=OptimizerOptuna line off the internet into hpo.py, it stops immediately
-    instead of quietly degrading. we pin that it still stops immediately.
+    this test used to assert the OPPOSITE -- that importing OptimizerOptuna raises ImportError --
+    back when optuna was deliberately not installed and RandomSearch was the default. its own
+    docstring said: "if this test ever FAILS, it means someone installed optuna. that is a
+    decision, not an accident -- go and make it deliberately." that is exactly what happened, so
+    the test is inverted rather than deleted: the contract it guards is still worth pinning, it
+    is just the other way round now.
 
-    if this test ever FAILS, it means someone installed optuna. that is a decision, not an
-    accident -- go and make it deliberately.
+    what it protects: hpo.py defaults to --strategy optuna. if optuna is ever dropped from
+    requirements.txt, every default HPO run dies at import -- loudly, but only once someone runs
+    one. this fails in the test suite instead.
+
+    BOHB is still NOT installed and still is not wanted -- it needs hpbandster, which drags in a
+    distributed scheduler we have no use for. pinned so nobody adds it by reflex.
     """
-    with pytest.raises(ImportError):
-        from clearml.automation.optuna import OptimizerOptuna     # noqa: F401
+    from clearml.automation.optuna import OptimizerOptuna         # noqa: F401
+    import optuna                                                 # noqa: F401
     with pytest.raises(ImportError):
         from clearml.automation.hpbandster import OptimizerBOHB   # noqa: F401
+
+
+def test_optuna_is_the_default_strategy_in_hpo():
+    """the default is the whole point of installing it -- pin that nobody flips it back."""
+    import re
+    src = (C.ROOT / "trainer" / "hpo.py").read_text()
+    m = re.search(r"--strategy.*?default\s*=\s*[\"'](\w+)[\"']", src, re.S)
+    assert m and m.group(1) == "optuna", "hpo.py's --strategy default must be optuna"
 
 
 # =====================================================================================
