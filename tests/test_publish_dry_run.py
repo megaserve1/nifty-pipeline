@@ -54,8 +54,39 @@ class FakeDataset:
 
 
 class FakeQueue:
-    def __init__(self, workers):
-        self.workers = workers
+    """a queue as the REAL server returns it: it has an id and a name, and NOTHING ELSE.
+
+    THIS FAKE USED TO CARRY A `.workers` LIST, AND THAT IS WHY A BROKEN CHECK SHIPPED.
+    the old production code read `client.queues.get_all(name=...)[0].workers`. against this fake
+    that worked. against the real clearml 2.1.10 server the Queue entity has no `workers` field at
+    all (the server only fills it when explicitly requested), so the real call raised
+    AttributeError EVERY time -- and publish_version caught it and downgraded it to
+    "WARN could not check for listening agents". the single most important pre-flight check in the
+    pipeline never once ran, and the test suite was green the whole time.
+
+    a fake that is kinder than the real thing does not test anything. so this one is now as bare
+    as the server's: ask the WORKERS who they are listening to (FakeWorkers below).
+    """
+    def __init__(self, name):
+        self.id, self.name = f"q-{name}", name
+
+
+class FakeWorkerQueue:
+    """the queue entry hanging off a worker -- the code reads `.name` off these."""
+    def __init__(self, name):
+        self.name = name
+
+
+class FakeWorker:
+    """a registered clearml-agent. `task` is None when idle, and an object with `.name` when it
+    is busy -- busy agents cannot pick our training tasks up, which is the whole point of
+    counting free ones separately."""
+    def __init__(self, spec, queue_name):
+        # accept "pc1:1" (idle) or ("pc1:1", "shap_random_forest v4") (busy)
+        wid, busy = (spec, None) if isinstance(spec, str) else spec
+        self.id = wid
+        self.queues = [FakeWorkerQueue(queue_name)]
+        self.task = types.SimpleNamespace(name=busy) if busy else None
 
 
 def fake_clearml(base_tasks, workers, ds_exists=False):
@@ -72,7 +103,17 @@ def fake_clearml(base_tasks, workers, ds_exists=False):
         class queues:
             @staticmethod
             def get_all(name=None):
-                return [FakeQueue(workers)]
+                return [FakeQueue(name or C.TRAIN_QUEUE)]
+
+        class workers:
+            @staticmethod
+            def get_all():
+                # every agent registered anywhere. the production code filters these down to the
+                # ones polling TRAIN_QUEUE itself -- so hand back one on a DIFFERENT queue too,
+                # to prove the filter is real and not just len(get_all()).
+                return ([FakeWorker(w, C.TRAIN_QUEUE) for w in workers]
+                        + [FakeWorker("someone-elses-box:0", "services")])
+
         def __init__(self):
             pass
     client_mod.APIClient = APIClient
@@ -130,7 +171,12 @@ def test_the_rehearsal_never_runs_a_command_that_changes_anything(stub_clearml, 
         pass                                  # a missing dataset is fine -- we only care what it RAN
 
     for cmd in spy_shell:
-        assert cmd[0] in ("dvc", "git"), f"unexpected command {cmd}"
+        # BASENAME, not the literal string. dvc is invoked by its ABSOLUTE path
+        # (final_venv/bin/dvc) because the bare name "dvc" only resolves when the venv happens to
+        # be activated -- unactivated it died at step 2/5 with FileNotFoundError, after step 1 had
+        # already printed "certificate OK". what this test actually cares about is that nothing
+        # but git and dvc is ever executed, and that is still exactly what it checks.
+        assert pathlib.Path(cmd[0]).name in ("dvc", "git"), f"unexpected command {cmd}"
         assert not any(w in cmd for w in MUTATES), \
             f"THE REHEARSAL WROTE SOMETHING: {' '.join(cmd)}"
     # the only thing it is allowed to run is a read
@@ -208,4 +254,39 @@ def test_one_agent_is_a_warning_not_an_error(stub_clearml, spy_shell, capsys):
     except SystemExit:
         pass
     out = capsys.readouterr().out
-    assert "ONE AFTER ANOTHER" in out
+    assert "only ONE agent" in out
+    assert "NOBODY IS LISTENING" not in out, "one agent is a warning, not a stop"
+
+
+def test_the_agent_check_asks_the_WORKERS_not_the_queue(stub_clearml, spy_shell, capsys):
+    """THE REGRESSION PIN. the old code read `queues.get_all(...)[0].workers` -- a field the real
+    server does not return -- so it raised AttributeError on every real run and got swallowed into
+    'could not check for listening agents'. the check looked fine in the test suite and had never
+    actually run in production. if anyone reintroduces it, this fails."""
+    stub_clearml(workers=["pc1:1", "pc2:0"])
+    try:
+        pv.dry_run("v1", list(C.MODEL_TYPES))
+    except SystemExit:
+        pass
+    out = capsys.readouterr().out
+    assert "could not check for listening agents" not in out, (
+        "the agent check silently failed -- it is reading a field the server does not send")
+    assert "2 agent(s)" in out, "it must count the agents polling OUR queue"
+    assert "someone-elses-box" not in out, "an agent on another queue must not be counted"
+
+
+def test_a_BUSY_agent_is_not_a_free_one(stub_clearml, spy_shell, capsys):
+    """an agent already running SHAP cannot pick a trainer up. counting it as available is how
+    you conclude '4 agents, all 3 models train at once' and then watch two of them sit queued."""
+    stub_clearml(workers=[("pc1:1", "shap_random_forest v4"),
+                          ("pc2:0", "shap_xgboost v4"),
+                          "pc3:0"])
+    try:
+        pv.dry_run("v1", list(C.MODEL_TYPES))
+    except SystemExit:
+        pass
+    out = capsys.readouterr().out
+    assert "3 agent(s)" in out and "1 free" in out and "2 busy" in out
+    assert "BUSY  shap_random_forest v4" in out, "it must name what is occupying the agent"
+    assert "will run in batches" in out, (
+        "1 free agent and 3 models to train must be called out, not glossed over")

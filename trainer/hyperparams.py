@@ -161,9 +161,36 @@ def all_param_names() -> list:
     hp = _load()
     names = set()
     for m in hp.values():
+        # the yaml also carries scalar top-level keys (hyperparams_version). they are not model
+        # blocks, and calling .get() on a string raises -- skip anything that is not a dict.
+        if not isinstance(m, dict):
+            continue
         names |= set((m.get("default") or {}).keys())
         names |= set((m.get("search") or {}).keys())
     return sorted(names)
+
+
+def version() -> str:
+    """the hyperparameter SET label (h1, h2, ...) from configs/hyperparams.yaml.
+
+    datasets are versioned; without this the numbers behind a result were not. train.py tags every
+    task with it, so a run reads 'v5 + h2' and two runs are only comparable when both halves match.
+    """
+    return str(_load().get("hyperparams_version") or "h?")
+
+
+def params_sha(model_type: str) -> str:
+    """a short hash of this model's EFFECTIVE settings (yaml defaults + any promoted tune).
+
+    the label above is hand-maintained, so it can go stale the moment somebody edits a number and
+    forgets to bump it. this is measured from the values themselves: if the label says h2 but the
+    sha moved, the numbers changed and the label is lying. same idea as measuring a feature's clock
+    instead of trusting the declaration.
+    """
+    import hashlib
+    d = defaults(model_type)
+    blob = ";".join(f"{k}={d[k]!r}" for k in sorted(d))
+    return hashlib.sha256(blob.encode()).hexdigest()[:8]
 
 
 def search_space(model_type: str) -> list:

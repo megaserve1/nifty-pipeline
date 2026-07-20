@@ -25,6 +25,16 @@
 #                            (learning_rate: 0.01 and 0.1 are one "step" apart in log space,
 #                             which is how you actually want to search it).
 
+# ---- THE HYPERPARAMETER SET LABEL -------------------------------------------------------------
+# datasets have versions (v4, v5, v6); hyperparameters did not -- so a result could never be traced
+# back to the numbers that produced it. this is that version. BUMP IT whenever you change any
+# `default:` value below (h1 -> h2 -> ...), and every training task gets tagged with it, so the
+# ClearML board reads "v5 + h2" and a comparison finally means something.
+#
+# a human can forget to bump it, so train.py ALSO records a short hash of the actual values
+# (params_sha). if the label says h2 but the hash moved, the numbers changed and the label lied.
+hyperparams_version: h1
+
 random_forest:
   # DEFAULTS = the proposed-hyperparameter PDF, 1-MIN column (our v3 is 1-minute data).
   # run WITHOUT --tune and training uses these directly -- a fast single pass, no HPO search.

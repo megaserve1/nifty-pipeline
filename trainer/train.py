@@ -513,11 +513,17 @@ def main():
     print(f"      {params}")
     if changed:
         print(f"      overridden: {changed}")
+    # WHICH SETTINGS PRODUCED THIS RESULT. the dataset half was already tagged (v5); this adds the
+    # hyperparameter half (h2), so the board reads "v5 + h2" and two runs are only comparable when
+    # BOTH match. params_sha is measured from the values, so a stale hand-set label is detectable.
+    hp_version, hp_sha = hyperparams.version(), hyperparams.params_sha(a.model_type)
+    print(f"      hyperparams set: {hp_version}   (values sha {hp_sha})")
     task.connect({**params, "model_type": a.model_type, "dataset_id": a.dataset_id,
                   "dataset_version": a.dataset_version or ds.version,
+                  "hyperparams_version": hp_version, "params_sha": hp_sha,
                   "n_features": len(feat_cols), "test_fraction": C.TEST_FRACTION,
                   "val_fraction": C.VAL_FRACTION, "embargo_sessions": C.EMBARGO_SESSIONS})
-    task.add_tags([a.model_type, f"v{a.dataset_version or ds.version}"])
+    task.add_tags([a.model_type, f"v{a.dataset_version or ds.version}", hp_version])
 
     # ---- 6. train, score, save ----------------------------------------------
     print(f"[6/6] training {a.model_type} on {len(Xtr):,} rows x {len(feat_cols)} features")

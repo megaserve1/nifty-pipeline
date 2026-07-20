@@ -159,7 +159,7 @@ def assert_schema(df, man: dict) -> None:
             "SCHEMA DRIFT between manifest and parquet:\n"
             f"  added  : {added}\n  removed: {removed}\n"
             f"  retyped: {[(c, w[c], '->', g[c]) for c in retyped]}")
-
+          
 
 # ------------------------------------------------------------------ the lock (core)
 def write_lock(path, man: dict, clearml_dataset_id: str, semver: str,

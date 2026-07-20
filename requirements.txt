@@ -49,6 +49,12 @@ pyyaml==6.0.3
 requests>=2.20,<2.33     # clearml-agent 3.0.x REQUIRES requests<2.33; pip otherwise pulls 2.34+
                          # and the agent warns "incompatible". this cap keeps the agent happy.
 
+# --- hyperparameter search ---------------------------------------------------
+# optuna backs `hpo.py --strategy optuna` (TPE), the default since 2026-07-20. it is needed ONLY
+# where hpo.py runs (the controller) -- the trials are ordinary training tasks and the agents never
+# import it. harmless everywhere else. `--strategy random` still works without it.
+optuna>=3.6,<5
+
 # --- explainability ----------------------------------------------------------
 shap==0.52.0
 matplotlib==3.11.0       # SHAP draws waterfall PNGs on a HEADLESS agent -- without it every SHAP

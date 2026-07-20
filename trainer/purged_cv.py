@@ -208,8 +208,26 @@ class PurgedKFold:
         self.purge_sessions = purge_sessions
         self.embargo_sessions = embargo_sessions
 
-        self._day = self.ts.normalize()
-        self._sessions = np.array(sorted(pd.unique(self._day)))
+        # KEEP THESE AS datetime64. BOTH LINES MATTER, AND THE REASON IS SPEED, NOT CORRECTNESS.
+        #
+        #   np.array(sorted(pd.unique(day)))   ->  dtype=OBJECT
+        #
+        # sorted() turns the array into a python list of pd.Timestamp objects, and np.array() of a
+        # list of Timestamps cannot infer datetime64 -- it makes an object array. everything still
+        # gives the RIGHT answer, so no test caught it. but np.isin() on an object array cannot use
+        # its sorted/hashed fast path: it falls back to comparing python objects one at a time.
+        #
+        # measured, 200 sessions x 375 rows = 75,000 rows:
+        #     object dtype      3.52  s per np.isin
+        #     datetime64      0.0026  s per np.isin        -- 1350x
+        #
+        # split() calls np.isin twice per fold, so 5 folds = ~35 s on a TOY dataset. on the real
+        # 513,611 rows x 1,370 sessions it is worse than linearly worse (the object path is
+        # O(n*m)) -- hours. that is why the test suite stopped finishing.
+        #
+        # .values keeps it as a datetime64 numpy array, and np.sort keeps it that way.
+        self._day = self.ts.normalize().values
+        self._sessions = np.sort(pd.unique(self._day))
 
         if len(self._sessions) < n_splits:
             raise NotEnoughData(
@@ -299,11 +317,16 @@ def assert_no_leak(ts, train_idx, test_idx, purge_sessions: int, embargo_session
     checked in SESSION distance, because that is the unit the cuts were made in.
     """
     ts = pd.DatetimeIndex(pd.Series(ts).values)
-    sess = np.array(sorted(pd.unique(ts.normalize())))
-    pos = {d: i for i, d in enumerate(sess)}
+    # same datetime64 discipline as __init__ (see the note there), plus: map day -> session number
+    # with searchsorted instead of a dict comprehension and a per-row python loop. the old
+    # `[pos[d] for d in ...]` walked all 513,611 rows in python, twice, on every fold -- and this
+    # is the LEAK GUARD, the one thing that must stay cheap enough that nobody is ever tempted to
+    # switch it off. sess is sorted and every day is in it, so searchsorted is exact.
+    day = ts.normalize().values
+    sess = np.sort(pd.unique(day))
 
-    tr_s = np.array([pos[d] for d in ts[train_idx].normalize()])
-    te_s = np.array([pos[d] for d in ts[test_idx].normalize()])
+    tr_s = np.searchsorted(sess, day[train_idx])
+    te_s = np.searchsorted(sess, day[test_idx])
     lo, hi = te_s.min(), te_s.max()
 
     # a training row before the fold: its LABEL reaches forward H sessions.

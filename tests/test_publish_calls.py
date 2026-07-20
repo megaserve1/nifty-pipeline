@@ -298,6 +298,12 @@ def test_gcs_storage_branch_pushes_dvc_and_resolves_the_remote_url():
     gcs_source = "\n".join(ast.unparse(n) for n in storage_if.body)
     local_source = "\n".join(ast.unparse(n) for n in storage_if.orelse)
 
-    assert "sh(['dvc', 'push'])" in gcs_source
+    # dvc is called through dvc_bin(), which resolves the executable inside the RUNNING
+    # interpreter's venv. the bare name "dvc" only resolves under an ACTIVATED venv -- without
+    # activation the publish died at step 2/5 with FileNotFoundError, having already printed
+    # "certificate OK". what this test pins is unchanged: `dvc push` is reachable in the gcs
+    # branch, and local mode is the else.
+    assert "sh([dvc_bin(), 'push'])" in gcs_source
+    assert "sh([dvc_bin(), 'add'" in gcs_source
     assert "dvc.api.get_url" in gcs_source
     assert "local storage mode" in local_source

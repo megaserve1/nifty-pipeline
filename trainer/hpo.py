@@ -72,20 +72,30 @@ WHICH OPTIMISER
 --------------------------------------------------------------------------------------
 clearml 2.1.10 ships four. TESTED on this venv:
 
+    OptimizerOptuna   needs the `optuna` package  -- PINNED in requirements.txt (2026-07-20)
     GridSearch        imports OK   -- pure clearml, no extra package
     RandomSearch      imports OK   -- pure clearml, no extra package
-    OptimizerOptuna   ImportError  -- "requires 'optuna' package, it was not found"
     OptimizerBOHB     ImportError  -- "requires 'hpbandster' package, it was not found"
 
-optuna is not installed and we are not installing it. so: RandomSearch (default) or GridSearch.
+OPTUNA IS NOW THE DEFAULT (was RandomSearch until 2026-07-20).
 
-that is not a consolation prize. with 4-6 knobs, random search beats grid search for a fixed
-budget, and it is not close -- grid spends its budget re-testing the knobs that do not matter.
-30 random trials over 5 knobs explore 30 distinct values of EVERY knob. a 3x3x3x3x3 grid is 243
-runs and explores exactly 3 values of each. we have 1-3 agents. random search it is.
+why it beats random search on the SAME budget: random search samples blindly -- trial 30 knows
+nothing about trials 1-29. optuna's TPE builds a model of which regions produced good scores and
+spends the remaining trials THERE. with a small budget (15-30 trials) and 4-9 knobs, that focus is
+worth real points; with an unlimited budget the two converge.
 
-use GridSearch only for the small, deliberate sweep you want to be able to explain line by line
-in a meeting -- e.g. "max_depth in {0,16,24,32} x min_samples_leaf in {5,25,100}", 12 runs.
+random search is still the honest fallback, and it is NOT a consolation prize: with 4-6 knobs it
+beats grid search for a fixed budget, and it is not close -- grid spends its budget re-testing the
+knobs that do not matter. 30 random trials over 5 knobs explore 30 distinct values of EVERY knob;
+a 3x3x3x3x3 grid is 243 runs and explores exactly 3 values of each.
+
+    --strategy optuna   (default)  TPE, learns from finished trials
+    --strategy random              blind sampling, no extra package, always available
+    --strategy grid                the small deliberate sweep you want to explain line by line in
+                                   a meeting -- e.g. max_depth {0,16,24,32} x leaf {5,25,100}
+
+NOTE: optuna is only needed WHERE hpo.py RUNS (the controller). the trials themselves are ordinary
+training tasks -- the agents run train.py and never import optuna.
 """
 import argparse
 import json
@@ -183,7 +193,9 @@ def main():
                     help="how many trials may run at once. SET THIS TO YOUR NUMBER OF AGENTS "
                          "-- no higher. more just queues them")
     ap.add_argument("--queue", default=C.TRAIN_QUEUE)
-    ap.add_argument("--strategy", default="random", choices=["random", "grid"])
+    ap.add_argument("--strategy", default="optuna", choices=["optuna", "random", "grid"],
+                    help="optuna = TPE, learns from finished trials (default). random = blind "
+                         "sampling, no extra package. grid = exhaustive, explainable, expensive.")
     ap.add_argument("--job_minutes", type=float, default=90,
                     help="kill any single trial that runs longer than this. a runaway forest "
                          "with max_depth=None and min_samples_leaf=2 can sit there for hours")
@@ -201,7 +213,20 @@ def main():
     from clearml.automation import (HyperParameterOptimizer, RandomSearch, GridSearch,
                                     DiscreteParameterRange)
 
-    strategy = {"random": RandomSearch, "grid": GridSearch}[a.strategy]
+    if a.strategy == "optuna":
+        # OptimizerOptuna lives in a SUBMODULE that imports optuna at import time. guarded so a
+        # missing package is a one-line instruction, not an ImportError traceback mid-search.
+        try:
+            from clearml.automation.optuna import OptimizerOptuna
+        except ImportError as e:
+            raise SystemExit(
+                f"--strategy optuna needs the 'optuna' package on THIS machine.\n"
+                f"    final_venv/bin/pip install -r requirements.txt   (optuna is pinned there)\n"
+                f"  or fall back with:  --strategy random\n"
+                f"  ({e})")
+        strategy = OptimizerOptuna
+    else:
+        strategy = {"random": RandomSearch, "grid": GridSearch}[a.strategy]
 
     # ---- 1. find the base task ----------------------------------------------
     base_name = C.base_trainer_name(a.model_type)

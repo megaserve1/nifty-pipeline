@@ -42,6 +42,7 @@ WHY --dry-run MATTERS HERE MORE THAN USUAL
     checks the late things FIRST and touches nothing.
 """
 import argparse
+import shutil
 import subprocess
 import sys
 import pathlib
@@ -62,6 +63,27 @@ def sh(cmd: list, check=True) -> str:
     if check and r.returncode != 0:
         raise SystemExit(f"command failed: {' '.join(cmd)}\n{r.stderr.strip()}")
     return r.stdout.strip()
+
+
+def dvc_bin() -> str:
+    """the dvc executable, resolved from the RUNNING interpreter's venv first.
+
+    WHY THIS IS NOT JUST "dvc". the calls below used the bare name, which only resolves when the
+    venv is ACTIVATED. run this the perfectly reasonable way --
+
+        final_venv/bin/python core/publish_version.py --version v4
+
+    -- without `source final_venv/bin/activate`, and PATH has no dvc, so the publish dies at step
+    2/5 with FileNotFoundError: 'dvc' -- AFTER step 1 has already printed "certificate OK", which
+    reads like the pipeline is healthy right up to the moment it isn't. it also bites any caller
+    that is not an interactive shell: cron, an IDE run button, a wrapper script.
+
+    dvc lives next to the python that is running us (same venv), so look there first.
+    """
+    cand = pathlib.Path(sys.executable).parent / "dvc"
+    if cand.exists():
+        return str(cand)
+    return shutil.which("dvc") or "dvc"        # activated venv / system install / let it error
 
 
 def git_sha() -> str:
@@ -223,7 +245,7 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
         if not (C.ROOT / ".dvc").exists():
             problems.append("no dvc repo -- run:  dvc init")
         else:
-            remotes = subprocess.run(["dvc", "remote", "list"], capture_output=True, text=True,
+            remotes = subprocess.run([dvc_bin(), "remote", "list"], capture_output=True, text=True,
                                      cwd=C.ROOT)
             if not remotes.stdout.strip():
                 problems.append("no dvc remote -- the push has nowhere to go. run:  "
@@ -303,7 +325,21 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
     lock = C.VERSIONS_DIR / f"dataset_{version}.lock.yaml"
     print(f"\n[4/5] would write the lock -> {lock}")
     if lock.exists():
-        warnings.append(f"{lock.name} already exists -- the real run would OVERWRITE it")
+        # REHEARSE THE BYTES CHECK TOO. publish() refuses to re-publish a version whose parquet
+        # was rebuilt after the lock was written (same version number, different bytes = the
+        # ClearML dataset points at the OLD parquet). That guard is correct, but it fired only in
+        # the REAL run -- so a dry-run said "all checks passed" and the real one died at [1/5].
+        # exactly the "you tell me the reason after the embarrassment" case. check it here.
+        prev_sha = (yaml.safe_load(lock.read_text()) or {}).get("parquet_sha256")
+        if prev_sha and prev_sha != man["parquet_sha256"]:
+            problems.append(
+                f"{version} was published before with DIFFERENT bytes "
+                f"(lock {prev_sha[:12]}... vs manifest {man['parquet_sha256'][:12]}...). "
+                f"the parquet was rebuilt after publishing. the real run STOPS here. "
+                f"make a new version instead of re-publishing this one.")
+        else:
+            warnings.append(f"{lock.name} already exists -- the real run would OVERWRITE it "
+                            f"(same bytes, so the ClearML dataset is still correct)")
 
     # ---- 5. the queue, and whether anyone is listening ------------------------
     print(f"\n[5/5] would queue on '{C.TRAIN_QUEUE}': {models} + select_champion")
@@ -317,8 +353,16 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
             if not q:
                 problems.append(f"queue '{C.TRAIN_QUEUE}' does not exist in ClearML")
             else:
-                workers = client.queues.get_all(name=C.TRAIN_QUEUE)[0].workers or []
-                if not workers:
+                # ASK THE WORKERS, NOT THE QUEUE. queues.get_all() returns a Queue entity that
+                # does NOT carry a .workers field (the server only fills it on request), so the
+                # old `q[0].workers` raised AttributeError -- caught below and downgraded to
+                # "could not check for listening agents". that turned THE most important check in
+                # this script into a warning nobody reads. workers.get_all() is the real answer:
+                # every registered agent, and the queues it polls.
+                agents = [w for w in (client.workers.get_all() or [])
+                          if any(getattr(q, "name", None) == C.TRAIN_QUEUE
+                                 for q in (w.queues or []))]
+                if not agents:
                     # THE SILENT ONE. everything succeeds, the dataset publishes, the tasks
                     # queue... and nothing ever runs, with no error anywhere.
                     problems.append(
@@ -326,9 +370,23 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
                         f"then sit there for ever, with no error. start a worker:\n"
                         f"           clearml-agent daemon --queue {C.TRAIN_QUEUE}")
                 else:
-                    print(f"      {len(workers)} worker(s) listening -- "
-                          f"{'they train IN PARALLEL' if len(workers) > 1 else 'they train ONE AFTER ANOTHER'}")
-                    if len(workers) == 1:
+                    # BUSY IS NOT AVAILABLE. an agent already running a task cannot take one of
+                    # ours until it finishes -- so count the FREE ones. this is exactly the
+                    # "workers get eaten by SHAP and champion while training waits" case.
+                    free = [w for w in agents if not getattr(w, "task", None)]
+                    print(f"      {len(agents)} agent(s) on '{C.TRAIN_QUEUE}', "
+                          f"{len(free)} free, {len(agents) - len(free)} busy")
+                    for w in agents:
+                        t = getattr(w, "task", None)
+                        print(f"        {w.id:<24} "
+                              f"{'BUSY  ' + str(getattr(t, 'name', '?')) if t else 'idle'}")
+                    need = len(models) + 1                     # the models + select_champion
+                    if len(free) < len(models):
+                        warnings.append(
+                            f"{len(free)} free agent(s) but {len(models)} models to train -- they "
+                            f"will run in batches, not all at once. ({need} free agents = "
+                            f"everything at once.)")
+                    if len(agents) == 1:
                         warnings.append(
                             "only ONE agent. the models train one after another, and "
                             "select_champion must not be picked up before them. it detects that "
@@ -443,7 +501,7 @@ def publish(version: str, models: list, do_train: bool = True,
     gcs_url = None
     if C.STORAGE_MODE == "gcs":
         print("[2/5] dvc add + git commit + dvc push")
-        sh(["dvc", "add", str(parquet)])
+        sh([dvc_bin(), "add", str(parquet)])
         sh(["git", "add", f"{parquet}.dvc", str(ds_dir / "manifest.json"), str(recipe)])
         r = subprocess.run(["git", "commit", "-m", f"dataset {version}"],
                            capture_output=True, text=True, cwd=str(C.ROOT))
@@ -462,7 +520,7 @@ def publish(version: str, models: list, do_train: bool = True,
                              f"  if it says 'who you are', run once:\n"
                              f"    git config user.email you@example.com && "
                              f"git config user.name you")
-        sh(["dvc", "push"])
+        sh([dvc_bin(), "push"])
         import dvc.api
         gcs_url = dvc.api.get_url(str(parquet))
         print(f"      pushed -> {gcs_url}")

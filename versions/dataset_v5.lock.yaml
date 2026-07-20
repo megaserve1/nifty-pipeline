@@ -4,7 +4,7 @@ version: v5
 clearml_dataset_id: 2526ababef67424eb71e95a9e3b2bbf7
 clearml_version: '5.0'
 gcs_url: gs://live-nifty-pipeline/final_pipeline/dvc/files/md5/85/3aa0bd99624bbb781011d60c4a9477
-git_sha: df1947e5595e2764c6484f984d59e476619273d8
+git_sha: 35a6f816e5945e2d2b8c1302bc10ddcef000a183
 parquet_sha256: a34409cae9314bf5c048c682f46b788b8140df76ea9b07ec3918f16a38d5c122
 recipe_sha256: 73294464c52b25c9bacef63710e37b2dc0477816a515afcc89166fc15ab1a965
 labels_sha256: 0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce
@@ -3295,4 +3295,4 @@ per_feature:
   - raw_bucket_raw_computed_v5__dolvol
   - raw_bucket_raw_computed_v5__amihud_ill
   - raw_bucket_raw_computed_v5__vsa_dev
-published_at: '2026-07-17T12:43:54+00:00'
+published_at: '2026-07-18T11:29:54+00:00'
