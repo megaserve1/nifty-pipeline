@@ -415,7 +415,14 @@ def test_max_depth_zero_means_fully_grown_for_the_forest_and_six_for_the_booster
     assert rf.max_depth is None, "max_depth=0 must mean FULLY GROWN for a random forest"
 
     xgb = build_model("xgboost", 7, p)
-    assert xgb.max_depth == 6, "max_depth=0 must fall back to 6 for a booster, not to unlimited"
+    assert xgb.max_depth == 6, "max_depth=0 must fall back to 6 for a DEPTHWISE booster"
+
+    # BUT under lossguide (loss-based, added 2026-07-21) 0 is a DELIBERATE value meaning
+    # "no depth cap, let max_leaves rule". it must pass through as 0, not get capped at 6 --
+    # else the leaf-wise overfit config is silently limited to depth 6.
+    xgl = build_model("xgboost", 7, {**p, "grow_policy": "lossguide", "max_leaves": 255})
+    assert xgl.max_depth == 0, "under lossguide, max_depth=0 must stay 0 (leaves rule), not become 6"
+    assert xgl.get_params()["grow_policy"] == "lossguide"
 
     rf6 = build_model("random_forest", 7, {**p, "max_depth": 6})
     assert rf6.max_depth == 6, "an explicit depth must still be honoured"

@@ -1,0 +1,31 @@
+name: dataset_v4.1
+kind: selection
+parent: v4
+created: '2026-07-17T15:30:34'
+author: megaserve
+selected_by: feature:bucket_bucket_raw_v4
+labels_name: labels_1min_A20_Ex_z2_En_zNA_anchor_7class
+date_range: full
+features:
+- bucket_bucket_raw_v4
+feature_clocks: {}
+derived_by: drop 18 columns from v4
+dropped_columns:
+- bucket_bucket_raw_v4__active_c3
+- bucket_bucket_raw_v4__allowed_raw_state
+- bucket_bucket_raw_v4__atr14
+- bucket_bucket_raw_v4__atr__stress_signal_raw
+- bucket_bucket_raw_v4__atr__trend_maturity_raw
+- bucket_bucket_raw_v4__bear_sma_weak
+- bucket_bucket_raw_v4__bull_sma_weak
+- bucket_bucket_raw_v4__clv
+- bucket_bucket_raw_v4__gap_down_stack
+- bucket_bucket_raw_v4__gap_down_total_unfilled_pts
+- bucket_bucket_raw_v4__gap_up_stack
+- bucket_bucket_raw_v4__gap_up_total_unfilled_pts
+- bucket_bucket_raw_v4__india_vix_zscore_20
+- bucket_bucket_raw_v4__range_weak
+- bucket_bucket_raw_v4__total_up_gap_area
+- bucket_bucket_raw_v4__up_unfilled_count
+- bucket_bucket_raw_v4__vwap
+- bucket_bucket_raw_v4__vwap__trend_maturity_raw

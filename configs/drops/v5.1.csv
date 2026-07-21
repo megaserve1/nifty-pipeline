@@ -1,0 +1,48 @@
+action,dropped_column,kept_instead
+dropped,vwap_dist_atr__nifty_features_v3,vwap_dist_atr
+dropped,ATR_14_NEW_FUTURES,atr_20
+dropped,active_c3,range_expanding
+dropped,allowed_raw_state,pending_state
+dropped,apo,macd
+dropped,atr14,atr
+dropped,atr__trend_maturity_raw,atr
+dropped,bear_sma_weak,bull_sma_support
+dropped,bull_sma_weak,bear_sma_support
+dropped,futures_oi_trend_1d__nifty_features_v3,futures_oi_trend_1d
+dropped,gap_down_stack,down_unfilled_count
+dropped,gap_down_total_unfilled_pts,total_down_gap_area
+dropped,gap_up_stack,nearest_up_gap_distance_atr
+dropped,gap_up_total_unfilled_pts,total_up_gap_area_atr
+dropped,lr_futures_5,lr_close_5
+dropped,minute_of_day,Time_Counter
+dropped,minute_of_session,Time_Counter
+dropped,range_weak,range_contracting
+dropped,tc_sin__nifty_features_v3,tc_sin
+dropped,trend_duration,bars_since_last_trough
+dropped,vwap__nifty_features_v3,vwap_dist_atr
+dropped,vwap__trend_maturity_raw,vwap_dist_atr
+dropped,williams_r,stoch_k
+dropped,vwap_dist_atr__aditya_raw_faeture_swing_trade,vwap_dist_atr
+dropped,india_vix_zscore_20,implied_vix
+dropped,atr__stress_signal_raw,atr_20
+dropped,atr_pct__aditya_raw_faeture_swing_trade,atr_pct
+dropped,fut_spot_spread__nifty_features_v3,fut_spot_spread
+dropped,intraday_cum_ret__nifty_features_v3,intraday_cum_ret
+dropped,tc_cos__nifty_features_v3,tc_cos
+dropped,clv,close_position
+dropped,vwap_slope_30__nifty_features_v3,vwap_slope_30
+dropped,total_up_gap_area,total_up_gap_area_atr
+dropped,up_unfilled_count,nearest_up_gap_distance_atr
+dropped,vwap,vwap_dist_atr
+dropped - requested outright,PCR_OI,
+dropped - requested outright,PCR_OI_chg1,
+dropped - requested outright,PCR_Volume,
+dropped - requested outright,PCR_Volume_chg1,
+dropped - requested outright,iv_skew,
+dropped - requested outright,pcr_regime,
+dropped - requested outright,vix_ret_1,
+dropped - requested outright,breadth_ratio,
+dropped - requested outright,breadth_mom5,
+dropped - requested outright,banking_ret,
+dropped - requested outright,banking_ret_lag1,
+dropped - requested outright,bank_it_spread,

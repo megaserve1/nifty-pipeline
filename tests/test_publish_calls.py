@@ -264,9 +264,16 @@ def test_auto_trigger_calls_enqueue_all_with_all_three_arguments():
     src = (ROOT / "core" / "auto_trigger.py").read_text()
     assert "from publish_version import enqueue_all" in src, "the import must name a real function"
     assert "enqueue_all(dataset_id, ds.version, C.MODEL_TYPES)" in src, (
-        "enqueue_all takes THREE arguments (dataset_id, version, models). "
+        "enqueue_all takes THREE required arguments (dataset_id, version, models). "
         "the old code passed two and would have raised TypeError on the first fire.")
-    assert len(inspect.signature(pv.enqueue_all).parameters) == 3
+    # a 4th, OPTIONAL param `queue` was added 2026-07-21 (to route the loss-based run to a
+    # separate pool). auto_trigger still passes the 3 required positionally; queue defaults. so
+    # the contract is "3 required, the rest optional", not "exactly 3".
+    sig = inspect.signature(pv.enqueue_all)
+    required = [n for n, prm in sig.parameters.items()
+                if prm.default is inspect.Parameter.empty]
+    assert required == ["dataset_id", "version", "models"], (
+        f"enqueue_all's REQUIRED params must stay (dataset_id, version, models); got {required}")
 
 
 def test_auto_trigger_tells_you_a_flag_that_actually_exists():

@@ -3,10 +3,19 @@
 #  train.py reads `default:`.  hpo.py reads `search:`.  no number lives in python.
 # ============================================================================
 #
-# h2 = the manager's set, 2026-07-20 (file "hyperparameter 20072026").
-#      taken as given. THREE things were changed from the file as delivered, and each one is
-#      marked "CHANGED FROM THE DELIVERED FILE" below with the reason. nothing else was touched.
-hyperparams_version: h2
+# h2 = the manager's set, 2026-07-20 (file "hyperparameter 20072026"). depth-based, regularised.
+#
+# h3 = DELIBERATE MAX-OVERFIT, LOSS-BASED (leaf-wise), 2026-07-21. xgboost + catboost only.
+#      the goal is to overfit as HARD as possible -- a capacity/sanity probe: if the model cannot
+#      drive TRAIN error near zero, the features carry no signal or the pipeline is broken. every
+#      knob below is turned toward memorising the training set. it is NOT a model to deploy.
+#      random_forest is left at its h2 values (it is not part of this run).
+#
+#      TWO of these changes REVERSE earlier decisions -- both are required to overfit, both are
+#      marked "OVERFIT REVERSAL" so you can put them back:
+#        1. early stopping OFF  (you insisted on it on 07-19; but it is an ANTI-overfit brake)
+#        2. no row/feature/scoring randomness (regularisers that fight overfit)
+hyperparams_version: h3
 
 random_forest:
   default:
@@ -45,23 +54,25 @@ random_forest:
 
 xgboost:
   default:
-    n_estimators: 6000
-    # CHANGED FROM THE DELIVERED FILE: early_stopping_rounds was absent; it is restored at 200.
-    #   train.py reads it with params.get("early_stopping_rounds") -- absent means None means NO
-    #   early stopping, silently. with n_estimators 6000 at depth 14 that is all 6000 trees
-    #   built every time, and it contradicts the requirement you set on 2026-07-19 ("i want to
-    #   use params edited by manager so we need early stopping too"). delete this line only if
-    #   you mean to turn early stopping off.
-    early_stopping_rounds: 200
-    max_depth: 14
-    learning_rate: 0.02
-    subsample: 0.6
-    colsample_bytree: 0.6
-    min_child_weight: 15.0
-    reg_lambda: 5.0
-    reg_alpha: 0.2
-    gamma: 0.3
+    # ===== h3 MAX-OVERFIT, LOSS-BASED. the values below are the set YOU handed over 2026-07-21. =====
+    grow_policy: "lossguide"     # LOSS-BASED (leaf-wise).
+    max_leaves: 0                # 0 = UNLIMITED leaves (xgboost) -- no cap on tree width.
+    max_depth: 0                 # 0 = UNLIMITED depth. leaves+depth both uncapped = max capacity.
+    max_bin: 512                 # finer histogram (default 256) -> finer splits -> more overfit.
+    n_estimators: 6000           # (not in your list -- kept)
+    early_stopping_rounds: 0     # OVERFIT REVERSAL: OFF. (not in your list -- off is required to
+                                 #   overfit; early stopping halts on VAL and PREVENTS it.)
+    learning_rate: 0.1           # (not in your list -- kept a fast rate)
+    subsample: 0.8               # your value.
+    colsample_bytree: 0.9        # your value.
+    min_child_weight: 5          # your value.
+    reg_lambda: 3                # your value (some L2).
+    reg_alpha: 0.0               # (not in your list -- 0)
+    gamma: 0                     # your value.
     seed: 42
+    # NOTE: max_leaves 0 + max_depth 0 means trees can grow UNBOUNDED on 513k rows. that is the
+    # most overfit-prone AND the slowest/most memory-hungry setting. if a trial crawls or an agent
+    # OOMs, cap one of them (e.g. max_leaves 4095).
   search:
     # Scale: [Conservative, Balanced/Actual, Extreme]
     max_depth: [3, 7, 10, 14]
@@ -76,17 +87,21 @@ xgboost:
 
 catboost:
   default:
+    # ===== h3 MAX-OVERFIT, LOSS-BASED. (h2 values in trailing comments for a clean revert.) =====
+    grow_policy: "Lossguide"     # LOSS-BASED (leaf-wise). was SymmetricTree = the MOST depth-based
+                                 #   form (oblivious trees). Lossguide is the opposite.
+    max_leaves: 512              # THE capacity knob under Lossguide. big.  (SymmetricTree had none.)
+    max_depth: 12                # a CAP only (leaves rule). NOT 16 -- depth-16 leaf-wise trees are
+                                 #   enormous and crawl. 12 already gives huge capacity.  (was 11)
     n_estimators: 6000
-    # CHANGED FROM THE DELIVERED FILE: same as xgboost -- restored, same reason.
-    early_stopping_rounds: 200
-    max_depth: 11                           # Fixed to match the 2048 leaves comment
-    learning_rate: 0.02
-    l2_leaf_reg: 5.0
-    min_data_in_leaf: 15
-    rsm: 0.6
-    subsample: 0.6
-    bootstrap_type: "MVS"
-    random_strength: 1.0
+    early_stopping_rounds: 0     # OVERFIT REVERSAL: OFF (was 200). same reason as xgboost.
+    learning_rate: 0.1           # fast fit.  (was 0.02)
+    l2_leaf_reg: 1.0             # near-minimum L2 (catboost needs > 0).  (was 5.0)
+    min_data_in_leaf: 1          # leaves down to a single row.  (was 15)
+    rsm: 1.0                     # OVERFIT REVERSAL: all features.  (was 0.6)
+    subsample: 1.0               # OVERFIT REVERSAL: all rows (MVS at 1.0 = no subsampling). (was 0.6)
+    bootstrap_type: "MVS"        # kept -- MVS + subsample 1.0 already means "use everything".
+    random_strength: 0.0         # OVERFIT REVERSAL: no noise when scoring splits.  (was 1.0)
     seed: 42
   search:
     # Scale: [Conservative, Balanced/Actual, Extreme]

@@ -264,36 +264,42 @@ def test_the_forest_gets_a_DEEP_tree_and_the_booster_a_SHALLOW_one():
     from trainer import hyperparams
 
     rf_depth = hyperparams.defaults("random_forest")["max_depth"]
-    xgb_depth = hyperparams.defaults("xgboost")["max_depth"]
+    xgb_def = hyperparams.defaults("xgboost")
+    xgb_policy = str(xgb_def.get("grow_policy", "depthwise"))
 
-    # a forest must be DEEP (0 = unlimited, or a large cap). NEVER a boosting depth of ~6.
+    # THE FOREST INVARIANT IS UNCONDITIONAL. a forest must be DEEP (0 = unlimited, or a large
+    # cap). NEVER a boosting depth of ~6. this is what the original crippled-forest bug violated,
+    # and it holds regardless of what the boosters are doing.
     assert rf_depth == 0 or rf_depth >= 12, (
         f"the FOREST's max_depth default is {rf_depth} -- too shallow. a forest wants deep trees "
         f"(0=unlimited, or >=12). ~6 is a BOOSTING depth and cripples it.")
-    # a booster must be SHALLOWER THAN THE FOREST (deep boosters memorise noise). the upper bound
-    # was 8 when the defaults came from the proposed-hyperparameter PDF. the manager's chosen set
-    # (2026-07-19) puts xgboost and catboost at max_depth 11, so a hard <=8 now fails on numbers
-    # that were picked deliberately. the bound is therefore expressed as the invariant that
-    # actually protects against the original bug -- the booster is shallower than the forest, and
-    # it is a bounded depth, not an unlimited one -- rather than a number that has to be edited
-    # every time somebody re-tunes.
-    #
-    # NOTE 11 IS DEEP FOR A BOOSTER. 2^11 = 2048 leaves per tree, x 6000 trees, on 53% NO_TRADE
-    # data. if train/val separate hard from test, this depth is the first thing to look at.
-    assert 1 <= xgb_depth <= 16, f"xgboost depth {xgb_depth} is not a bounded boosting depth"
-    assert xgb_depth < rf_depth or rf_depth == 0, (
-        f"the booster ({xgb_depth}) must be shallower than the forest ({rf_depth})")
-    # and the crux of the original bug: they must NOT be the same number.
-    assert rf_depth != xgb_depth, "forest and booster must not share one depth (the original bug)"
-
     rf = T.build_model("random_forest", 7, hyperparams.defaults("random_forest"))
     assert rf.max_depth is None or rf.max_depth >= 12, "the forest must build a DEEP tree"
 
-    xgb = T.build_model("xgboost", 7, hyperparams.defaults("xgboost"))
-    # same bound as above, for the same reason -- the manager's set puts the booster at 11.
-    assert 1 <= xgb.max_depth <= 16, "the booster must build a bounded tree"
-    assert xgb.max_depth < (rf.max_depth or 10**6), (
-        "the booster must be shallower than the forest")
+    # THE BOOSTER INVARIANT DEPENDS ON THE GROWTH POLICY (loss-based support added 2026-07-21).
+    if xgb_policy == "lossguide":
+        # LOSS-BASED (leaf-wise): max_depth is NOT the shape control -- max_leaves is. so the
+        # "booster shallower than the forest" test does not apply (the h3 overfit config
+        # deliberately runs unlimited depth). the bug this file guards -- a boosting *depth*
+        # silently crippling a *forest* -- cannot occur through the depth knob here. instead
+        # pin that it is actually built loss-based. max_leaves 0 is LEGAL here: under xgboost
+        # lossguide, 0 means "no leaf cap" -- the deliberate max-overfit setting, not a mistake.
+        ml = int(xgb_def.get("max_leaves", 0) or 0)
+        assert ml >= 0, f"max_leaves must be a non-negative int (0 = unlimited), got {ml}"
+        xgb = T.build_model("xgboost", 7, xgb_def)
+        assert xgb.get_params()["grow_policy"] == "lossguide"
+        assert int(xgb.get_params()["max_leaves"]) == ml
+    else:
+        # DEPTH-BASED: the original guard. the booster must be SHALLOWER THAN THE FOREST (deep
+        # boosters memorise noise), a bounded depth, and NOT the same number as the forest.
+        xgb_depth = xgb_def["max_depth"]
+        assert 1 <= xgb_depth <= 16, f"xgboost depth {xgb_depth} is not a bounded boosting depth"
+        assert xgb_depth < rf_depth or rf_depth == 0, (
+            f"the booster ({xgb_depth}) must be shallower than the forest ({rf_depth})")
+        assert rf_depth != xgb_depth, "forest and booster must not share one depth (original bug)"
+        xgb = T.build_model("xgboost", 7, xgb_def)
+        assert 1 <= xgb.max_depth <= 16, "the booster must build a bounded tree"
+        assert xgb.max_depth < (rf.max_depth or 10**6), "the booster must be shallower than the forest"
 
 
 def test_no_hyperparameter_is_hardcoded_in_python_any_more():

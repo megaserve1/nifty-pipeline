@@ -169,9 +169,34 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
 
     if model_type == "xgboost":
         import xgboost as xgb
+        # GROWTH POLICY -- the depth-vs-loss switch.
+        #   "depthwise" (default): grow level by level, capped by max_depth = DEPTH-BASED.
+        #   "lossguide"          : split whichever leaf cuts loss most, capped by max_leaves
+        #                          = LOSS-BASED (leaf-wise).
+        grow_policy = str(params.get("grow_policy", "depthwise"))
+        # max_depth 0 means "no depth cap". what that SHOULD do depends on the policy:
+        #   lossguide: 0 = correct, "let max_leaves rule" -- pass it through.
+        #   depthwise: 0 = an UNBOUNDED level-wise booster, the exact boosting anti-pattern the
+        #              old `or 6` guarded against. keep the fall-back to 6 there.
+        # None (genuinely unset) -> 6 in both. this is why it is not just `params["max_depth"] or 6`
+        # (that turns lossguide's deliberate 0 into 6 and silently caps the overfit).
+        md = params["max_depth"]
+        if md is None:
+            max_depth = 6
+        elif int(md) == 0:
+            max_depth = 0 if grow_policy == "lossguide" else 6
+        else:
+            max_depth = int(md)
         return xgb.XGBClassifier(
             n_estimators=params["n_estimators"],
-            max_depth=params["max_depth"] or 6,
+            max_depth=max_depth,
+            # max_leaves=0 means "no leaf limit" and is ignored under depthwise, so it is safe in
+            # both modes -- the yaml decides which mode by setting grow_policy.
+            grow_policy=grow_policy,
+            max_leaves=int(params.get("max_leaves", 0) or 0),
+            # max_bin: histogram resolution. more bins = finer split thresholds = MORE capacity
+            # to fit (and more overfit). xgboost default is 256; higher is the overfit direction.
+            max_bin=int(params.get("max_bin", 256)),
             learning_rate=params["learning_rate"],
             subsample=params.get("subsample", 1.0),
             colsample_bytree=params.get("colsample_bytree", 1.0),
@@ -214,6 +239,17 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
             verbose=0,
             allow_writing_files=False,        # do not litter the agent's disk
         )
+        # GROWTH POLICY -- the depth-vs-loss switch for catboost.
+        #   "SymmetricTree" (default): oblivious trees, capped by depth = DEPTH-BASED. this is the
+        #                              MOST depth-based form there is (same split across a level).
+        #   "Lossguide"             : split the highest-loss leaf, capped by max_leaves = LOSS-BASED.
+        #   "Depthwise"             : level by level but non-oblivious.
+        # max_leaves is ONLY legal when the policy is NOT SymmetricTree -- passing it under
+        # SymmetricTree makes catboost refuse to start. so add it only for the leaf-wise modes.
+        gp = str(params.get("grow_policy", "SymmetricTree"))
+        kw["grow_policy"] = gp
+        if gp != "SymmetricTree" and params.get("max_leaves"):
+            kw["max_leaves"] = int(params["max_leaves"])
         # BOOTSTRAP: `subsample` is only valid for a NON-Bayesian bootstrap. the default (Bayesian)
         # uses bagging_temperature and silently IGNORES subsample -- so pass exactly the matching
         # pair, never both. feature-team set bootstrap_type=Bernoulli + subsample=0.7.
@@ -546,7 +582,17 @@ def main():
                   "hyperparams_version": hp_version, "params_sha": hp_sha,
                   "n_features": len(feat_cols), "test_fraction": C.TEST_FRACTION,
                   "val_fraction": C.VAL_FRACTION, "embargo_sessions": C.EMBARGO_SESSIONS})
-    task.add_tags([a.model_type, f"v{a.dataset_version or ds.version}", hp_version])
+    # THE h2 TAG MUST NOT GO ON AN HPO TRIAL. a trial's numbers come from the SEARCH SPACE
+    # (max_depth picked from [3,7,10,14], etc.), not from the h2 fixed set -- but the search never
+    # overrides hyperparams_version, so without this guard every trial reads 'h2' off the yaml and
+    # tags itself h2. a board full of "h2" trials that are not h2 is exactly the kind of thing a
+    # cross-examination catches. same detection as the SHAP guard below: a clone still carrying
+    # "(base)" in its name is a trial (or the base task itself), not a real fixed-number run.
+    # trials are already marked 'optimization' + 'opt:<id>' by clearml, so tag them 'hpo' and drop
+    # the misleading version label.
+    is_hpo_trial = "(base)" in (task.name or "")
+    version_tag = "hpo" if is_hpo_trial else hp_version
+    task.add_tags([a.model_type, f"v{a.dataset_version or ds.version}", version_tag])
 
     # ---- 6. train, score, save ----------------------------------------------
     print(f"[6/6] training {a.model_type} on {len(Xtr):,} rows x {len(feat_cols)} features")
@@ -661,7 +707,23 @@ def main():
     # finished one model early would grab the next queued task -- which might be the SHAP task
     # for a model that is STILL TRAINING. it would find no model artifact and die.
     # queueing it from inside the finished trainer means the model provably exists.
-    queue_shap_for_me(task.id, a.model_type, a.dataset_version or ds.version)
+    #
+    # BUT NOT DURING A HYPERPARAMETER SEARCH. an HPO run trains DOZENS of throwaway trial models,
+    # and each one reaching this line would queue its own SHAP task -- 20 trials -> 20 SHAP tasks,
+    # all piling onto the same queue, explaining models nobody will keep. that is exactly what
+    # flooded the board on 2026-07-21 (3 finished trials -> 3 queued shap_xgboost v4). SHAP is for
+    # the model you PROMOTE, not for every guess along the way.
+    #
+    # how we know it is a trial: the optimizer CLONES the base task ("train_xgboost (base)") and
+    # names the clone "train_xgboost (base): Args/...". a real run is renamed "train_xgboost v5"
+    # by publish_version. so a name still carrying "(base)" is either an HPO trial or the base
+    # registration itself -- neither wants SHAP.
+    is_hpo_trial = "(base)" in (task.name or "")
+    if is_hpo_trial:
+        print("  HPO trial (or base task) -- NOT queuing SHAP. explain the promoted winner, "
+              "not every trial.")
+    else:
+        queue_shap_for_me(task.id, a.model_type, a.dataset_version or ds.version)
 
     task.close()
 

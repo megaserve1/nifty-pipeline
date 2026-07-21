@@ -107,8 +107,13 @@ def semver(version: str) -> str:
     return v if "." in v else f"{v}.0"
 
 
-def enqueue_all(dataset_id: str, version: str, models: list) -> dict:
-    """clone the base tasks and queue them. the models run in PARALLEL, one per agent."""
+def enqueue_all(dataset_id: str, version: str, models: list, queue: str = None) -> dict:
+    """clone the base tasks and queue them. the models run in PARALLEL, one per agent.
+
+    `queue` lets a run target a SEPARATE pool -- e.g. the loss-based xgboost+catboost run goes to
+    'lossbased' where only the new machine listens, leaving 'training' for the depth-based work.
+    defaults to C.TRAIN_QUEUE."""
+    queue = queue or C.TRAIN_QUEUE
     from clearml import Task
 
     ids = {}
@@ -171,25 +176,26 @@ def enqueue_all(dataset_id: str, version: str, models: list) -> dict:
             "Args/hyperparams_version": H.version(),
         })
         run.set_parameters(params)
-        Task.enqueue(run, queue_name=C.TRAIN_QUEUE)
+        Task.enqueue(run, queue_name=queue)
         ids[mtype] = run.id
         print(f"      queued  train_{mtype} v{str(version).lstrip('v')}   ({run.id})")
 
-    print(f"\n  {len(ids)} models are queued on '{C.TRAIN_QUEUE}'.")
+    print(f"\n  {len(ids)} models are queued on '{queue}'.")
     print(f"  THEY ONLY RUN IF A WORKER IS LISTENING:")
-    print(f"      clearml-agent daemon --queue {C.TRAIN_QUEUE}")
+    print(f"      clearml-agent daemon --queue {queue}")
     print(f"  one agent  -> they train ONE AFTER ANOTHER.")
     print(f"  three agents (one per machine) -> they train AT THE SAME TIME.")
     return ids
 
 
-def enqueue_champion(dataset_id: str, version: str, models: list):
+def enqueue_champion(dataset_id: str, version: str, models: list, queue: str = None):
     """pick the best of the three, AFTER they have all finished.
 
     it is queued now but it WAITS -- see trainer/select_champion.py. it polls until all the
     models are done (or gives up after a timeout and says so). without that wait it would run
     the moment an agent was free, find zero finished models, and crown nothing.
     """
+    queue = queue or C.TRAIN_QUEUE
     from clearml import Task
 
     base = Task.get_task(project_name=C.CLEARML_PROJECT, task_name=C.BASE_CHAMPION_NAME)
@@ -207,12 +213,12 @@ def enqueue_champion(dataset_id: str, version: str, models: list):
         # read as 'still running' for ever.
         "Args/expect_models": ",".join(models),
     })
-    Task.enqueue(run, queue_name=C.TRAIN_QUEUE)
+    Task.enqueue(run, queue_name=queue)
     print(f"      queued  select_champion v{str(version).lstrip('v')}   (it WAITS for: {', '.join(models)})")
     return run.id
 
 
-def dry_run(version: str, models: list, do_train: bool = True) -> None:
+def dry_run(version: str, models: list, do_train: bool = True, queue: str = None) -> None:
     """the REHEARSAL. check everything, change nothing.
 
     WHY IT EXISTS
@@ -231,6 +237,7 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
 
     it prints the exact commands it would run, so you can also just read them and decide.
     """
+    queue = queue or C.TRAIN_QUEUE
     recipe = C.VERSIONS_DIR / f"dataset_{version}.yaml"
     ds_dir = C.DATASETS_DIR / version
     parquet = ds_dir / f"dataset_{version}.parquet"
@@ -368,16 +375,16 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
                             f"(same bytes, so the ClearML dataset is still correct)")
 
     # ---- 5. the queue, and whether anyone is listening ------------------------
-    print(f"\n[5/5] would queue on '{C.TRAIN_QUEUE}': {models} + select_champion")
+    print(f"\n[5/5] would queue on '{queue}': {models} + select_champion")
     if not do_train:
         print("      (--no-train: nothing would be queued)")
     else:
         try:
             from clearml.backend_api.session.client import APIClient
             client = APIClient()
-            q = client.queues.get_all(name=C.TRAIN_QUEUE)
+            q = client.queues.get_all(name=queue)
             if not q:
-                problems.append(f"queue '{C.TRAIN_QUEUE}' does not exist in ClearML")
+                problems.append(f"queue '{queue}' does not exist in ClearML")
             else:
                 # ASK THE WORKERS, NOT THE QUEUE. queues.get_all() returns a Queue entity that
                 # does NOT carry a .workers field (the server only fills it on request), so the
@@ -386,21 +393,21 @@ def dry_run(version: str, models: list, do_train: bool = True) -> None:
                 # this script into a warning nobody reads. workers.get_all() is the real answer:
                 # every registered agent, and the queues it polls.
                 agents = [w for w in (client.workers.get_all() or [])
-                          if any(getattr(q, "name", None) == C.TRAIN_QUEUE
+                          if any(getattr(q, "name", None) == queue
                                  for q in (w.queues or []))]
                 if not agents:
                     # THE SILENT ONE. everything succeeds, the dataset publishes, the tasks
                     # queue... and nothing ever runs, with no error anywhere.
                     problems.append(
-                        f"NOBODY IS LISTENING on '{C.TRAIN_QUEUE}'. the tasks would queue and "
+                        f"NOBODY IS LISTENING on '{queue}'. the tasks would queue and "
                         f"then sit there for ever, with no error. start a worker:\n"
-                        f"           clearml-agent daemon --queue {C.TRAIN_QUEUE}")
+                        f"           clearml-agent daemon --queue {queue}")
                 else:
                     # BUSY IS NOT AVAILABLE. an agent already running a task cannot take one of
                     # ours until it finishes -- so count the FREE ones. this is exactly the
                     # "workers get eaten by SHAP and champion while training waits" case.
                     free = [w for w in agents if not getattr(w, "task", None)]
-                    print(f"      {len(agents)} agent(s) on '{C.TRAIN_QUEUE}', "
+                    print(f"      {len(agents)} agent(s) on '{queue}', "
                           f"{len(free)} free, {len(agents) - len(free)} busy")
                     for w in agents:
                         t = getattr(w, "task", None)
@@ -453,7 +460,7 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
     to_run = [m for m in models if re_hpo or H.tuned_sha(m) != parquet_sha256]
     if to_run:
         print(f"\n  !! --tune will run HPO for {to_run}: up to {trials} training jobs EACH, on "
-              f"the '{C.TRAIN_QUEUE}' queue. that is real agent time. (cached models are skipped.)")
+              f"the '{queue}' queue. that is real agent time. (cached models are skipped.)")
     print(f"\n[4b] TUNE: hpo -> promote, per model  (cache key = parquet sha "
           f"{str(parquet_sha256)[:12]}...)")
     for mtype in models:
@@ -484,7 +491,9 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
 
 
 def publish(version: str, models: list, do_train: bool = True,
-            tune: bool = False, re_hpo: bool = False, hpo_trials: int = 15) -> str:
+            tune: bool = False, re_hpo: bool = False, hpo_trials: int = 15,
+            queue: str = None, no_champion: bool = False) -> str:
+    queue = queue or C.TRAIN_QUEUE
     from clearml import Dataset
 
     recipe = C.VERSIONS_DIR / f"dataset_{version}.yaml"
@@ -665,13 +674,16 @@ def publish(version: str, models: list, do_train: bool = True,
         print("[5/5] --no-train: published, nothing queued")
         return ds_id
 
-    print(f"[5/5] queueing {len(models)} models + the champion")
-    enqueue_all(ds_id, version, models)
+    print(f"[5/5] queueing {len(models)} models + the champion on '{queue}'")
+    enqueue_all(ds_id, version, models, queue=queue)
     print()
     # SHAP is NOT queued here. each trainer queues its OWN shap task when it finishes, so the
     # model provably exists by then. queueing them now would let a free agent start explaining
     # a model that is still training.
-    enqueue_champion(ds_id, version, models)
+    if no_champion:
+        print("  --no-champion: NOT queuing select_champion (you asked to skip it).")
+    else:
+        enqueue_champion(ds_id, version, models, queue=queue)
     print(f"\n  each model will queue its own SHAP task when it finishes.")
     return ds_id
 
@@ -693,6 +705,13 @@ def main():
                          "unchanged.")
     ap.add_argument("--hpo-trials", type=int, default=15,
                     help="with --tune: trials per model (default 15).")
+    ap.add_argument("--queue", default=C.TRAIN_QUEUE,
+                    help=f"which agent pool to train on (default '{C.TRAIN_QUEUE}'). use a "
+                         f"separate queue -- e.g. 'lossbased' -- to run on a dedicated machine "
+                         f"without competing with the main queue's work.")
+    ap.add_argument("--no-champion", action="store_true",
+                    help="do not queue select_champion. use when you only want the trained "
+                         "models (e.g. a loss-based overfit probe where a champion is pointless).")
     ap.add_argument("--dry-run", action="store_true",
                     help="rehearse it: check everything, write nothing. do this first.")
     a = ap.parse_args()
@@ -711,10 +730,11 @@ def main():
                          "training, and --no-train cancels the training. drop one.")
 
     if a.dry_run:
-        dry_run(a.version, models, do_train=not a.no_train)
+        dry_run(a.version, models, do_train=not a.no_train, queue=a.queue)
         return
     publish(a.version, models, do_train=not a.no_train,
-            tune=a.tune, re_hpo=a.re_hpo, hpo_trials=a.hpo_trials)
+            tune=a.tune, re_hpo=a.re_hpo, hpo_trials=a.hpo_trials, queue=a.queue,
+            no_champion=a.no_champion)
 
 
 if __name__ == "__main__":
