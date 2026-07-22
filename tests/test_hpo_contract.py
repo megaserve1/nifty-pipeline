@@ -539,3 +539,39 @@ def test_max_iteration_per_job_is_passed_but_is_None():
         kw["max_iteration_per_job"].value is None, (
         "max_iteration_per_job must be None: our objective carries iteration=-2**31, so any "
         "real budget would be compared against a nonsense number.")
+
+
+# =====================================================================================
+# EVERY SEARCH RUNG MUST CAST -- the int-default / fractional-search trap
+# =====================================================================================
+def test_every_search_rung_casts_against_its_default_type():
+    """THE 2026-07-22 CRASH (and the min_child_weight one before it), PINNED FOR ALL MODELS.
+
+    hyperparams.merge() casts every HPO override to the TYPE OF THE DEFAULT. so if a knob's
+    `default:` is an int (gamma: 0) but its `search:` list holds a fraction (0.3), the trial that
+    picks 0.3 dies mid-run with:
+        --gamma='0.3' is not a whole number, and this knob is an integer. refusing to round it.
+    it fails ONLY on the agent, ONLY for the trials that happen to pick a fractional rung -- so
+    half an HPO search silently dies and the optimiser reads the crashes as "bad region".
+
+    the rule: for every model, every value in every `search:` list must survive merge() against
+    its own default. an int default with a fractional rung is the exact violation. this test walks
+    all of them, so the mismatch is caught here -- offline, in seconds -- not four hours into a run.
+    """
+    import yaml
+    from trainer import hyperparams as H
+    doc = yaml.safe_load(H.HP_FILE.read_text())
+    failures = []
+    for model in ("random_forest", "xgboost", "catboost"):
+        for knob, rungs in (doc[model].get("search") or {}).items():
+            if not isinstance(rungs, list):
+                continue                      # {min,max} ranges are handled by search_space()
+            for v in rungs:
+                try:
+                    H.merge(model, {knob: str(v)})
+                except SystemExit as e:
+                    failures.append(f"{model}.{knob} rung {v!r}: {str(e).splitlines()[0]}")
+    assert not failures, (
+        "these search rungs do not cast against their default's type (an int default with a "
+        "fractional rung is the classic cause -- make the default a float):\n  "
+        + "\n  ".join(failures))

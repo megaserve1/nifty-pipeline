@@ -218,7 +218,8 @@ def enqueue_champion(dataset_id: str, version: str, models: list, queue: str = N
     return run.id
 
 
-def dry_run(version: str, models: list, do_train: bool = True, queue: str = None) -> None:
+def dry_run(version: str, models: list, do_train: bool = True, queue: str = None,
+            no_champion: bool = False) -> None:
     """the REHEARSAL. check everything, change nothing.
 
     WHY IT EXISTS
@@ -375,7 +376,10 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
                             f"(same bytes, so the ClearML dataset is still correct)")
 
     # ---- 5. the queue, and whether anyone is listening ------------------------
-    print(f"\n[5/5] would queue on '{queue}': {models} + select_champion")
+    champ = "" if no_champion else " + select_champion"
+    print(f"\n[5/5] would queue on '{queue}': {models}{champ}")
+    if no_champion:
+        print("      (--no-champion: select_champion will NOT be queued)")
     if not do_train:
         print("      (--no-train: nothing would be queued)")
     else:
@@ -413,17 +417,21 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
                         t = getattr(w, "task", None)
                         print(f"        {w.id:<24} "
                               f"{'BUSY  ' + str(getattr(t, 'name', '?')) if t else 'idle'}")
-                    need = len(models) + 1                     # the models + select_champion
+                    need = len(models) + (0 if no_champion else 1)   # models (+champion)
                     if len(free) < len(models):
                         warnings.append(
                             f"{len(free)} free agent(s) but {len(models)} models to train -- they "
                             f"will run in batches, not all at once. ({need} free agents = "
                             f"everything at once.)")
-                    if len(agents) == 1:
+                    if len(agents) == 1 and not no_champion:
                         warnings.append(
                             "only ONE agent. the models train one after another, and "
                             "select_champion must not be picked up before them. it detects that "
                             "and exits rather than deadlock -- but two agents is better.")
+                    elif len(agents) == 1:
+                        warnings.append(
+                            "only ONE agent: xgboost and catboost train ONE AFTER ANOTHER "
+                            "(no champion, so no deadlock risk). two agents would run both at once.")
         except Exception as e:
             warnings.append(f"could not check for listening agents: {e}")
 
@@ -730,7 +738,7 @@ def main():
                          "training, and --no-train cancels the training. drop one.")
 
     if a.dry_run:
-        dry_run(a.version, models, do_train=not a.no_train, queue=a.queue)
+        dry_run(a.version, models, do_train=not a.no_train, queue=a.queue, no_champion=a.no_champion)
         return
     publish(a.version, models, do_train=not a.no_train,
             tune=a.tune, re_hpo=a.re_hpo, hpo_trials=a.hpo_trials, queue=a.queue,

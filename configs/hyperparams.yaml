@@ -65,10 +65,14 @@ xgboost:
     learning_rate: 0.1           # (not in your list -- kept a fast rate)
     subsample: 0.8               # your value.
     colsample_bytree: 0.9        # your value.
-    min_child_weight: 5          # your value.
-    reg_lambda: 3                # your value (some L2).
+    # THESE MUST BE FLOATS (note the .0). merge() casts every HPO override to the TYPE of the
+    # default here; the search spaces contain fractions (gamma 0.3/0.5, reg_lambda 0.1), so an
+    # INTEGER default makes int("0.3") fail and the trial dies ("not a whole number"). that is
+    # exactly what killed the gamma=0.3 trials on 2026-07-22. keep the .0.
+    min_child_weight: 5.0        # your value (5).
+    reg_lambda: 3.0              # your value (3) -- FLOAT so search rung 0.1 casts.
     reg_alpha: 0.0               # (not in your list -- 0)
-    gamma: 0                     # your value.
+    gamma: 0.0                   # your value (0) -- FLOAT so search rungs 0.3/0.5 cast.
     seed: 42
     # NOTE: max_leaves 0 + max_depth 0 means trees can grow UNBOUNDED on 513k rows. that is the
     # most overfit-prone AND the slowest/most memory-hungry setting. if a trial crawls or an agent
