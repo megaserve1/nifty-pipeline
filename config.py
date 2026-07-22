@@ -57,6 +57,10 @@ def base_trainer_name(model_type: str) -> str:
 
 BASE_SHAP_NAME     = "shap_explain (base)"
 BASE_CHAMPION_NAME = "select_champion (base)"
+# CHAMPION IS OFF. select_champion is not run -- it was judged useless (2026-07-22). publish never
+# queues it regardless of flags. flip this to True (and pass --champion) only if you ever want the
+# "pick the best of the trained models" step back.
+RUN_CHAMPION       = False
 
 # ============================================================================
 # STORAGE MODE  -- THE ONE SWITCH. flip this word to move all data storage.

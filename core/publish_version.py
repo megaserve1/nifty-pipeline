@@ -376,10 +376,11 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
                             f"(same bytes, so the ClearML dataset is still correct)")
 
     # ---- 5. the queue, and whether anyone is listening ------------------------
-    champ = "" if no_champion else " + select_champion"
+    champ_off = no_champion or not C.RUN_CHAMPION
+    champ = "" if champ_off else " + select_champion"
     print(f"\n[5/5] would queue on '{queue}': {models}{champ}")
-    if no_champion:
-        print("      (--no-champion: select_champion will NOT be queued)")
+    if champ_off:
+        print("      (champion is off: config.RUN_CHAMPION=False -- select_champion NOT queued)")
     if not do_train:
         print("      (--no-train: nothing would be queued)")
     else:
@@ -417,13 +418,13 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
                         t = getattr(w, "task", None)
                         print(f"        {w.id:<24} "
                               f"{'BUSY  ' + str(getattr(t, 'name', '?')) if t else 'idle'}")
-                    need = len(models) + (0 if no_champion else 1)   # models (+champion)
+                    need = len(models) + (0 if champ_off else 1)      # models (+champion, if on)
                     if len(free) < len(models):
                         warnings.append(
                             f"{len(free)} free agent(s) but {len(models)} models to train -- they "
                             f"will run in batches, not all at once. ({need} free agents = "
                             f"everything at once.)")
-                    if len(agents) == 1 and not no_champion:
+                    if len(agents) == 1 and not champ_off:
                         warnings.append(
                             "only ONE agent. the models train one after another, and "
                             "select_champion must not be picked up before them. it detects that "
@@ -688,8 +689,10 @@ def publish(version: str, models: list, do_train: bool = True,
     # SHAP is NOT queued here. each trainer queues its OWN shap task when it finishes, so the
     # model provably exists by then. queueing them now would let a free agent start explaining
     # a model that is still training.
-    if no_champion:
-        print("  --no-champion: NOT queuing select_champion (you asked to skip it).")
+    # champion is OFF by default (config.RUN_CHAMPION=False) AND can be forced off per-run
+    # (--no-champion). it only runs if BOTH allow it. it was judged useless, so this stays off.
+    if no_champion or not C.RUN_CHAMPION:
+        print("  select_champion NOT queued (champion is off: config.RUN_CHAMPION=False).")
     else:
         enqueue_champion(ds_id, version, models, queue=queue)
     print(f"\n  each model will queue its own SHAP task when it finishes.")
