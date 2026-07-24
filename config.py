@@ -81,12 +81,31 @@ STORAGE_MODE = "gcs"
 # app.clear.ml holds only metadata, so no market data or model bytes ever leave company GCP.
 # In "local" mode it is None: artifacts go to the self-hosted fileserver (see model_output_uri).
 GCS_BUCKET     = "live-nifty-pipeline"          # production bucket for the live run (set 2026-07-16)
-GCS_OUTPUT_URI = f"gs://{GCS_BUCKET}/clearml"
+GCS_OUTPUT_URI = f"gs://{GCS_BUCKET}/clearml"   # LEGACY -- old artifacts already live here; we do not move them
+
+# NEW STRUCTURE (2026-07-24): each kind of output gets its own folder, so the bucket is browsable
+# by type. OLD artifacts stay under clearml/ (kept, not migrated); everything from now writes here.
+#     artifacts/models   trained model bundles
+#     artifacts/shap     SHAP outputs
+#     tables             the scored tables
+#     dvc/               datasets (unchanged -- DVC content-addressed blobs)
+GCS_ARTIFACTS_URI = f"gs://{GCS_BUCKET}/artifacts"
+GCS_TABLES_URI    = f"gs://{GCS_BUCKET}/tables"
 
 
 def model_output_uri():
-    """where trained models are written. None in local mode = the self-hosted fileserver."""
-    return None if STORAGE_MODE == "local" else GCS_OUTPUT_URI
+    """where trained MODELS are written. None in local mode = the self-hosted fileserver."""
+    return None if STORAGE_MODE == "local" else f"{GCS_ARTIFACTS_URI}/models"
+
+
+def shap_output_uri():
+    """where SHAP outputs are written. None in local mode = the self-hosted fileserver."""
+    return None if STORAGE_MODE == "local" else f"{GCS_ARTIFACTS_URI}/shap"
+
+
+def tables_output_uri():
+    """where the scored tables are written. None in local mode = the self-hosted fileserver."""
+    return None if STORAGE_MODE == "local" else GCS_TABLES_URI
 
 
 # ---- DVC (only used in "gcs" mode) --------------------------------------------
@@ -263,6 +282,13 @@ WEIGHT_COL      = "weight"
 WEIGHT_RAW_COL  = "weight_raw"
 LABEL_TS_FORMAT = "%d-%m-%Y %H:%M"      # e.g. 01-01-2020 09:15
 
+# THE ROW ID. assigned at dataset build (build_dataset.py), one per merged row. it is an
+# IDENTIFIER, never a feature -- the trainer builds X from feature_columns (or the '__' fallback),
+# and this name has no '__', so the model can never see it or memorise row position. it exists as
+# a stable JOIN KEY for the scored tables and the next team (an integer is safer to join on than a
+# datetime). timestamp is the merge key; this is stamped on the result. see [[unique-index-in-dataset]].
+INDEX_COL       = "unique_index"
+
 # ---- CLASS WEIGHTS: a fixed weight per class, instead of the labels' per-row `weight` ---------
 #
 # Set to a dict -> every row is weighted by its CLASS (these numbers).
@@ -347,12 +373,16 @@ LEAK_GUARD_ENFORCE = False
 # case-insensitively against the exact column name.)
 CALENDAR_ALWAYS_DROP = ("session", "t5", "date", "datetime", "timestamp", "expiry_date")
 
-# ---- fixed NaN sentinel (project decision, 2026-07-17) ------------------------
-# When set, EVERY numeric NaN is filled with this one value for ALL models (no drop, no 0). The
-# per-column formula above is safer (it can never collide), but a flat -999 is simpler to explain
-# and is out of range for this feature set. Set to None to go back to the per-column sentinel.
-# (Text/categorical NaN still becomes CATEGORICAL_NA_LABEL -- a number can't live in a text column.)
-NA_FIXED_SENTINEL = -999.0
+# ---- fixed NaN sentinel -------------------------------------------------------
+# None (2026-07-24): NaN is KEPT in the dataset, and each model handles it the way it is meant to:
+#   xgboost / catboost  keep the NaN and learn a branch for "missing" NATIVELY (a per-split
+#                       decision -- strictly better than one fixed number).
+#   random forest       gets a PER-COLUMN sentinel at train time (compute_sentinel, fit on the
+#                       TRAIN rows only -- can never collide with a real value; safer than -999).
+# a flat value here (e.g. -999.0) instead fills EVERY numeric NaN for ALL models at BUILD time --
+# simpler to explain, but it takes native NaN handling AWAY from xgboost/catboost (they'd just see
+# -999). so it is off. (Text/categorical NaN always becomes CATEGORICAL_NA_LABEL -- see train.py.)
+NA_FIXED_SENTINEL = None
 
 
 # --- make sure the folders exist ------------------------------------------------

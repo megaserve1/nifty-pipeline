@@ -75,7 +75,7 @@ def main():
     task = Task.init(project_name=C.CLEARML_PROJECT,
                      task_name=C.BASE_SHAP_NAME,
                      task_type=Task.TaskTypes.qc,
-                     output_uri=C.model_output_uri())
+                     output_uri=C.shap_output_uri())   # -> gs://<bucket>/artifacts/shap
     logger = task.get_logger()
 
     if not a.model_task_id:

@@ -318,11 +318,13 @@ def report_metrics(y_true, y_pred, proba, classes, logger, split: str):
                                 target_names=classes, zero_division=0, output_dict=True)
     text = classification_report(y_true, y_pred, labels=range(len(classes)),
                                  target_names=classes, zero_division=0)
-    print(f"\n--- per-class report [{split}] "
-          f"(accuracy is meaningless here, so it is not the headline)")
+    print(f"\n--- per-class report [{split}]")
     print(text)
     if logger:
-        logger.report_text(f"[{split}]\n{text}")
+        # print_console=False: we already print(text) above. without this, clearml's report_text
+        # ALSO echoes the whole table to the console, so every split printed TWICE. this keeps it
+        # in the ClearML web UI (report_text) but not a second time on the terminal.
+        logger.report_text(f"[{split}]\n{text}", print_console=False)
 
     # PR-AUC per class: how well the model ranks a rare class, ignoring the threshold.
     # for a rare class this is far more informative than precision/recall at one cut-off.
@@ -605,6 +607,15 @@ def main():
     else:
         model.fit(Xtr, ytr, sample_weight=wtr)      # the per-row weight, in every library
 
+    # --- TRAINING (in-sample). PRINTED, not logged. this is the OVERFIT CHECK: train scoring far
+    # above val/test means the model memorised rather than learned. skipped on HPO trials -- dozens
+    # of throwaways do not each need a full train-set predict. logger=None so it only PRINTS (and so
+    # series_for, which knows only val/test, is never asked for a 'train' series).
+    if not is_hpo_trial:
+        tr_proba = full_proba(model, model.predict_proba(Xtr), len(classes))
+        tr_pred = tr_proba.argmax(axis=1)
+        report_metrics(ytr, tr_pred, tr_proba, classes, logger=None, split="train")
+
     # --- VALIDATION. this is the number hpo.py optimises. ---------------------
     # WITHOUT THIS BLOCK THE WHOLE SEARCH IS THEATRE. clearml's optimiser does not call a score
     # function of ours -- it lets the trial finish and then READS ONE SCALAR off the task, by
@@ -640,6 +651,16 @@ def main():
 
     if metrics["never_predicted"]:
         print(f"\n      !! this model NEVER predicts: {metrics['never_predicted']}")
+
+    # HPO TRIALS ARE SEARCH ONLY. the val/trading_cost the optimiser reads was already reported
+    # above, so a trial STOPS HERE -- it does not save or upload a model. otherwise every one of
+    # 20-40 throwaway trials would push a ~100 MB bundle into your GCS bucket. only a real run
+    # (and the promoted winner, retrained by publish) writes a model. this is what keeps HPO off
+    # your bucket entirely.
+    if is_hpo_trial:
+        print("  HPO trial -- search only; no model saved or uploaded (keeps GCP + local clean).")
+        task.close()
+        return
 
     # THE BUNDLE. shap_explain.py and select_champion.py both open this, so its shape is a
     # contract. an early trainer once set output_uri but never actually saved a model -- the

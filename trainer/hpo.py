@@ -202,8 +202,9 @@ def main():
     ap.add_argument("--total_minutes", type=float, default=None,
                     help="give up on the whole search after this long")
     ap.add_argument("--keep_top", type=int, default=0,
-                    help="archive every trial outside the top N. 0 = keep them all (default) -- "
-                         "the losers are evidence, and 30 tasks is not clutter")
+                    help="keep only the top N trials and delete the rest at the end. default 0 = "
+                         "KEEP ALL (you delete them yourself, on your own schedule). trials live in "
+                         "the 'hpo' subproject either way, so they never clutter the main project.")
     ap.add_argument("--remote", action="store_true",
                     help="run the CONTROLLER on an agent instead of on this laptop. only do "
                          "this if you have a spare agent -- see the note below")
@@ -253,7 +254,10 @@ def main():
     ]
 
     # ---- 2. the controller ---------------------------------------------------
-    task = Task.init(project_name=C.CLEARML_PROJECT,
+    # the HPO controller AND its trials live in a SEPARATE subproject ("Nifty Production/hpo"),
+    # never the main project. so the search + its graphs + the kept top-N are all off to the side,
+    # and the main project only ever shows real training runs. see spawn_project below.
+    task = Task.init(project_name=f"{C.CLEARML_PROJECT}/hpo",
                      task_name=f"hpo_{a.model_type} v{a.dataset_version or '?'}",
                      task_type=Task.TaskTypes.optimizer,
                      output_uri=C.model_output_uri(),
@@ -278,7 +282,7 @@ def main():
         execution_queue=a.queue,
         max_number_of_concurrent_tasks=a.concurrent,
         optimization_time_limit=a.total_minutes,
-        spawn_project=None,
+        spawn_project=f"{C.CLEARML_PROJECT}/hpo",   # trials go to the SEPARATE subproject, never main
         save_top_k_tasks_only=a.keep_top or None,
         # ---- everything below is **optimizer_kwargs. it is forwarded, unchecked, to the
         # SearchStrategy constructor, whose signature ENDS IN **_: Any -- so a typo here is

@@ -441,6 +441,18 @@ def main():
         df = df[~drop_rows.values].reset_index(drop=True)
         print(f"      dropped {n:,} minutes (a feature with na_policy=drop could not serve them)")
 
+    # ---- the row id --------------------------------------------------------
+    # stamped HERE, after the merge on timestamp and after any drops, so it is a clean 0..n-1 on
+    # the FINAL rows. it is an IDENTIFIER, NOT A FEATURE: it is added to df but never to
+    # feature_columns below (which is list(X.columns) -- features only), and it carries no '__',
+    # so the trainer's feature selection (manifest feature_columns, or the '__' fallback) can never
+    # pick it up. the model never sees it, so it cannot memorise row position -- which is exactly
+    # why leak_guard bans an id COUNTER when it arrives as a FEATURE. as a downstream JOIN KEY it
+    # is safe, and it is what the scored tables and the next team merge on (an integer is safer to
+    # join than a datetime). timestamp is the merge key; this is the id stamped on the result.
+    df.insert(0, C.INDEX_COL, range(len(df)))
+    print(f"      stamped {C.INDEX_COL} (id column, not a feature): 0..{len(df)-1:,}")
+
     feature_columns = list(X.columns)
     categorical_columns = [c for f in per_feature for c in f["categorical"]]
     complete = int(X.notna().all(axis=1).sum())

@@ -96,14 +96,16 @@ def git_sha() -> str:
 def semver(version: str) -> str:
     """our version -> ClearML's version. they are the SAME NUMBER, which is the whole point.
 
-        v2    -> "2.0"      a major: a fresh human selection
-        v2.1  -> "2.1"      a minor: a variation on v2
+        v2         -> "2.0"    a major: a fresh human selection
+        v2.1       -> "2.1"    a minor: a variation on v2
+        v4.2_test  -> "4.2"    a '_test' (or any '_suffix') is a LABEL, not part of the number
 
-    ClearML compares dataset versions NUMERICALLY (PEP440), so a bare 'v3' would not sort
-    against 'v10'. Our scheme is already valid PEP440 -- "2.10" correctly sorts after "2.9" --
-    so there is no translation layer to get wrong.
+    ClearML compares dataset versions NUMERICALLY (PEP440), so a bare 'v3' would not sort against
+    'v10', and a suffix like '_test' is not valid PEP440 at all. So we drop any '_suffix' -- a
+    clearly-labelled test build (v4.2_test) still publishes under a legal numeric version, and the
+    '_test' rides along as a ClearML tag (see Dataset.create) and in the lock/recipe file names.
     """
-    v = version.lstrip("v")
+    v = version.lstrip("v").split("_", 1)[0]     # drop a '_test' / '_<label>' suffix
     return v if "." in v else f"{v}.0"
 
 
@@ -644,6 +646,9 @@ def publish(version: str, models: list, do_train: bool = True,
         print(f"[3/5] ClearML: create v{sv} -> upload -> finalize -> PUBLISH")
         ds = Dataset.create(dataset_project=C.CLEARML_PROJECT,
                             dataset_name=C.CLEARML_DATASET, dataset_version=sv)
+        if "_test" in version:
+            ds.add_tags(["test"])       # a '_test' version -> a visible 'test' tag in ClearML, so
+            print(f"      tagged 'test' -- labelled test dataset (numeric version {sv})")
         if C.STORAGE_MODE == "gcs":
             # a LINK to the bytes DVC already pushed. there is ONE copy of the data, it lives in
             # your bucket, and app.clear.ml only ever holds the pointer and the metadata.

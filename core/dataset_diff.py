@@ -1,16 +1,26 @@
 """
-dataset_diff.py -- compare dataset versions by their frozen recipes
+dataset_diff.py -- compare dataset versions by what they ACTUALLY BUILT
 ===================================================================
-Reads the version yamls (not the giant parquets), so comparing 2 or 20
-versions is instant.
+Reads the manifests (datasets/vN/manifest.json), not the giant parquets, so
+comparing 2 or 20 versions is instant. It does NOT touch DVC or the bucket --
+every file it reads is a tiny local one that is committed to git.
+
+WHY MANIFEST COLUMNS AND NOT THE RECIPE'S `features:` LIST.
+    the recipe names feature SOURCES (one entry, `bucket_bucket_raw_v4`), and one
+    source expands into 300+ COLUMNS at build time. an ablation like v4.1 ("drop 18
+    columns from v4") changes the COLUMNS but not the source list -- so diffing the
+    `features:` list reported "kept: 1, nothing changed" for two datasets that differ
+    by 18 features. it compared what was ASKED at source level, not what was GIVEN.
+    so we diff the manifest's feature_columns -- the columns that were really built.
 
 Run:
-    python dataset_diff.py v1 v2          # pairwise diff
-    python dataset_diff.py v1 v2 v3 v4    # feature matrix across many
+    python dataset_diff.py v1 v2          # pairwise column diff
+    python dataset_diff.py v1 v2 v3 v4    # matrix of the columns that DIFFER
     python dataset_diff.py --all          # matrix of every version
 """
 import argparse
 
+import json
 import yaml
 
 import sys
@@ -43,30 +53,68 @@ def load(v: str) -> dict:
     return yaml.safe_load(p.read_text())
 
 
+def columns_of(v: str, recipe: dict) -> tuple:
+    """the columns this version actually built -- the GIVEN, read from its manifest.
+
+    returns (set_of_names, granularity). granularity is 'columns' when the manifest was
+    found (the real, built columns) and 'sources' when it was not (a version that has been
+    frozen but not built yet -- all we can show then is the recipe's source list). the caller
+    says which one it got, so a column diff and a source diff are never silently mixed.
+    """
+    man = C.DATASETS_DIR / v / "manifest.json"
+    if man.exists():
+        cols = json.loads(man.read_text()).get("feature_columns")
+        if cols:
+            return set(cols), "columns"
+    return set(recipe.get("features", [])), "sources"
+
+
+def _print_names(names: list, cap: int = 60):
+    for n in names[:cap]:
+        print(f"      - {n}")
+    if len(names) > cap:
+        print(f"      ... (+{len(names) - cap} more)")
+
+
 def pairwise(a: str, b: str):
     da, db = load(a), load(b)
-    fa, fb = set(da["features"]), set(db["features"])
-    print(f"diff {a} -> {b}")
-    print(f"  features added   : {sorted(fb - fa) or '-'}")
-    print(f"  features removed : {sorted(fa - fb) or '-'}")
-    print(f"  features kept    : {len(fa & fb)}")
-    for key in ("labels_file", "date_range"):
-        va, vb = da.get(key), db.get(key)
-        print(f"  {key:16s} : {'unchanged' if va == vb else f'{va}  ->  {vb}'}")
+    ca, ka = columns_of(a, da)
+    cb, kb = columns_of(b, db)
+    gran = "columns" if ka == "columns" and kb == "columns" else "sources"
+    print(f"diff {a} -> {b}   (comparing built {gran})")
+    if gran == "sources":
+        print(f"  NOTE: {a if ka!='columns' else b} has no manifest yet, so this compares recipe")
+        print(f"        SOURCES, not the real columns. build the dataset to diff at column level.")
+    added, removed = sorted(cb - ca), sorted(ca - cb)
+    print(f"  {gran} added   : {len(added) or '-'}")
+    _print_names(added)
+    print(f"  {gran} removed : {len(removed) or '-'}")
+    _print_names(removed)
+    print(f"  {gran} kept    : {len(ca & cb)}")
+    if db.get("derived_by"):
+        print(f"  recipe note      : {db['derived_by']}")
+    for key in ("labels_name", "date_range"):        # was 'labels_file' -- a key the recipe never
+        va, vb = da.get(key), db.get(key)             # has, so it read None==None and always said
+        print(f"  {key:16s} : {'unchanged' if va == vb else f'{va}  ->  {vb}'}")   # 'unchanged'
     print(f"  created          : {da.get('created')}  vs  {db.get('created')}")
     print(f"  author           : {da.get('author')}  vs  {db.get('author')}")
 
 
 def matrix(versions: list):
+    """show ONLY the columns that differ across the versions -- the ablation, not all 315 rows."""
     docs = {v: load(v) for v in versions}
-    all_feats = sorted(set().union(*(d["features"] for d in docs.values())))
-    w = max((len(f) for f in all_feats), default=10) + 2
-    print(f"{'FEATURE':{w}s} " + " ".join(f"{v:>4s}" for v in versions))
-    for f in all_feats:
-        row = " ".join(f"{'x' if f in docs[v]['features'] else '-':>4s}" for v in versions)
+    cols = {v: columns_of(v, docs[v])[0] for v in versions}
+    everywhere = set.intersection(*cols.values()) if cols else set()
+    varying = sorted(set().union(*cols.values()) - everywhere)
+    w = max((len(f) for f in varying), default=10) + 2
+    print(f"columns that DIFFER across {', '.join(versions)}  "
+          f"({len(everywhere)} column(s) are in ALL of them, not shown)")
+    print(f"{'COLUMN':{w}s} " + " ".join(f"{v:>7s}" for v in versions))
+    for f in varying:
+        row = " ".join(f"{'x' if f in cols[v] else '-':>7s}" for v in versions)
         print(f"{f:{w}s} {row}")
-    print(f"\n{'total':{w}s} " +
-          " ".join(f"{len(docs[v]['features']):>4d}" for v in versions))
+    print(f"\n{'built total':{w}s} " +
+          " ".join(f"{len(cols[v]):>7d}" for v in versions))
 
 
 def main():
