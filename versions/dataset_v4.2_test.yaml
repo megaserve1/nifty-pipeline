@@ -1,0 +1,14 @@
+# TEST RECIPE -- built ONLY to verify the NaN=None + unique_index build changes (2026-07-24).
+# NOT a real version: it selects the same feature source as v4.1 and is never meant to be published.
+# safe to DELETE after checking:  rm -rf datasets/v4.2_test versions/dataset_v4.2_test.yaml
+name: dataset_v4.2_test
+kind: selection
+parent: null
+created: '2026-07-24T00:00:00'
+author: megaserve
+selected_by: feature:bucket_bucket_raw_v4
+labels_name: labels_1min_A20_Ex_z2_En_zNA_anchor_7class
+date_range: full
+features:
+- bucket_bucket_raw_v4
+feature_clocks: {}
