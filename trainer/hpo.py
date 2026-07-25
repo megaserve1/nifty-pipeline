@@ -239,19 +239,12 @@ def main():
     space = search_space(a.model_type)
     preflight(base, space, a.dataset_id)
 
-    # PIN THE DATA. the base task's Args/dataset_id is "" -- register_base_trainer.py runs
-    # train.py with no dataset, and train.py exits early on purpose. clone that as-is and every
-    # trial would exit early too, report NOTHING, and score None. thirty green tasks, no models.
-    #
-    # a one-value DiscreteParameterRange is how you pin a constant through the HPO: it goes into
-    # the same parameter_override dict as everything else, so every trial gets it.
-    space = space + [
-        DiscreteParameterRange("Args/dataset_id", values=[a.dataset_id]),
-        DiscreteParameterRange("Args/dataset_version", values=[a.dataset_version or ""]),
-        # every trial uses the same seed. we are measuring the SETTINGS, not the luck of the
-        # random state -- if the seed floated, a lucky seed would win and we would ship it.
-        DiscreteParameterRange("Args/seed", values=[42]),
-    ]
+    # PIN THE DATA -- on a CLONE of the base task (created below, after the controller), NOT via the
+    # search space. a one-value range in the search space DID pin it, but ClearML names every trial
+    # after its search-space params -- so the long dataset_id hash got dragged into every trial's
+    # NAME (the confusing "train_catboost (base): Args/dataset_id=6fe2539e..."). pinning it on the
+    # base clone instead keeps trial names to the real searched params only, and every trial still
+    # inherits the same dataset/version/seed. so the search space stays EXACTLY the hyperparameters.
 
     # ---- 2. the controller ---------------------------------------------------
     # the HPO controller AND its trials live in a SEPARATE subproject ("Nifty Production/hpo"),
@@ -272,8 +265,17 @@ def main():
     print(f"      search -- if it were, the test score would be a number we tuned INTO, and we")
     print(f"      would have nothing honest left to report.")
 
+    # the PINNED base: a clone of the trainer base with the data + seed fixed, in the hpo subproject.
+    # the optimiser clones THIS for every trial, so trials inherit dataset_id/version/seed WITHOUT
+    # those entering the search space (and thus never the trial name). the trainer base's own
+    # Args/dataset_id is "" (train.py exits early on empty), so it MUST be set here or trials no-op.
+    pinned = Task.clone(source_task=base, name=f"{base_name} [pinned]", project=task.project)
+    pinned.set_parameters({"Args/dataset_id": a.dataset_id,
+                           "Args/dataset_version": a.dataset_version or "",
+                           "Args/seed": 42})
+
     opt = HyperParameterOptimizer(
-        base_task_id=base.id,
+        base_task_id=pinned.id,
         hyper_parameters=space,
         objective_metric_title=OBJECTIVE_TITLE,      # "Summary"
         objective_metric_series=OBJECTIVE_SERIES,    # "val/trading_cost"

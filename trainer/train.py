@@ -745,6 +745,7 @@ def main():
               "not every trial.")
     else:
         queue_shap_for_me(task.id, a.model_type, a.dataset_version or ds.version)
+        queue_export_for_me(task.id, a.model_type, a.dataset_version or ds.version)
 
     task.close()
 
@@ -765,6 +766,31 @@ def queue_shap_for_me(model_task_id: str, model_type: str, version: str):
     })
     Task.enqueue(run, queue_name=C.SHAP_QUEUE)
     print(f"  queued shap_{model_type} v{version}  (explains THIS model)")
+
+
+def queue_export_for_me(model_task_id: str, model_type: str, version: str):
+    """ask ClearML to run export_scored_tables against THIS model, now that it is saved.
+
+    SAME pattern and SAME reason as queue_shap_for_me: queued from inside the FINISHED trainer, not
+    up front by publish -- so the model provably exists when the export runs, and a still-training
+    model can never get a premature export task. it fetches the model + dataset, scores the whole
+    thing, and writes scored_train/scored_test to gs://<bucket>/tables. skipped on HPO trials via
+    the same is_hpo_trial guard as SHAP (this is only reached on a real, renamed run).
+    """
+    from clearml import Task
+    base = Task.get_task(project_name=C.CLEARML_PROJECT,
+                         task_name=getattr(C, "BASE_EXPORT_NAME", "export_scored_tables (base)"))
+    if base is None:
+        print("  (no export base task registered -- skipping. "
+              "run: python trainer/register_base_trainer.py)")
+        return
+    run = Task.clone(source_task=base, name=f"scored_tables_{model_type} v{version}")
+    run.set_parameters({
+        "Args/model_task_id": model_task_id,
+        "Args/dataset_version": version,
+    })
+    Task.enqueue(run, queue_name=getattr(C, "EXPORT_QUEUE", C.SHAP_QUEUE))
+    print(f"  queued scored_tables_{model_type} v{version}  (scores THIS model)")
 
 
 if __name__ == "__main__":

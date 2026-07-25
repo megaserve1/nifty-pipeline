@@ -50,12 +50,14 @@ CLEARML_PROJECT   = "Nifty Production"
 CLEARML_DATASET   = "nifty_signal_dataset"
 TRAIN_QUEUE       = "training"          # a clearml-agent must listen here, or nothing runs
 SHAP_QUEUE        = "training"          # SHAP runs on the same queue by default
+EXPORT_QUEUE      = "training"          # scored-tables export runs on the same queue by default
 
 def base_trainer_name(model_type: str) -> str:
     """The name of the base task publish_version.py clones for each model."""
     return f"train_{model_type} (base)"
 
 BASE_SHAP_NAME     = "shap_explain (base)"
+BASE_EXPORT_NAME   = "export_scored_tables (base)"
 BASE_CHAMPION_NAME = "select_champion (base)"
 # CHAMPION IS OFF. select_champion is not run -- it was judged useless (2026-07-22). publish never
 # queues it regardless of flags. flip this to True (and pass --champion) only if you ever want the
@@ -275,6 +277,34 @@ def _find_labels() -> Path:
 def labels_csv() -> Path:
     """the labels file on THIS machine -- resolved when asked for, never at import."""
     return _find_labels()
+
+
+def labels_csv_for(labels_name):
+    """resolve the labels file for a version's CHOSEN label set (recipe['labels_name']).
+
+    THIS is how multiple label sets work. A version records which label it picked -- 'L1', 'L2',
+    'L3', ... -- and the build resolves + hashes EXACTLY that file, so labels_name and
+    labels_sha256 in the certificate always describe the SAME file (that was the old bug: the name
+    came from the recipe, the sha from the single configured file, and they could disagree).
+
+    Looks for data/labels/<labels_name>.csv (a $NIFTY_LABELS override still wins). Returns the Path,
+    or None if nothing matches -- the caller then falls back to the single LABELS_FILE, which keeps
+    pre-multi-label recipes building exactly as before.
+    """
+    import os
+    if not labels_name:
+        return None
+    name = str(labels_name)
+    env = os.environ.get("NIFTY_LABELS")
+    if env and Path(env).expanduser().exists():
+        return Path(env).expanduser()
+    # a bare handle (L1) -> L1.csv or L1.parquet; an explicit name (L1.parquet) is tried as-is.
+    names = [name] if name.endswith((".csv", ".parquet")) else [f"{name}.csv", f"{name}.parquet"]
+    for base in (LABELS_DIR, Path.home() / "Downloads"):
+        for n in names:
+            if (base / n).exists():
+                return base / n
+    return None
 
 LABEL_TS_COL    = "timestamp"
 LABEL_COL       = "primary_label"

@@ -116,6 +116,11 @@ def load_version(v: str) -> dict:
     return yaml.safe_load(p.read_text())
 
 
+# the LABEL SET the current CLI run picked (--labels L3). freeze() reads it, set once in main().
+# a version's label is part of its identity: same features + a different label = a different version.
+_CHOSEN_LABELS = None
+
+
 def freeze(features: list, source: str, parent: str | None = None) -> str:
     """write the frozen recipe. THE ONE EXIT -- every mode ends here, so no route can skip the
     checks. a MAJOR if it came from a ballot; a MINOR if it was derived from a parent."""
@@ -145,7 +150,7 @@ def freeze(features: list, source: str, parent: str | None = None) -> str:
         "created":     dt.datetime.now().isoformat(timespec="seconds"),
         "author":      getpass.getuser(),
         "selected_by": source,
-        "labels_name": C.labels_name(),        # derived from the FILE, so it cannot go stale
+        "labels_name": _CHOSEN_LABELS or C.labels_name(),   # the CHOSEN label set (--labels L3) or default
         "date_range":  "full",
         "features":    sorted(features),
         # ONLY the clocks a HUMAN actually declared. Not the machine's summary.
@@ -419,7 +424,16 @@ def main():
                     metavar="FILE",
                     help="run a plan file: many variations at once (an ablation sweep)")
     ap.add_argument("--list", action="store_true", help="show the version tree")
+    ap.add_argument("--labels", default="", metavar="L3",
+                    help="which LABEL SET this version uses (e.g. L1, L2, L3) -> data/labels/<name>.csv. "
+                         "same features + a different label = a DIFFERENT version. default: the "
+                         "configured labels file.")
     a = ap.parse_args()
+
+    # the chosen label rides into every freeze() below via the module-level _CHOSEN_LABELS.
+    if a.labels:
+        global _CHOSEN_LABELS
+        _CHOSEN_LABELS = a.labels
 
     split = lambda s: [x.strip() for x in s.split(",") if x.strip()]
     if a.new:

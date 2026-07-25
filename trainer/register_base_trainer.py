@@ -83,6 +83,7 @@ def main():
                        ["--model_type", mtype], a.force)
 
     ok &= register(HERE / "shap_explain.py", C.BASE_SHAP_NAME, [], a.force)
+    ok &= register(HERE / "export_scored_tables.py", C.BASE_EXPORT_NAME, [], a.force)
     ok &= register(HERE / "select_champion.py", C.BASE_CHAMPION_NAME, [], a.force)
 
     print()

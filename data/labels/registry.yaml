@@ -1,0 +1,30 @@
+# data/labels/registry.yaml -- THE LABEL MENU.
+#
+# a person (technical or not) picks a label by its HANDLE (L1, L2, L3, ...) and its explanation --
+# never the file name. a dataset version records the handle in its recipe (labels_name: L3), and
+# build_dataset resolves data/labels/<handle>.{csv,parquet} and hashes it. the sha256 below is the
+# REAL identity: it catches the exact file even if someone swaps one later.
+#
+# to add a label: drop data/labels/L<n>.csv (or .parquet), add an entry here, dvc add + git commit.
+#
+# NOTE: the `note:` fields are DRAFTED from each file name (A20 = 20-bar forward window, Ex_z2 =
+# exit threshold z=2, En_zNA = entry z none, anchor = anchored, 7class = 7 classes). CONFIRM /
+# rewrite them in your own words -- this is what a non-technical picker reads.
+
+L1:
+  file: L1.csv
+  source: labels_1min_2026-07-17_1139_A20_Ex_z2_En_zNA_anchor_7class.csv
+  note: "20-bar forward window, exit threshold z=2, entry z=none, ANCHORED, 7 classes. (current default)"
+  sha256: "0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce"
+
+L2:
+  file: L2.csv
+  source: labels_1min_2026-07-18_1642_A20_Ex_z2_En_zNA_7class.csv
+  note: "20-bar forward window, exit threshold z=2, entry z=none, NOT anchored, 7 classes."
+  sha256: "19e12473c26722399af3307a9ffc2790f9e3a1b69904fe29d5ea6cfb2de54c33"
+
+L3:
+  file: L3.parquet
+  source: labels_1min_2026-07-24_1539_A20_Ex_z2_En_zNA.parquet
+  note: "20-bar forward window, exit threshold z=2, entry z=none. CONFIRM the class scheme (name has no _7class)."
+  sha256: "828720b2f374e71684d3f38a825b09df6bee5792a550a2160e5e407f5eb4ecee"

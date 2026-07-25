@@ -75,3 +75,4 @@ catboost_info/
 
 # the labels arrive as .csv OR .zip -- both are DATA, both belong in DVC, never in git
 /data/labels/*.zip
+scripts/model_view/

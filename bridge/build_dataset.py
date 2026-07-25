@@ -59,10 +59,15 @@ def load_registry() -> dict:
     return yaml.safe_load(C.REGISTRY.read_text()) or {}
 
 
-def load_labels() -> pd.DataFrame:
-    """the spine. one row per minute. every feature gets bent to fit THIS."""
-    labels_path = C.labels_csv()       # resolved HERE, the one place that needs it
-    lab = pd.read_csv(labels_path, low_memory=False)
+def load_labels(labels_path) -> pd.DataFrame:
+    """the spine. one row per minute. every feature gets bent to fit THIS.
+
+    labels_path is resolved by the caller from the version's chosen label set
+    (recipe['labels_name'] -> data/labels/<name>.csv), so different versions can use different
+    label sets -- L1, L2, L3 -- and the same features + a different label set is a different
+    version. labels may be delivered as CSV or parquet; we read whichever it is."""
+    lab = (pd.read_parquet(labels_path) if str(labels_path).endswith(".parquet")
+           else pd.read_csv(labels_path, low_memory=False))
     raw_ts = lab[C.LABEL_TS_COL]
     ts = pd.to_datetime(raw_ts, format=C.LABEL_TS_FORMAT, errors="coerce")
     # THE FIXED FORMAT IS FOR ONE LABELLING RUN, AND A NEW LABELS FILE CAN USE A DIFFERENT ONE.
@@ -199,8 +204,14 @@ def main():
     print(f"building {recipe['name']}  ({len(feats)} features)")
 
     # ---- 1. the spine -------------------------------------------------------
-    print(f"[1/5] labels  <- {C.labels_csv().name}")
-    lab = load_labels()
+    # the version PICKS its label set: recipe['labels_name'] -> data/labels/<name>.csv. this is what
+    # makes "same features, different labels = a different version" real (a different labels file ->
+    # a different labels_sha256 -> a different parquet_sha256 -> a genuinely distinct version). a
+    # recipe whose labels_name does not map to a file (pre-multi-label) falls back to LABELS_FILE.
+    labels_name = recipe.get("labels_name")
+    labels_path = C.labels_csv_for(labels_name) or C.labels_csv()
+    print(f"[1/5] labels  <- {labels_path.name}   (label set: {labels_name or 'default'})")
+    lab = load_labels(labels_path)
     label_ts = lab[C.LABEL_TS_COL]
     print(f"      {len(lab):,} minutes  ({label_ts.min()} -> {label_ts.max()})")
 
@@ -561,7 +572,7 @@ def main():
         weight_cols=[c for c in (C.WEIGHT_COL, C.WEIGHT_RAW_COL) if c in df.columns],
         per_feature=per_feature,
         labels_name=recipe.get("labels_name", C.labels_name()),
-        labels_sha256=hashes.sha256_file(C.labels_csv()),
+        labels_sha256=hashes.sha256_file(labels_path),   # the file ACTUALLY used -- name + sha agree
         class_distribution={str(k): int(v) for k, v in dist.items()},
         zero_weight_classes=zero_w,
         no_peek={"applied": True, "rule": "bar_close",
