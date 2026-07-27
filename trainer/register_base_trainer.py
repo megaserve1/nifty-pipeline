@@ -9,10 +9,10 @@ WHY IT EXISTS
     arguments, its environment -- and then it exits. that recording IS the base task.
 
 it creates FIVE base tasks:
-    train_random_forest (base)
     train_xgboost (base)
     train_catboost (base)
     shap_explain (base)
+    export_scored_tables (base)
     select_champion (base)
 
 without them, publish_version.py stops with a clear message instead of quietly publishing a

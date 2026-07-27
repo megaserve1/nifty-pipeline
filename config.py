@@ -44,7 +44,7 @@ def labels_name() -> str:
     return re.sub(r"^(labels_1min_)\d{4}-\d{2}-\d{2}_\d{4}_", r"\1", stem)
 
 # ---- the three models ---------------------------------------------------------
-MODEL_TYPES = ["random_forest", "xgboost", "catboost"]
+MODEL_TYPES = ["xgboost", "catboost"]   # random_forest turned OFF -- xgboost + catboost only
 
 # ---- ClearML ------------------------------------------------------------------
 # project name. defaults to production; set NIFTY_PROJECT to point a whole run at a throwaway test

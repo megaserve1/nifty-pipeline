@@ -103,7 +103,7 @@ def scores(y_true, y_pred, proba, classes) -> dict:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True, metavar="vN")
-    ap.add_argument("--models", nargs="+", default=["xgboost", "random_forest"],
+    ap.add_argument("--models", nargs="+", default=list(C.MODEL_TYPES),
                     choices=C.MODEL_TYPES)
     ap.add_argument("--rows", type=int, default=0, help="use only the most recent N minutes")
     ap.add_argument("--n_estimators", type=int, default=200)

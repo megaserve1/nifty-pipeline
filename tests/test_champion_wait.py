@@ -53,7 +53,8 @@ def script(*frames):
     return probe
 
 
-ALL = C.MODEL_TYPES          # ["random_forest", "xgboost", "catboost"]
+ALL = ["random_forest", "xgboost", "catboost"]   # a fixed trio -- these tests exercise the generic
+                                                 # wait-for-N logic; it is NOT tied to the active models
 
 
 # ---------------------------------------------------------------- the happy path

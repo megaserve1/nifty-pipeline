@@ -8,7 +8,7 @@ it does five things, in one script, and each step checks the one before it:
     3. PUBLISH    ClearML registers the dataset (as a POINTER to those bytes) and publishes it
     4. LOCK       write down exactly what was published, so "what did model X train on?" has
                   an answer for ever
-    5. ENQUEUE    launch random_forest + xgboost + catboost -- they train IN PARALLEL, then
+    5. ENQUEUE    launch xgboost + catboost -- they train IN PARALLEL, then
                   SHAP explains each one, then a champion is picked
 
 WHY THIS SCRIPT *IS* THE HOOK

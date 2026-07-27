@@ -60,7 +60,7 @@ def load_severity() -> tuple[dict, float]:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model_task_id", default="", help="the training task whose model we explain")
-    ap.add_argument("--model_type", default="", help="random_forest | xgboost | catboost")
+    ap.add_argument("--model_type", default="", help="xgboost | catboost")
     ap.add_argument("--dataset_version", default="")
     ap.add_argument("--n_samples", type=int, default=300,
                     help="rows to explain per class of the worst pair. SHAP is slow.")
