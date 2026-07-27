@@ -443,6 +443,30 @@ def main():
     # ---- 3. glue side by side ----------------------------------------------
     print("[3/5] assembling")
     X = pd.concat(pieces, axis=1)
+
+    # COLUMN SELECTION (recipe 'columns'): keep only the ticked columns. THIS is what lets the UI
+    # (or a recipe) pick individual features, not just whole sources. absent -> keep every column
+    # the selected features produce (the old behaviour). names are the built 'source__column' form.
+    if recipe.get("dropped_columns") and not recipe.get("columns"):
+        print("      note: this recipe has a LEGACY 'dropped_columns' field. this builder never "
+              "applied it -- it is IGNORED. the dataset will contain the WHOLE source (same as its "
+              "parent). to really drop columns, use a positive 'columns' list (the selection UI "
+              "writes one).")
+    wanted = recipe.get("columns")
+    if wanted:
+        before_n = X.shape[1]
+        keep = [c for c in X.columns if c in set(wanted)]
+        if not keep:
+            raise SystemExit("recipe 'columns' matched NONE of the built columns -- check the names "
+                             "(built columns look like 'bucket_bucket_raw_v4__bar_range'). "
+                             f"first wanted: {list(wanted)[:3]}")
+        missing = [c for c in wanted if c not in X.columns]
+        if missing:
+            print(f"      !! {len(missing)} selected column(s) are not produced by the features -- "
+                  f"ignored (e.g. {missing[:3]})")
+        X = X[keep]
+        print(f"      column selection: kept {len(keep)} of {before_n} built columns")
+
     keep_label = [c for c in (C.LABEL_TS_COL, C.LABEL_COL, C.WEIGHT_COL, C.WEIGHT_RAW_COL)
                   if c in lab.columns]
     df = pd.concat([lab[keep_label].reset_index(drop=True), X], axis=1)

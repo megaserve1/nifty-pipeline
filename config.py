@@ -10,6 +10,7 @@ Per-feature settings never live here. Each feature declares its own clock and Na
 registry.yaml, because only the people who WROTE the feature know what its NaN means.
 This file does not grow when you go from 14 features to 400.
 """
+import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -46,7 +47,9 @@ def labels_name() -> str:
 MODEL_TYPES = ["random_forest", "xgboost", "catboost"]
 
 # ---- ClearML ------------------------------------------------------------------
-CLEARML_PROJECT   = "Nifty Production"
+# project name. defaults to production; set NIFTY_PROJECT to point a whole run at a throwaway test
+# project (register/build/publish/train all follow it). unset it to go back -- no code change.
+CLEARML_PROJECT   = os.environ.get("NIFTY_PROJECT", "Nifty Production")
 CLEARML_DATASET   = "nifty_signal_dataset"
 TRAIN_QUEUE       = "training"          # a clearml-agent must listen here, or nothing runs
 SHAP_QUEUE        = "training"          # SHAP runs on the same queue by default

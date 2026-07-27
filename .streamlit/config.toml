@@ -1,0 +1,7 @@
+# streamlit theme for the selection UI. only affects how the local page looks -- nothing else.
+# read automatically when you run streamlit from inside final_pipeline/.
+[theme]
+primaryColor = "#4f46e5"        # indigo -- matches the CSS accent so checkboxes/radios match
+
+[browser]
+gatherUsageStats = false        # do not phone home
