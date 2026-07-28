@@ -785,10 +785,19 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
               "run: python trainer/register_base_trainer.py)")
         return
     run = Task.clone(source_task=base, name=f"scored_tables_{model_type} v{version}")
-    run.set_parameters({
+    params = {
         "Args/model_task_id": model_task_id,
         "Args/dataset_version": version,
-    })
+    }
+    # if BOTH the backtest script and the price dataset are configured, the export also runs the
+    # backtest on the TEST table and prints its report into that task's console. blank -> tables only.
+    bt = getattr(C, "BACKTEST_SCRIPT", "")
+    px = getattr(C, "PRICE_DATASET_ID", "")
+    if bt and px:
+        params["Args/backtest"] = bt
+        params["Args/price_dataset_id"] = px
+        print(f"  backtest wired: {bt}  (prices {px})")
+    run.set_parameters(params)
     Task.enqueue(run, queue_name=getattr(C, "EXPORT_QUEUE", C.SHAP_QUEUE))
     print(f"  queued scored_tables_{model_type} v{version}  (scores THIS model)")
 

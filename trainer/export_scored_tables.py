@@ -37,6 +37,7 @@ run (local, on v4.1 -- you run it):
         --data datasets/v4.1/dataset_v4.1.parquet
 """
 import argparse
+import datetime
 import sys
 import pathlib
 
@@ -51,7 +52,46 @@ from trainer.train import load_model_bundle, full_proba, find_dataset_parquet  #
 from trainer.objective import three_way_split          # noqa: E402  (the SAME split as training)
 
 
-def score_dataset(df: pd.DataFrame, bundle: dict) -> tuple:
+def preflight(parquet_path, bundle: dict) -> None:
+    """check an OOS parquet against the model BEFORE scoring. reads the file FOOTER only -- no rows,
+    so it costs nothing and fails in a second instead of after an hour.
+
+    it catches the two mismatches that would otherwise produce a perfect-looking, meaningless table:
+      1. a feature the model needs is missing        -> prepare() would raise anyway, but late
+      2. THE SILENT ONE: a column that was TEXT in training arrives as numbers (or the reverse).
+         na_policy.encode_categoricals only maps object/str columns, so a flipped column skips the
+         saved cat_map entirely and raw numbers go into the model. no error, wrong predictions.
+    """
+    import pyarrow.parquet as pq
+    have = {f.name: str(f.type) for f in pq.ParquetFile(str(parquet_path)).schema_arrow}
+    feats = list(bundle.get("features") or [])
+
+    missing = [c for c in feats if c not in have]
+    if missing:
+        raise SystemExit(
+            f"OOS set is missing {len(missing)} feature column(s) this model needs -- refusing to "
+            f"score. first few: {missing[:10]}\n"
+            f"(the OOS file must carry the SAME feature columns the model trained on.)")
+
+    TEXTY = ("string", "large_string", "binary", "large_binary", "bool")
+    cats = set(bundle.get("categorical") or [])
+    flips = []
+    for c in feats:
+        is_text_now = str(have[c]).startswith(TEXTY)
+        if (c in cats) != is_text_now:
+            flips.append(f"{c} (training={'text' if c in cats else 'numeric'}, oos={have[c]})")
+    if flips:
+        raise SystemExit(
+            f"dtype flip vs training on {len(flips)} column(s) -- refusing to score, because the "
+            f"saved category mapping would NOT be applied and the predictions would be silently "
+            f"wrong. first few: {flips[:10]}")
+
+    extra = [c for c in have if c not in feats]
+    print(f"      preflight OK: {len(feats)} feature columns match "
+          f"({len(extra)} extra column(s) in the file, ignored)")
+
+
+def score_dataset(df: pd.DataFrame, bundle: dict, oos: bool = False, meta: dict = None) -> tuple:
     """score the WHOLE dataframe with the bundle's model. returns (table, split_counts).
 
     the table has one row per input row: id, timestamp, the true and predicted label, and one
@@ -64,29 +104,49 @@ def score_dataset(df: pd.DataFrame, bundle: dict) -> tuple:
     le = bundle["label_encoder"]
     classes = list(le.classes_)
 
-    # ---- rebuild the split the model actually trained with, FROM THE BUNDLE ----
     ts = pd.to_datetime(df[C.LABEL_TS_COL])
-    sp = bundle.get("split") or {}
-    val_frac = float(sp.get("val_fraction", C.VAL_FRACTION))
-    test_frac = float(sp.get("test_fraction", C.TEST_FRACTION))
-    embargo = int(sp.get("embargo_sessions", C.EMBARGO_SESSIONS))
-    if not sp:
-        print("      !! old bundle: no recorded split. rebuilding from CURRENT config -- if config "
-              "changed since training, the train/test labels below are for the WRONG rows.")
-    tr, va, te, info = three_way_split(ts, val_frac, test_frac, embargo)
-    split = np.full(len(df), "embargo", dtype=object)  # anything in neither slice is embargoed
-    split[tr.to_numpy()] = "train"
-    split[va.to_numpy()] = "val"
-    split[te.to_numpy()] = "test"
-    print(f"      split from bundle: val_frac={val_frac} test_frac={test_frac} "
-          f"embargo={embargo} sessions   (test starts {info['test_start']})")
+    if oos:
+        # OOS ROWS THE MODEL HAS NEVER SEEN -> the split is the CONSTANT "oos". never rebuild the
+        # training split here: the bundle's fractions would carve a meaningless "train" slice out
+        # of unseen data and the backtest would believe it.
+        split = np.full(len(df), "oos", dtype=object)
+        print("      split: oos (constant -- these rows were never part of training)")
+    else:
+        # ---- rebuild the split the model actually trained with, FROM THE BUNDLE ----
+        sp = bundle.get("split") or {}
+        val_frac = float(sp.get("val_fraction", C.VAL_FRACTION))
+        test_frac = float(sp.get("test_fraction", C.TEST_FRACTION))
+        embargo = int(sp.get("embargo_sessions", C.EMBARGO_SESSIONS))
+        if not sp:
+            print("      !! old bundle: no recorded split. rebuilding from CURRENT config -- if config "
+                  "changed since training, the train/test labels below are for the WRONG rows.")
+        tr, va, te, info = three_way_split(ts, val_frac, test_frac, embargo)
+        split = np.full(len(df), "embargo", dtype=object)  # anything in neither slice is embargoed
+        split[tr.to_numpy()] = "train"
+        split[va.to_numpy()] = "val"
+        split[te.to_numpy()] = "test"
+        print(f"      split from bundle: val_frac={val_frac} test_frac={test_frac} "
+              f"embargo={embargo} sessions   (test starts {info['test_start']})")
 
     # ---- score every row in one pass ----
     X = prepare(df, bundle)                            # exact columns, encoding, sentinels
     proba = full_proba(model, model.predict_proba(X), len(classes))   # (n_rows, n_classes)
     pred_idx = proba.argmax(axis=1)
-    true = df[C.LABEL_COL].astype(str).str.strip().to_numpy()   # labels carry trailing spaces
     pred = le.inverse_transform(pred_idx)
+
+    # A REAL OOS SET USUALLY HAS NO LABELS YET -- the future has not happened. so the label column
+    # is OPTIONAL: without it true_label and correct come back null and the backtest works off
+    # predicted_label + the probabilities. (this used to be a bare KeyError, raised AFTER the whole
+    # dataset had already been scored.)
+    has_label = C.LABEL_COL in df.columns
+    if has_label:
+        true = df[C.LABEL_COL].astype(str).str.strip().to_numpy()   # labels carry trailing spaces
+        true_col = pd.array(true, dtype="string")
+        correct_col = pd.array(np.where(pred == true, "YES", "no"), dtype="string")
+    else:
+        true_col = pd.array([None] * len(df), dtype="string")       # nullable STRING, not object:
+        correct_col = pd.array([None] * len(df), dtype="string")    # object-None -> arrow 'null'
+        print("      no label column -> true_label / correct are null (scoring does not need them)")
 
     # THE UNIQUE INDEX BELONGS TO THE DATASET, NOT TO US.
     # it is assigned at dataset-creation time (the merge step) and travels as a column in the
@@ -104,12 +164,25 @@ def score_dataset(df: pd.DataFrame, bundle: dict) -> tuple:
         "unique_index": uid,
         "timestamp": ts.values,
         "split": split,
-        "true_label": true,
+        "true_label": true_col,
         "predicted_label": pred,
-        "correct": np.where(pred == true, "YES", "no"),
+        "correct": correct_col,
     })
     for i, cls in enumerate(classes):                  # one probability column per class
         tbl[f"proba_{cls}"] = proba[:, i]
+
+    # ---- traceability: WHICH MODEL produced this table, and on WHICH rows ----------------------
+    # constant per file, so parquet dictionary-encodes them for almost nothing. without these you
+    # cannot tell two tables apart once they are concatenated, and "one table per model" is a
+    # filename convention instead of a fact in the data. emitted in BOTH modes -> ONE contract.
+    m = meta or {}
+    tbl["model_task_id"] = str(m.get("model_task_id", ""))
+    tbl["model_type"] = str(bundle.get("model_type", ""))
+    tbl["train_dataset_id"] = str(bundle.get("dataset_id", ""))
+    tbl["train_dataset_version"] = str(bundle.get("dataset_version", ""))
+    tbl["scored_dataset_id"] = str(m.get("scored_dataset_id", bundle.get("dataset_id", "")))
+    tbl["scored_dataset_version"] = str(m.get("scored_dataset_version", ""))
+    tbl["scored_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
 
     counts = tbl["split"].value_counts().to_dict()
     return tbl, counts
@@ -135,13 +208,107 @@ def write_and_report(train_tbl, test_tbl, version, out_dir, task=None):
         p = out_dir / f"scored_{name}_v{version}.parquet"
         t.to_parquet(p, index=False)
         paths[name] = p
-        acc = (t["correct"] == "YES").mean() if len(t) else float("nan")
-        print(f"      wrote {p.name}  ({len(t):,} rows, raw-accuracy {acc:.4f})")
+        if len(t) and t["correct"].notna().any():
+            acc = (t["correct"] == "YES").mean()
+            print(f"      wrote {p.name}  ({len(t):,} rows, raw-accuracy {acc:.4f})")
+        else:
+            print(f"      wrote {p.name}  ({len(t):,} rows, unlabelled -- no accuracy)")
         if task is not None:
             # upload the FILE (not the DataFrame) so a 500k-row table goes straight to the bucket
             # as one parquet blob, exactly like the model artifact does.
             task.upload_artifact(f"scored_{name}_v{version}", str(p))
     return paths
+
+
+def write_oos(tbl, tag, model_type, version, out_dir, task=None):
+    """ONE table for an OOS run (there is no train/test to cut -- every row is 'oos')."""
+    out_dir = pathlib.Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
+    name = f"scored_oos_{tag or 'set'}_{model_type or 'model'}_v{version}"
+    p = out_dir / f"{name}.parquet"
+    tbl.to_parquet(p, index=False)
+    if len(tbl) and tbl["correct"].notna().any():
+        print(f"      wrote {p.name}  ({len(tbl):,} rows, raw-accuracy "
+              f"{(tbl['correct'] == 'YES').mean():.4f})")
+    else:
+        print(f"      wrote {p.name}  ({len(tbl):,} rows, unlabelled -- no accuracy)")
+    if task is not None:
+        task.upload_artifact(name, str(p))       # the FILE, straight to the bucket
+    return p
+
+
+def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int:
+    """run the backtest script on the table we just wrote, and PRINT everything it says.
+
+    THE CALLING CONVENTION IS THEIRS, not ours (backtest_single.py, main()):
+        python <script>  <signal_file>  <price_parquet>  <output_dir>
+    three POSITIONAL arguments -- no flags.
+
+    IT CANNOT READ PARQUET FOR THE SIGNAL. load_signal() only special-cases .xlsx/.xls and sends
+    everything else to pd.read_csv, so we hand it a CSV. it needs exactly two of our columns:
+      timestamp        (first hit in its TIME_COLS)
+      predicted_label  (first hit in its SIG_COLS)
+    our 7 class names are already what it validates against, and it upper-cases/strips anyway.
+
+    printing is the whole trick: ClearML captures a task's stdout, so their report lands in this
+    task's CONSOLE tab with no extra wiring. we never parse it -- we just show it.
+    """
+    import subprocess
+    script_path = pathlib.Path(script)
+    if not script_path.is_absolute():
+        script_path = C.ROOT / script
+    if not script_path.exists():
+        print(f"      !! backtest script not found: {script_path} -- table is written, skipping "
+              f"the backtest. (it must be committed in the repo so agents get it.)")
+        return 1
+    if not price:
+        print("      !! no --price given -- the backtest needs the OHLC parquet. skipping.")
+        return 1
+    price_path = pathlib.Path(price)
+    if not price_path.is_absolute():
+        price_path = C.ROOT / price
+    if not price_path.exists():
+        print(f"      !! price file not found: {price_path} -- skipping the backtest.")
+        return 1
+
+    # parquet -> CSV, because their loader cannot read parquet signals.
+    out_dir = pathlib.Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
+    signal_csv = out_dir / (pathlib.Path(table_path).stem + "_signal.csv")
+    sig = pd.read_parquet(table_path, columns=["timestamp", "predicted_label"])
+    sig.to_csv(signal_csv, index=False)
+    print(f"      signal csv for the backtest: {signal_csv.name}  ({len(sig):,} rows)")
+
+    bt_out = out_dir / "backtest"
+    cmd = [sys.executable, "-u", str(script_path), str(signal_csv), str(price_path), str(bt_out)]
+    print(f"\n{'=' * 70}\nBACKTEST  {' '.join(cmd[1:])}\n{'=' * 70}", flush=True)
+    r = subprocess.run(cmd, cwd=str(C.ROOT), capture_output=True, text=True)
+    out = (r.stdout or "") + (("\n[stderr]\n" + r.stderr) if r.stderr else "")
+    print(out, flush=True)                      # -> ClearML CONSOLE tab
+    print("=" * 70, flush=True)
+    if task is not None:
+        if out.strip():
+            # park it as a report too, so it survives console truncation on a long run
+            task.get_logger().report_text(out, print_console=False)
+        # their CSVs land in a timestamped folder -- upload them or they die with the worker
+        for d in sorted(bt_out.glob("backtest_*")):
+            for f in sorted(d.glob("*.csv")) + sorted(d.glob("*.txt")):
+                task.upload_artifact(f"backtest_{f.stem}", str(f))
+                print(f"      uploaded {f.name}")
+    if r.returncode != 0:
+        print(f"      !! backtest exited {r.returncode} -- output above.")
+    return r.returncode
+
+
+def resolve_price(price: str, price_dataset_id: str, Dataset=None) -> str:
+    """the OHLCV the backtest prices trades against. either a local path (--price) or a ClearML
+    dataset on GCP (--price_dataset_id), so a worker needs nothing pre-staged on its disk."""
+    if price_dataset_id and Dataset is not None:
+        print(f"      fetching the OHLC prices {price_dataset_id}")
+        px_local = pathlib.Path(Dataset.get(dataset_id=price_dataset_id,
+                                            alias="price_data").get_local_copy())
+        p = str(find_dataset_parquet(px_local, price_dataset_id))
+        print(f"      prices: {pathlib.Path(p).name}")
+        return p
+    return price
 
 
 def main():
@@ -152,12 +319,45 @@ def main():
     # local mode (no ClearML):
     ap.add_argument("--bundle", default="", help="a model_*.joblib on disk (local mode)")
     ap.add_argument("--data", default="", help="the dataset parquet (local mode)")
+    # OOS mode -- score a set the model has NEVER seen, for the backtest:
+    # a STRING, not store_true: a cloned ClearML task hands every Arg back as a string, and a
+    # store_true round-trips badly ("False" is truthy). a string compare is unambiguous.
+    ap.add_argument("--mode", default="insample", choices=["insample", "oos"])
+    ap.add_argument("--oos_dataset_id", default="", help="ClearML dataset id of the OOS set")
+    ap.add_argument("--oos_data", default="", help="an OOS parquet on disk (local OOS mode)")
+    ap.add_argument("--oos_tag", default="", help="short name for the file, e.g. 2025h2")
+    ap.add_argument("--backtest", default="",
+                    help="path to the backtest script to run on the table. its output is PRINTED, "
+                         "so it appears in this task's ClearML console.")
+    ap.add_argument("--price", default="",
+                    help="the OHLC futures parquet the backtest prices trades against "
+                         "(its 2nd positional argument). a LOCAL path.")
+    ap.add_argument("--price_dataset_id", default="",
+                    help="same file, but registered on GCP as a ClearML dataset -- the worker "
+                         "fetches it. use this in the pipeline; --price is for local runs.")
     # both:
     ap.add_argument("--out", default="scored_out", help="where to write the two parquets")
     ap.add_argument("--strict_train", action="store_true",
                     help="train table = ONLY the train slice (drop val+embargo). default keeps "
                          "them so the two files cover the complete dataset.")
     a = ap.parse_args()
+
+    # ---------- LOCAL OOS: bundle + an OOS parquet on disk, no ClearML ----------
+    if a.mode == "oos" and a.bundle and a.oos_data:
+        print(f"[local-oos] loading model bundle {pathlib.Path(a.bundle).name}")
+        bundle = load_model_bundle(a.bundle)
+        version = a.dataset_version or str(bundle.get("dataset_version", "?"))
+        print(f"[local-oos] checking {a.oos_data} against the model")
+        preflight(a.oos_data, bundle)
+        df = pd.read_parquet(a.oos_data)
+        print(f"        {len(df):,} OOS rows   model trained on v{version}")
+        tbl, _ = score_dataset(df, bundle, oos=True,
+                               meta={"scored_dataset_version": a.oos_tag or "oos"})
+        p = write_oos(tbl, a.oos_tag, bundle.get("model_type", ""), version, a.out, task=None)
+        if a.backtest:
+            run_backtest(a.backtest, p, a.price, a.out, task=None)
+        print(f"\ndone (local oos). table: {p}")
+        return
 
     # ---------- LOCAL MODE: bundle + data on disk, no ClearML ----------
     if a.bundle and a.data:
@@ -179,12 +379,59 @@ def main():
     # ---------- PIPELINE MODE: fetch model + data from GCP, upload tables to GCS ----------
     from clearml import Dataset, Task   # imported AFTER parse_args on purpose -- clearml patches
     # argparse at import; parsing first means a cloned task's Args/ overrides are silently lost.
+    _base_name = (getattr(C, "BASE_OOS_NAME", "score_oos (base)") if a.mode == "oos"
+                  else getattr(C, "BASE_EXPORT_NAME", "export_scored_tables (base)"))
     task = Task.init(project_name=C.CLEARML_PROJECT,
-                     task_name=getattr(C, "BASE_EXPORT_NAME", "export_scored_tables (base)"),
+                     task_name=_base_name,
                      task_type=Task.TaskTypes.qc,
                      output_uri=C.tables_output_uri())   # gcs mode -> gs://<bucket>/tables
     if not a.model_task_id:
         print("no --model_task_id: base-task registration run. exiting cleanly.")
+        task.close()
+        return
+
+    # ---------- PIPELINE OOS: model from a training task, rows from the OOS dataset ----------
+    if a.mode == "oos":
+        if not a.oos_dataset_id:
+            raise SystemExit("--mode oos needs --oos_dataset_id (the ClearML dataset id of the "
+                             "OOS set). it must NOT be the training dataset.")
+        print(f"[1/5] fetching the model from task {a.model_task_id}")
+        src = Task.get_task(task_id=a.model_task_id)
+        if src is None or "model" not in src.artifacts:
+            raise SystemExit(f"task {a.model_task_id} has no 'model' artifact -- nothing to score.")
+        bundle = load_model_bundle(src.artifacts["model"].get_local_copy())
+        version = a.dataset_version or str(bundle.get("dataset_version", "?"))
+
+        print(f"[2/5] fetching the OOS dataset {a.oos_dataset_id}")
+        oos_ds = Dataset.get(dataset_id=a.oos_dataset_id, alias="oos_data")
+        oos_local = pathlib.Path(oos_ds.get_local_copy())
+        oos_parquet = find_dataset_parquet(oos_local, a.oos_dataset_id)
+
+        print("[3/5] preflight -- do the OOS columns match what the model trained on?")
+        preflight(oos_parquet, bundle)          # cheap footer read; refuses on a mismatch
+        df = pd.read_parquet(oos_parquet)
+        print(f"      {len(df):,} OOS rows   model trained on v{version}")
+
+        print("[4/5] scoring")
+        tbl, _ = score_dataset(df, bundle, oos=True, meta={
+            "model_task_id": a.model_task_id,
+            "scored_dataset_id": a.oos_dataset_id,
+            "scored_dataset_version": a.oos_tag or getattr(oos_ds, "version", "") or "oos",
+        })
+        mtype = bundle.get("model_type", "")
+        p = write_oos(tbl, a.oos_tag, mtype, version, a.out, task=task)
+        task.add_tags([mtype or "?", "scored_oos", a.oos_tag or "oos", f"v{version}"])
+
+        print("[5/5] backtest")
+        # the OHLC prices live on GCP as their own ClearML dataset -- pull them the same way we
+        # pulled the OOS rows, so any worker can run this with nothing pre-staged on its disk.
+        price_path = resolve_price(a.price, a.price_dataset_id, Dataset)
+        if a.backtest:
+            run_backtest(a.backtest, p, price_path, a.out, task=task)  # output -> CONSOLE tab
+        else:
+            print("      no --backtest given -- table written, nothing to run.")
+        print(f"\ndone. table '{p.name}' is an artifact on this task, under "
+              f"{C.tables_output_uri()} .")
         task.close()
         return
 
@@ -207,8 +454,15 @@ def main():
     train_tbl, test_tbl = split_tables(tbl, a.strict_train)
 
     print("[4/4] writing + uploading the two tables to GCS")
-    write_and_report(train_tbl, test_tbl, version, a.out, task=task)
+    paths = write_and_report(train_tbl, test_tbl, version, a.out, task=task)
     task.add_tags([bundle.get("model_type", "?"), "scored_tables", f"v{version}"])
+
+    # BACKTEST THE TEST TABLE, not the train one -- backtesting rows the model was fitted on is
+    # meaningless. its report prints straight into this task's CONSOLE tab.
+    if a.backtest:
+        print("[5/5] backtest (on the TEST split)")
+        run_backtest(a.backtest, paths["test"],
+                     resolve_price(a.price, a.price_dataset_id, Dataset), a.out, task=task)
     print(f"\ndone. scored_train_v{version} + scored_test_v{version} are artifacts on this task, "
           f"in gs://{C.GCS_BUCKET}/clearml . the next team reads them from there.")
     task.close()

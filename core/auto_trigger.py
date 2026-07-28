@@ -55,7 +55,8 @@ def retrain(dataset_id):
         # the same two calls publish_version makes on its own path: train all the models, then
         # queue the champion picker to WAIT for them (by name).
         ids = enqueue_all(dataset_id, ds.version, C.MODEL_TYPES)
-        enqueue_champion(dataset_id, ds.version, list(ids))
+        if C.RUN_CHAMPION:                                   # off by default (judged useless)
+            enqueue_champion(dataset_id, ds.version, list(ids))
     except BaseException as e:
         print(f"[trigger] FAILED for dataset {dataset_id}:")
         traceback.print_exc()

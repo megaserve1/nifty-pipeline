@@ -51,9 +51,14 @@ MODEL_TYPES = ["xgboost", "catboost"]   # random_forest turned OFF -- xgboost + 
 # project (register/build/publish/train all follow it). unset it to go back -- no code change.
 CLEARML_PROJECT   = os.environ.get("NIFTY_PROJECT", "Nifty Production")
 CLEARML_DATASET   = "nifty_signal_dataset"
+# the OOS (out-of-sample) set the backtest scores against. IT MUST NOT SHARE THE TRAINING DATASET
+# NAME: auto_trigger watches CLEARML_DATASET, so publishing OOS rows under that name would start
+# TRAINING on out-of-sample data.
+CLEARML_OOS_DATASET = "nifty_oos_dataset"
 TRAIN_QUEUE       = "training"          # a clearml-agent must listen here, or nothing runs
 SHAP_QUEUE        = "training"          # SHAP runs on the same queue by default
 EXPORT_QUEUE      = "training"          # scored-tables export runs on the same queue by default
+OOS_QUEUE         = "training"          # OOS scoring runs on the same queue by default
 
 def base_trainer_name(model_type: str) -> str:
     """The name of the base task publish_version.py clones for each model."""
@@ -61,6 +66,14 @@ def base_trainer_name(model_type: str) -> str:
 
 BASE_SHAP_NAME     = "shap_explain (base)"
 BASE_EXPORT_NAME   = "export_scored_tables (base)"
+BASE_OOS_NAME      = "score_oos (base)"
+
+# ---- backtest ------------------------------------------------------------------
+# set BOTH and every finished model automatically gets a backtest on its TEST table, printed into
+# that task's ClearML console. leave either blank and you just get the tables (no backtest).
+# the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
+BACKTEST_SCRIPT   = ""                  # e.g. "scripts/backtest_single.py"
+PRICE_DATASET_ID  = ""                  # ClearML dataset id of the OHLCV prices
 BASE_CHAMPION_NAME = "select_champion (base)"
 # CHAMPION IS OFF. select_champion is not run -- it was judged useless (2026-07-22). publish never
 # queues it regardless of flags. flip this to True (and pass --champion) only if you ever want the

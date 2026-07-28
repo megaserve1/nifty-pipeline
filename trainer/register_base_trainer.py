@@ -8,12 +8,12 @@ WHY IT EXISTS
     running a script once with no dataset id makes ClearML record it -- the script, its
     arguments, its environment -- and then it exits. that recording IS the base task.
 
-it creates FIVE base tasks:
+it creates these base tasks (select_champion only when config.RUN_CHAMPION is on -- it is off):
     train_xgboost (base)
     train_catboost (base)
     shap_explain (base)
     export_scored_tables (base)
-    select_champion (base)
+    select_champion (base)   -- only if RUN_CHAMPION
 
 without them, publish_version.py stops with a clear message instead of quietly publishing a
 dataset that nothing ever trains on.
@@ -84,7 +84,14 @@ def main():
 
     ok &= register(HERE / "shap_explain.py", C.BASE_SHAP_NAME, [], a.force)
     ok &= register(HERE / "export_scored_tables.py", C.BASE_EXPORT_NAME, [], a.force)
-    ok &= register(HERE / "select_champion.py", C.BASE_CHAMPION_NAME, [], a.force)
+    # the SAME script registered a second time in OOS mode -- same trick as train.py being
+    # registered once per model_type. with no --model_task_id it exits cleanly, which is what
+    # makes it a clonable template.
+    ok &= register(HERE / "export_scored_tables.py", C.BASE_OOS_NAME, ["--mode", "oos"], a.force)
+    if C.RUN_CHAMPION:
+        ok &= register(HERE / "select_champion.py", C.BASE_CHAMPION_NAME, [], a.force)
+    else:
+        print("  select_champion NOT registered (champion is off: config.RUN_CHAMPION=False)")
 
     print()
     if not ok:

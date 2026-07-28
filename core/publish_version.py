@@ -349,8 +349,8 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
                                     f"python trainer/register_base_trainer.py")
                 else:
                     print(f"      base task OK: {name}")
-            if Task.get_task(project_name=C.CLEARML_PROJECT,
-                             task_name=C.BASE_CHAMPION_NAME) is None:
+            if (C.RUN_CHAMPION and not no_champion) and Task.get_task(
+                    project_name=C.CLEARML_PROJECT, task_name=C.BASE_CHAMPION_NAME) is None:
                 warnings.append(f"no base task '{C.BASE_CHAMPION_NAME}' -- "
                                 f"the models would train but no champion would be picked")
     except Exception as e:
