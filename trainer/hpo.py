@@ -398,7 +398,15 @@ def main():
     # hand the winner's settings back as a file, so publish_version.py can train the next
     # dataset version with them instead of the argparse defaults.
     drop = ("task_id", "val_cost", "test_cost", "test_macro_f1")
-    winner = {k: v for k, v in best.items() if k not in drop}
+    # DROP THE BLANKS. `best` is a scoreboard row holding every Args/* off the winning trial, and
+    # ClearML hands back a never-overridden parameter as '' (and NaN for a column only some trials
+    # had). writing those made the winner file claim knobs the search never touched, and promoting
+    # it crashed on int(float('')). the file should say only what was actually searched.
+    winner = {k: v for k, v in best.items()
+              if k not in drop
+              and v is not None
+              and not (isinstance(v, float) and v != v)          # NaN
+              and not (isinstance(v, str) and not v.strip())}    # ''
     out = pathlib.Path(f"best_params_{a.model_type}.json")
     out.write_text(json.dumps({"model_type": a.model_type,
                                "dataset_version": a.dataset_version,

@@ -56,6 +56,14 @@ def main():
     for k, v in params.items():
         if k not in known:
             continue
+        # '' IS CLEARML'S "THIS KNOB WAS NEVER OVERRIDDEN", NOT A VALUE. hpo.py copies every
+        # Args/* off the winning trial, and a parameter no trial set comes back as the empty
+        # string; a column only some trials had comes back as NaN (the scoreboard is a DataFrame).
+        # without this guard int(float('')) raises and apply_hpo dies -- which is why
+        # configs/tuned/ was still EMPTY after three completed searches. hyperparams.merge()
+        # already skips exactly these (see its comment); this is the same rule at promote time.
+        if v is None or (isinstance(v, float) and v != v) or (isinstance(v, str) and not v.strip()):
+            continue
         # coerce to the baseline's type, exactly as training will (merge() does the same).
         base = H.defaults(model)[k]
         try:

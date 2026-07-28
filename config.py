@@ -72,10 +72,11 @@ BASE_OOS_NAME      = "score_oos (base)"
 # set BOTH and every finished model automatically gets a backtest on its TEST table, printed into
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
-BACKTEST_SCRIPT   = ""                  # e.g. "scripts/backtest_single.py"
+BACKTEST_SCRIPT   = "scripts/backtest_single.py"
 PRICE_DATASET_ID  = ""                  # ClearML dataset id of the OHLCV prices -- ANY worker can
                                         #   fetch this. use it once you have >1 machine.
-PRICE_FILE        = ""                  # OR a LOCAL path to the OHLCV parquet. only works while
+PRICE_FILE        = "/home/megaserve/Downloads/Nifty_Futures_Data.parquet"
+                                        # OR a LOCAL path to the OHLCV parquet. only works while
                                         #   the agent runs on THIS machine -- a worker on another
                                         #   box has no such file and the backtest is skipped.
                                         #   PRICE_DATASET_ID wins if both are set.
