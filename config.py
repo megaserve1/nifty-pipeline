@@ -73,7 +73,12 @@ BASE_OOS_NAME      = "score_oos (base)"
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
 BACKTEST_SCRIPT   = ""                  # e.g. "scripts/backtest_single.py"
-PRICE_DATASET_ID  = ""                  # ClearML dataset id of the OHLCV prices
+PRICE_DATASET_ID  = ""                  # ClearML dataset id of the OHLCV prices -- ANY worker can
+                                        #   fetch this. use it once you have >1 machine.
+PRICE_FILE        = ""                  # OR a LOCAL path to the OHLCV parquet. only works while
+                                        #   the agent runs on THIS machine -- a worker on another
+                                        #   box has no such file and the backtest is skipped.
+                                        #   PRICE_DATASET_ID wins if both are set.
 BASE_CHAMPION_NAME = "select_champion (base)"
 # CHAMPION IS OFF. select_champion is not run -- it was judged useless (2026-07-22). publish never
 # queues it regardless of flags. flip this to True (and pass --champion) only if you ever want the

@@ -1,0 +1,82 @@
+# configs/hyperparams_fast.yaml -- TINY values, for PLUMBING TESTS ONLY.
+#
+# this is NOT a model. every number here is chosen to finish in minutes so you can prove the chain
+# works end to end: publish -> hpo -> apply_hpo -> train -> shap -> table -> backtest.
+#
+# use it WITHOUT touching the real configs/hyperparams.yaml:
+#     export NIFTY_HPARAMS=configs/hyperparams_fast.yaml
+#     python core/publish_version.py --version v6 --tune --hpo-trials 2
+#
+# unset the variable and everything is back to the real h3 file. nothing to revert, nothing to
+# accidentally commit.
+#
+# the search: lists are 2 rungs each on purpose -- optuna still has something to search, but no
+# trial can pick a 6000-tree model and eat the night.
+hyperparams_version: fast-smoke
+
+random_forest:
+  default:
+    n_estimators: 40
+    max_depth: 6
+    min_samples_leaf: 50
+    max_features: "0.5"
+    max_samples: 0.5
+    seed: 42
+  search:
+    max_depth: [4, 6]
+    min_samples_leaf: [50, 25]
+    max_features: ["0.3", "0.5"]
+    max_samples: [0.4, 0.6]
+    n_estimators: [30, 60]
+
+xgboost:
+  default:
+    grow_policy: "depthwise"     # cheap. lossguide + unlimited leaves is the slow h3 setting.
+    max_leaves: 0
+    max_depth: 5
+    max_bin: 128
+    n_estimators: 60
+    early_stopping_rounds: 0
+    learning_rate: 0.3           # high, so few trees still learn something
+    subsample: 0.6
+    colsample_bytree: 0.6
+    min_child_weight: 5.0        # FLOAT -- merge() casts by the default's type
+    reg_lambda: 3.0              # FLOAT
+    reg_alpha: 0.0               # FLOAT
+    gamma: 0.0                   # FLOAT
+    seed: 42
+  search:
+    max_depth: [4, 6]
+    learning_rate: [0.2, 0.3]
+    n_estimators: [40, 80]
+    subsample: [0.5, 0.7]
+    colsample_bytree: [0.5, 0.7]
+    min_child_weight: [5.0, 1.0]
+    reg_lambda: [5.0, 1.0]
+    reg_alpha: [1.0, 0.0]
+    gamma: [0.5, 0.0]
+
+catboost:
+  default:
+    grow_policy: "SymmetricTree"  # much cheaper than Lossguide with 512 leaves
+    max_leaves: 64
+    max_depth: 5
+    n_estimators: 60
+    early_stopping_rounds: 0
+    learning_rate: 0.3
+    l2_leaf_reg: 3.0
+    min_data_in_leaf: 50
+    rsm: 0.6
+    subsample: 0.6
+    bootstrap_type: "MVS"
+    random_strength: 1.0
+    seed: 42
+  search:
+    max_depth: [4, 6]
+    learning_rate: [0.2, 0.3]
+    n_estimators: [40, 80]
+    l2_leaf_reg: [10.0, 3.0]
+    min_data_in_leaf: [50, 25]
+    rsm: [0.5, 0.7]
+    subsample: [0.5, 0.7]
+    random_strength: [1.0, 0.5]

@@ -36,7 +36,11 @@ import yaml
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 import config as C      # noqa: E402
 
-HP_FILE = C.CONFIGS_DIR / "hyperparams.yaml"
+# NIFTY_HPARAMS points at a DIFFERENT hyperparams file for one run -- same safety-catch pattern as
+# NIFTY_TUNED_DIR below. it exists so a fast smoke/plumbing run can use tiny tree counts and a tiny
+# search space WITHOUT editing the real configs/hyperparams.yaml, which is the hand-authored file
+# in git. (editing that file for a speed test, and then committing it by accident, has happened.)
+HP_FILE = pathlib.Path(os.environ.get("NIFTY_HPARAMS") or (C.CONFIGS_DIR / "hyperparams.yaml"))
 # where an APPLIED hpo winner lives. one json per model, written by trainer/apply_hpo.py.
 # it is a SEPARATE file on purpose: hyperparams.yaml is the hand-authored baseline that lives
 # in git; the tuned file is a machine-found overlay a human chose to promote. keeping them apart

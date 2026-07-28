@@ -792,11 +792,20 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     # if BOTH the backtest script and the price dataset are configured, the export also runs the
     # backtest on the TEST table and prints its report into that task's console. blank -> tables only.
     bt = getattr(C, "BACKTEST_SCRIPT", "")
-    px = getattr(C, "PRICE_DATASET_ID", "")
-    if bt and px:
+    px_id = getattr(C, "PRICE_DATASET_ID", "")
+    px_file = getattr(C, "PRICE_FILE", "")
+    if bt and (px_id or px_file):
         params["Args/backtest"] = bt
-        params["Args/price_dataset_id"] = px
-        print(f"  backtest wired: {bt}  (prices {px})")
+        if px_id:                                  # a GCP dataset -- any worker can fetch it
+            params["Args/price_dataset_id"] = px_id
+            print(f"  backtest wired: {bt}  (prices from dataset {px_id})")
+        else:                                      # a local file -- only valid on THIS machine
+            params["Args/price"] = px_file
+            print(f"  backtest wired: {bt}  (prices from local file {px_file} -- only works if "
+                  f"the agent runs on this machine)")
+    elif bt:
+        print("  !! BACKTEST_SCRIPT is set but neither PRICE_DATASET_ID nor PRICE_FILE is -- "
+              "the table will be written but NO backtest will run.")
     run.set_parameters(params)
     Task.enqueue(run, queue_name=getattr(C, "EXPORT_QUEUE", C.SHAP_QUEUE))
     print(f"  queued scored_tables_{model_type} v{version}  (scores THIS model)")

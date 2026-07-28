@@ -452,7 +452,7 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
 
 
 def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo: bool = False,
-             trials: int = 15) -> None:
+             trials: int = 15, queue: str = None) -> None:
     """for each model: search hyperparameters, then promote the winner. THE CACHE LIVES HERE.
 
     it calls trainer/hpo.py and trainer/apply_hpo.py as SUBPROCESSES -- the exact commands you
@@ -468,7 +468,8 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
 
     # WARN BEFORE THE COST. each model that is not cached runs `trials` full training jobs on
     # the queue -- dozens of agent-hours across three models. say so before spending it.
-    to_run = [m for m in models if re_hpo or H.tuned_sha(m) != parquet_sha256]
+    queue = queue or C.TRAIN_QUEUE            # 'queue' used to be undefined here -> NameError the
+    to_run = [m for m in models if re_hpo or H.tuned_sha(m) != parquet_sha256]   # moment HPO ran
     if to_run:
         print(f"\n  !! --tune will run HPO for {to_run}: up to {trials} training jobs EACH, on "
               f"the '{queue}' queue. that is real agent time. (cached models are skipped.)")
@@ -486,7 +487,8 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
         winner = C.ROOT / f"best_params_{mtype}.json"
         r = subprocess.run([sys.executable, str(C.ROOT / "trainer" / "hpo.py"),
                             "--dataset_id", dataset_id, "--model_type", mtype,
-                            "--dataset_version", version, "--trials", str(trials)],
+                            "--dataset_version", version, "--trials", str(trials),
+                            "--queue", queue],       # or the trials ignore publish's --queue
                            cwd=str(C.ROOT))
         if r.returncode != 0 or not winner.exists():
             raise SystemExit(f"  HPO failed for {mtype} (exit {r.returncode}). "
@@ -680,7 +682,7 @@ def publish(version: str, models: list, do_train: bool = True,
     # CACHE-GATED: a model whose data has not changed since its last tune is skipped, so re-
     # publishing the same dataset does NOT burn hours re-searching.
     if tune:
-        run_tune(models, ds_id, version, man.get("parquet_sha256"), re_hpo=re_hpo,
+        run_tune(models, ds_id, version, man.get("parquet_sha256"), queue=queue, re_hpo=re_hpo,
                  trials=hpo_trials)
 
     # ---- 5. train ------------------------------------------------------------
