@@ -371,7 +371,12 @@ def main():
         tbl, counts = score_dataset(df, bundle)
         print(f"        rows per split: {counts}")
         train_tbl, test_tbl = split_tables(tbl, a.strict_train)
-        write_and_report(train_tbl, test_tbl, version, a.out, task=None)
+        paths = write_and_report(train_tbl, test_tbl, version, a.out, task=None)
+        if a.backtest:
+            # the TEST table -- backtesting rows the model was fitted on is meaningless.
+            # local mode has no ClearML, so the price file is a plain path (--price).
+            print("\n[backtest] on the TEST split")
+            run_backtest(a.backtest, paths["test"], a.price, a.out, task=None)
         print(f"\ndone (local). two tables in {a.out}/ . to also push them to GCS, run in pipeline "
               f"mode with --model_task_id, or hand them to the next team as-is.")
         return
