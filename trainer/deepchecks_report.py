@@ -69,6 +69,20 @@ try:
         _sk_scorer._SCORERS["max_error"] = _mk(_max_err, greater_is_better=False)
 except Exception:
     pass          # a future sklearn may restore it, or move _SCORERS -- do not block on this
+
+# 3. setuptools AFTER 81 removed pkg_resources, and deepchecks imports parse_version from it.
+#    THIS MUST BE A SHIM, NOT A REQUIREMENTS PIN: a clearml-agent records a task's requirements
+#    from the packages the SCRIPT IMPORTS, so "setuptools<82" in requirements.txt never reaches
+#    the agent -- it builds a fresh venv with the newest setuptools and fails here every time.
+#    packaging.version.parse is the same function pkg_resources.parse_version delegates to.
+try:
+    import pkg_resources          # noqa: F401  -- present on older setuptools, nothing to do
+except ImportError:
+    import types as _types
+    from packaging.version import parse as _parse_version
+    _shim = _types.ModuleType("pkg_resources")
+    _shim.parse_version = _parse_version
+    sys.modules["pkg_resources"] = _shim
 # ---------------------------------------------------------------------------------------------
 
 
