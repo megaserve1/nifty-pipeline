@@ -28,7 +28,7 @@ import sys
 import streamlit as st
 import yaml
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent.parent   # ui/pages/x.py -> final_pipeline/
 sys.path.insert(0, str(ROOT))
 import config as C                       # noqa: E402
 from core import make_version as mkv     # next_major / next_minor / load_version  # noqa: E402
@@ -163,7 +163,8 @@ CSS = """
   :root{ --card-bg:color-mix(in srgb, currentColor 8%, transparent);
          --card-border:color-mix(in srgb, currentColor 22%, transparent); --accent:#818cf8; }
 }
-.block-container{ max-width:980px; padding-top:1.4rem; padding-bottom:4rem; }
+/* NO .block-container width override: that selector is GLOBAL and an injected <style> can survive
+   a page switch, which squeezed the Visualizer's full-width charts. own classes only. */
 .fs-hero{ border-radius:var(--radius); padding:1.15rem 1.35rem; margin-bottom:1.2rem;
   background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,transparent),
   color-mix(in srgb,var(--accent) 6%,transparent)); border:1px solid var(--card-border); }
@@ -199,7 +200,7 @@ CSS = """
   background:color-mix(in srgb,currentColor 15%,transparent) !important; color:var(--muted) !important;
   box-shadow:none !important; }
 [data-testid="stExpander"] summary{ font-weight:600; }
-#MainMenu, footer{ visibility:hidden; }
+/* (no #MainMenu/footer hiding either -- same bleed risk onto the other pages) */
 </style>
 """
 

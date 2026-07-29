@@ -312,6 +312,18 @@ def resolve_price(price: str, price_dataset_id: str, Dataset=None) -> str:
 
 
 def main():
+    # CLEARML MUST BE IMPORTED BEFORE argparse.parse_args() RUNS. THIS IS NOT STYLE.
+    # clearml patches argparse AT IMPORT; that patch is what injects a cloned task's Args/* into
+    # the parser. import it afterwards and the injection never happens -- every Arg keeps its
+    # argparse default, so a queued run saw model_task_id="" and exited as a "base registration
+    # run", reporting COMPLETED while producing nothing. that is exactly what happened to
+    # scored_tables_xgboost v6. train.py carries the same warning at its parser.
+    # local mode does not need clearml, but importing it is harmless (no Task is created).
+    try:
+        from clearml import Dataset, Task      # noqa: F401  -- BEFORE the parser. see above.
+    except ImportError:
+        Dataset = Task = None                  # local mode still works without clearml installed
+
     ap = argparse.ArgumentParser()
     # pipeline mode (fetch from GCP, like shap_explain):
     ap.add_argument("--model_task_id", default="", help="training task whose model we score")
