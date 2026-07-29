@@ -750,10 +750,28 @@ def main():
     task.close()
 
 
+def my_project() -> str:
+    """THE PROJECT THIS TASK IS ACTUALLY RUNNING IN -- not the one config guesses.
+
+    C.CLEARML_PROJECT comes from the NIFTY_PROJECT env var, which is set in the terminal that
+    LAUNCHES things. an agent has its OWN environment and never sees it, so on any agent that
+    lacks the variable config falls back to the default project. the task itself was cloned from
+    a base task in the right project, so IT knows the truth -- ask it.
+
+    this is not hypothetical: on 2026-07-29 a windows agent looked for the base tasks in
+    'Nifty Production' while the run lived in 'Nifty LiveTest'. SHAP was queued into the wrong
+    project and the scored-tables step was skipped entirely as "not registered".
+    """
+    from clearml import Task
+    t = Task.current_task()
+    name = t.get_project_name() if t is not None else None
+    return name or C.CLEARML_PROJECT
+
+
 def queue_shap_for_me(model_task_id: str, model_type: str, version: str):
     """ask ClearML to run shap_explain against THIS model, now that it is saved."""
     from clearml import Task
-    base = Task.get_task(project_name=C.CLEARML_PROJECT, task_name=C.BASE_SHAP_NAME)
+    base = Task.get_task(project_name=my_project(), task_name=C.BASE_SHAP_NAME)
     if base is None:
         print("  (no SHAP base task registered -- skipping. "
               "run: python trainer/register_base_trainer.py)")
@@ -778,7 +796,7 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     the same is_hpo_trial guard as SHAP (this is only reached on a real, renamed run).
     """
     from clearml import Task
-    base = Task.get_task(project_name=C.CLEARML_PROJECT,
+    base = Task.get_task(project_name=my_project(),
                          task_name=getattr(C, "BASE_EXPORT_NAME", "export_scored_tables (base)"))
     if base is None:
         print("  (no export base task registered -- skipping. "
