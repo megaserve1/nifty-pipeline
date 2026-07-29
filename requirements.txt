@@ -76,3 +76,4 @@ clearml-agent==3.0.3
 # jupyter + papermill were removed 2026-07-15: the notebook-execution path is dead (the feature
 # team hands over parquets now), and they were 200+ MB of venv nothing calls.
 # ----------------------------------------------------------------------------
+deepchecks>=0.19.1

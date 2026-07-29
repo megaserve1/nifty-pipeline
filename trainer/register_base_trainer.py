@@ -88,6 +88,7 @@ def main():
     # registered once per model_type. with no --model_task_id it exits cleanly, which is what
     # makes it a clonable template.
     ok &= register(HERE / "export_scored_tables.py", C.BASE_OOS_NAME, ["--mode", "oos"], a.force)
+    ok &= register(HERE / "deepchecks_report.py", C.BASE_DEEPCHECKS_NAME, [], a.force)
     if C.RUN_CHAMPION:
         ok &= register(HERE / "select_champion.py", C.BASE_CHAMPION_NAME, [], a.force)
     else:

@@ -67,6 +67,11 @@ def base_trainer_name(model_type: str) -> str:
 BASE_SHAP_NAME     = "shap_explain (base)"
 BASE_EXPORT_NAME   = "export_scored_tables (base)"
 BASE_OOS_NAME      = "score_oos (base)"
+BASE_DEEPCHECKS_NAME = "deepchecks_report (base)"
+DEEPCHECKS_QUEUE   = "training"     # runs on the same queue by default
+# deepchecks on 513k rows x 500 cols is very slow. it SAMPLES this many rows per split -- the
+# checks and their conditions are unchanged, only the runtime is. 0 = use every row.
+DEEPCHECKS_SAMPLE  = 50_000
 
 # ---- backtest ------------------------------------------------------------------
 # set BOTH and every finished model automatically gets a backtest on its TEST table, printed into
@@ -130,6 +135,12 @@ def shap_output_uri():
 def tables_output_uri():
     """where the scored tables are written. None in local mode = the self-hosted fileserver."""
     return None if STORAGE_MODE == "local" else GCS_TABLES_URI
+
+
+def deepchecks_output_uri():
+    """where the deepchecks HTML reports are written -> gs://<bucket>/artifacts/deepchecks .
+    they land as task artifacts, so anyone can download and open them from the ClearML UI."""
+    return None if STORAGE_MODE == "local" else f"{GCS_ARTIFACTS_URI}/deepchecks"
 
 
 # ---- DVC (only used in "gcs" mode) --------------------------------------------

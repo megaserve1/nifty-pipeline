@@ -746,6 +746,7 @@ def main():
     else:
         queue_shap_for_me(task.id, a.model_type, a.dataset_version or ds.version)
         queue_export_for_me(task.id, a.model_type, a.dataset_version or ds.version)
+        queue_deepchecks_for_me(task.id, a.model_type, a.dataset_version or ds.version)
 
     task.close()
 
@@ -827,6 +828,35 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     run.set_parameters(params)
     Task.enqueue(run, queue_name=getattr(C, "EXPORT_QUEUE", C.SHAP_QUEUE))
     print(f"  queued scored_tables_{model_type} v{version}  (scores THIS model)")
+
+
+
+def queue_deepchecks_for_me(model_task_id: str, model_type: str, version: str):
+    """ask ClearML to run deepchecks_report against THIS model, now that it is saved.
+
+    SAME pattern and SAME reason as queue_shap_for_me / queue_export_for_me: queued from inside
+    the FINISHED trainer, so the model provably exists. it rebuilds the model's own train/test
+    split, runs the suites, and uploads three static HTML reports to
+    gs://<bucket>/artifacts/deepchecks -- download one from the ClearML UI and open it.
+
+    REPORT ONLY. it never fails the training run.
+    """
+    from clearml import Task
+    base = Task.get_task(project_name=my_project(),
+                         task_name=getattr(C, "BASE_DEEPCHECKS_NAME", "deepchecks_report (base)"))
+    if base is None:
+        print("  (no deepchecks base task registered -- skipping. "
+              "install deepchecks, then: python trainer/register_base_trainer.py --force)")
+        return
+    run = Task.clone(source_task=base, name=f"deepchecks_{model_type} v{version}")
+    run.set_parameters({
+        "Args/model_task_id": model_task_id,
+        "Args/dataset_version": version,
+        "Args/suites": "data,model",
+        "Args/sample": str(getattr(C, "DEEPCHECKS_SAMPLE", 50000)),
+    })
+    Task.enqueue(run, queue_name=getattr(C, "DEEPCHECKS_QUEUE", C.TRAIN_QUEUE))
+    print(f"  queued deepchecks_{model_type} v{version}  (checks THIS model)")
 
 
 if __name__ == "__main__":
