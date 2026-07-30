@@ -55,6 +55,11 @@ CLEARML_DATASET   = "nifty_signal_dataset"
 # NAME: auto_trigger watches CLEARML_DATASET, so publishing OOS rows under that name would start
 # TRAINING on out-of-sample data.
 CLEARML_OOS_DATASET = "nifty_oos_dataset"
+# the master OOS currently registered (MASTER_OOS 2025-01-01 -> 2026-02-24, 593 feature columns,
+# NO labels -- by design: the backtest evaluates from predictions, it does not need true labels).
+# it matches the V7/V8/V9 feature naming, NOT our v1-v6 datasets, so only a model trained on those
+# can score it. bytes live in gs://<bucket>/datasets.
+OOS_DATASET_ID    = "563f70e7ddb44e699e3a5d3c73f76573"
 TRAIN_QUEUE       = "training"          # a clearml-agent must listen here, or nothing runs
 SHAP_QUEUE        = "training"          # SHAP runs on the same queue by default
 EXPORT_QUEUE      = "training"          # scored-tables export runs on the same queue by default
@@ -78,10 +83,10 @@ DEEPCHECKS_SAMPLE  = 50_000
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
 BACKTEST_SCRIPT   = "scripts/backtest_single.py"
-PRICE_DATASET_ID  = ""                  # ClearML dataset id of the OHLCV prices -- ANY worker can
-                                        #   fetch this. use it once you have >1 machine.
-PRICE_FILE        = "/home/megaserve/Downloads/Nifty_Futures_Data.parquet"
-                                        # OR a LOCAL path to the OHLCV parquet. only works while
+PRICE_DATASET_ID  = "f7471a4a6cc4422ebdaa34456ee2f678"   # nifty_ohlcv, bytes in gs://<bucket>/datasets
+                                        # ClearML dataset id of the OHLCV prices -- ANY worker can
+                                        #   fetch this. wins over PRICE_FILE below.
+PRICE_FILE        = ""                  # OR a LOCAL path to the OHLCV parquet. only works while
                                         #   the agent runs on THIS machine -- a worker on another
                                         #   box has no such file and the backtest is skipped.
                                         #   PRICE_DATASET_ID wins if both are set.

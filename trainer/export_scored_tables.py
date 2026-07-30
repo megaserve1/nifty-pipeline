@@ -52,6 +52,38 @@ from trainer.train import load_model_bundle, full_proba, find_dataset_parquet  #
 from trainer.objective import three_way_split          # noqa: E402  (the SAME split as training)
 
 
+def normalise_time_column(df: pd.DataFrame) -> pd.DataFrame:
+    """make sure the frame has a 'timestamp' column, whatever the feature team called it.
+
+    the pipeline reads C.LABEL_TS_COL ("timestamp") everywhere -- the split, the scored table, the
+    signal csv. the handed-over feature files (MASTER_OOS, V7/V8/V9) call it 'datetime' instead, so
+    without this every OOS run dies on a bare KeyError: 'timestamp'. renaming here keeps that name
+    in exactly one place instead of sprinkling aliases through the scoring code.
+    """
+    if C.LABEL_TS_COL in df.columns:
+        return df
+
+    # THE INDEX CASE, which is what the handed-over files actually do: MASTER_OOS and V7/V8/V9 store
+    # the time as a named DatetimeIndex ('datetime'), NOT as a column -- so it never shows up in
+    # df.columns and a plain rename finds nothing. reset it into a column first.
+    if isinstance(df.index, pd.DatetimeIndex) or str(df.index.name or "").lower() in (
+            "datetime", "timestamp", "date", "ts", "time"):
+        print(f"      time is the INDEX ({df.index.name!r}) -> moving it to a "
+              f"{C.LABEL_TS_COL!r} column")
+        out = df.reset_index()
+        first = out.columns[0]
+        return out.rename(columns={first: C.LABEL_TS_COL}) if first != C.LABEL_TS_COL else out
+
+    for alt in ("datetime", "date", "ts", "time"):
+        if alt in df.columns:
+            print(f"      time column is {alt!r} -> using it as {C.LABEL_TS_COL!r}")
+            return df.rename(columns={alt: C.LABEL_TS_COL})
+
+    raise SystemExit(f"no time column found. expected {C.LABEL_TS_COL!r} or one of "
+                     f"datetime/date/ts/time, as a column or the index. "
+                     f"got columns: {list(df.columns)[:6]} index: {df.index.name!r}")
+
+
 def preflight(parquet_path, bundle: dict) -> None:
     """check an OOS parquet against the model BEFORE scoring. reads the file FOOTER only -- no rows,
     so it costs nothing and fails in a second instead of after an hour.
@@ -361,7 +393,7 @@ def main():
         version = a.dataset_version or str(bundle.get("dataset_version", "?"))
         print(f"[local-oos] checking {a.oos_data} against the model")
         preflight(a.oos_data, bundle)
-        df = pd.read_parquet(a.oos_data)
+        df = normalise_time_column(pd.read_parquet(a.oos_data))
         print(f"        {len(df):,} OOS rows   model trained on v{version}")
         tbl, _ = score_dataset(df, bundle, oos=True,
                                meta={"scored_dataset_version": a.oos_tag or "oos"})
@@ -426,7 +458,7 @@ def main():
 
         print("[3/5] preflight -- do the OOS columns match what the model trained on?")
         preflight(oos_parquet, bundle)          # cheap footer read; refuses on a mismatch
-        df = pd.read_parquet(oos_parquet)
+        df = normalise_time_column(pd.read_parquet(oos_parquet))
         print(f"      {len(df):,} OOS rows   model trained on v{version}")
 
         print("[4/5] scoring")
