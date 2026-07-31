@@ -241,7 +241,14 @@ def main():
         screen = leak_guard.screen(raw, allow=meta.get("allow_columns"))
         # a raw date/timestamp is NEVER a feature, in either mode -- it lets the model memorise
         # which day it is. dropped up front so 'allow everything' can never let it back in.
-        cal = [c for c in raw.columns if c.lower() in C.CALENDAR_ALWAYS_DROP]
+        # THREE ways a calendar column arrives, all covered:
+        #   bare name ('session'), prefixed name ('vwap_microstructure_raw__session' -- the real
+        #   V9 file carries the DATE AS TEXT under exactly that name), and a raw datetime64
+        #   column whatever it is called ('...__t5' in V8/V9 and the MASTER_OOS).
+        cal = [c for c in raw.columns
+               if c.lower() in C.CALENDAR_ALWAYS_DROP
+               or c.lower().rsplit("__", 1)[-1] in C.CALENDAR_ALWAYS_DROP
+               or pd.api.types.is_datetime64_any_dtype(raw[c])]
         if screen["banned"] or cal:
             leak_guard.report(screen, where=f"{name} ({meta['file']})")
             if C.LEAK_GUARD_ENFORCE:
@@ -277,7 +284,12 @@ def main():
         # suddenly MOVES inside its own bar (value, 0, value). movement reads as a fast clock,
         # and a fast clock is the leak direction. the NaN policy is about what missing MEANS;
         # the clock is about when a value is KNOWABLE. they must not contaminate each other.
-        measured = column_clocks(raw)
+        if meta.get("pre_aligned"):
+            # the clock machinery exists to feed bar_close -- which a pre_aligned source SKIPS.
+            # measuring 500+ columns over 915k rows here costs real minutes and feeds nothing.
+            measured = {}
+        else:
+            measured = column_clocks(raw)
         declared = resolve_declared_clock(name, recipe, reg)
         overrides = resolve_clock_override(name, reg)
 
@@ -344,23 +356,49 @@ def main():
 
         if not declared and not overrides:
             # nobody declared anything. what the data says, which errs SLOW -- stale is honest,
-            # early is lookahead.
-            print(f"      !! no clock declared for {name} -- using the measurement. "
-                  f"ask the feature team to confirm it in registry.yaml.")
+            # early is lookahead. (silent for pre_aligned: no clock was measured, none is used.)
+            if not meta.get("pre_aligned"):
+                print(f"      !! no clock declared for {name} -- using the measurement. "
+                      f"ask the feature team to confirm it in registry.yaml.")
             clocks = measured
 
         groups = {}                                  # clock -> the columns on that clock
         for c, mins in clocks.items():
             groups.setdefault(mins, []).append(c)
 
-        parts = []
-        for mins in sorted(groups):
-            sub = treated[groups[mins]]
-            a_sub = align_feature_to_labels(sub, label_ts, bar_minutes=mins,
-                                            tolerance_bars=C.STALE_TOLERANCE_BARS)
-            parts.append(a_sub)
-        aligned = pd.concat(parts, axis=1)[list(treated.columns)]   # keep the original order
-        aligned.columns = [f"{name}__{c}" for c in aligned.columns]
+        if meta.get("pre_aligned"):
+            # ALREADY ALIGNED BY THE FEATURE TEAM. do NOT run bar_close again -- a second shift
+            # would push every value one more bar into the past, so the features would be STALE
+            # instead of leaky. silent, and wrong. we only line the rows up with the label
+            # timestamps (a plain reindex, no shifting) and leave the values untouched.
+            #
+            # THE HONEST COST: the no-lookahead rule is now THEIR guarantee, not ours. the manifest
+            # records that (no_peek.applied = "by feature team", verified = false) instead of
+            # claiming a check we did not perform.
+            print(f"      {name}: pre_aligned -- reindexing to the label minutes, NO bar_close "
+                  f"shift (alignment is the feature team's guarantee)")
+            if not treated.index.is_unique:
+                dup = int(treated.index.duplicated().sum())
+                raise SystemExit(f"feature '{name}' has {dup:,} duplicate timestamps -- a "
+                                 f"pre_aligned file must have one row per minute. fix the file.")
+            # THE INDEX CONTRACT: the normal path returns RangeIndex frames (align.py resets it),
+            # and the label frame is RangeIndex too -- concat joins ON THE INDEX. a DatetimeIndex
+            # left here outer-joins 200 label rows with 200 feature rows into 400 rows of NaN
+            # garbage that then certifies itself as ready. reset_index is load-bearing.
+            aligned = treated.reindex(pd.DatetimeIndex(label_ts)).reset_index(drop=True)
+        else:
+            parts = []
+            for mins in sorted(groups):
+                sub = treated[groups[mins]]
+                a_sub = align_feature_to_labels(sub, label_ts, bar_minutes=mins,
+                                                tolerance_bars=C.STALE_TOLERANCE_BARS)
+                parts.append(a_sub)
+            aligned = pd.concat(parts, axis=1)[list(treated.columns)]   # keep the original order
+        # PREFIX, unless the file already carries one. the handed-over matrices (V7/V8/V9) are
+        # already named 'source__column' by the feature team, so prefixing again would produce
+        # 'V8_TRAIN__bar_conviction_raw__bar_range'. registry.yaml marks them pre_prefixed.
+        if not meta.get("pre_prefixed"):
+            aligned.columns = [f"{name}__{c}" for c in aligned.columns]
 
         if policy == "drop":
             # this feature says some minutes are genuinely unusable. remove THE LABEL MINUTES
@@ -406,13 +444,17 @@ def main():
             print(f"         categorical: {', '.join(cat_cols)}  "
                   f"(catboost reads these as-is; RF/XGB get them encoded)")
 
+        # manifest names must match the BUILT columns. a pre_prefixed source keeps its own names,
+        # so prefixing here would make categorical/clock keys point at columns that do not exist
+        # -- and the trainer reads `categorical` to hand catboost its text columns.
+        pfx = (lambda c: str(c)) if meta.get("pre_prefixed") else (lambda c: f"{name}__{c}")
         per_feature.append({
             "name": name,
             "file": meta["file"],
-            "column_clocks": {f"{name}__{c}": m for c, m in clocks.items()},
+            "column_clocks": {pfx(c): m for c, m in clocks.items()},
             "clock_minutes": max(clocks.values()) if clocks else 1,
             "clock_source": src,
-            "clock_measured": {f"{name}__{c}": m for c, m in measured.items()},
+            "clock_measured": {pfx(c): m for c, m in measured.items()},
             # every place a HUMAN overrode the measurement to serve a column FASTER than the data
             # can prove is safe. this is the only door the leak can come back through, so it is
             # written on the certificate, by name, every time it is used. an empty dict is the
@@ -435,7 +477,7 @@ def main():
                                        for c in aligned.columns
                                        if int(aligned[c].isna().sum()) > 0},
             },
-            "categorical": [f"{name}__{c}" for c in cat_cols],
+            "categorical": [pfx(c) for c in cat_cols],
             "parquet_sha256": hashes.sha256_file(path),
             "columns": list(aligned.columns),
         })
@@ -489,7 +531,10 @@ def main():
     print(f"      stamped {C.INDEX_COL} (id column, not a feature): 0..{len(df)-1:,}")
 
     feature_columns = list(X.columns)
-    categorical_columns = [c for f in per_feature for c in f["categorical"]]
+    # per_feature is recorded BEFORE the recipe 'columns' filter, so intersect with what actually
+    # survived into X -- otherwise a subset build lists categoricals that are not in the parquet,
+    # and the trainer hands catboost a column that does not exist.
+    categorical_columns = [c for f in per_feature for c in f["categorical"] if c in X.columns]
     complete = int(X.notna().all(axis=1).sum())
     print(f"      {len(df):,} rows x {df.shape[1]} cols")
     print(f"      {complete:,} rows have every feature present "
@@ -599,8 +644,18 @@ def main():
         labels_sha256=hashes.sha256_file(labels_path),   # the file ACTUALLY used -- name + sha agree
         class_distribution={str(k): int(v) for k, v in dist.items()},
         zero_weight_classes=zero_w,
-        no_peek={"applied": True, "rule": "bar_close",
-                 "tolerance_bars": C.STALE_TOLERANCE_BARS},
+        # THE CERTIFICATE MUST NOT CLAIM A CHECK WE DID NOT PERFORM. for a pre_aligned source the
+        # bar_close rule is the FEATURE TEAM's guarantee -- we did a plain reindex and cannot
+        # verify it. an auditor reading "applied: true" would believe the leak check ran here.
+        no_peek=(
+            {"applied": "by feature team (pre_aligned -- plain reindex, NOT verified here)",
+             "rule": "bar_close", "verified": False,
+             "pre_aligned_features": [p["name"] for p in per_feature
+                                      if reg.get(p["name"], {}).get("pre_aligned")],
+             "tolerance_bars": C.STALE_TOLERANCE_BARS}
+            if any(reg.get(p["name"], {}).get("pre_aligned") for p in per_feature)
+            else {"applied": True, "rule": "bar_close",
+                  "tolerance_bars": C.STALE_TOLERANCE_BARS}),
         built_by=getpass.getuser(),
         status="ready",
     )

@@ -487,7 +487,9 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
         winner = C.ROOT / f"best_params_{mtype}.json"
         r = subprocess.run([sys.executable, str(C.ROOT / "trainer" / "hpo.py"),
                             "--dataset_id", dataset_id, "--model_type", mtype,
-                            "--dataset_version", version, "--trials", str(trials),
+                            # STRIPPED like enqueue_all does -- trials tagged 'v7' while real
+                            # runs say '7' makes the same dataset look like two different ones.
+                            "--dataset_version", str(version).lstrip("v"), "--trials", str(trials),
                             "--queue", queue],       # or the trials ignore publish's --queue
                            cwd=str(C.ROOT))
         if r.returncode != 0 or not winner.exists():

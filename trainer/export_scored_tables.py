@@ -309,6 +309,36 @@ def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int
     sig.to_csv(signal_csv, index=False)
     print(f"      signal csv for the backtest: {signal_csv.name}  ({len(sig):,} rows)")
 
+    # COVERAGE CHECK. their engine inner-merges signal x price and says NOTHING when only part of
+    # the window matches -- measured on the real files: the price parquet ends 2025-07-31 while
+    # the master OOS runs to 2026-02-24, so HALF the OOS would be silently ignored and the report
+    # would read as if it covered everything. refuse the nothing case, shout about the partial.
+    try:
+        import pyarrow.parquet as pq
+        pf = pq.ParquetFile(str(price_path))
+        tcol = next((f.name for f in pf.schema_arrow
+                     if f.name.lower() in ("timestamp", "datetime", "date", "ts")), None)
+        if tcol:
+            pt = pd.to_datetime(pd.read_parquet(price_path, columns=[tcol])[tcol])
+            st = pd.to_datetime(sig["timestamp"])
+            covered = int(((st >= pt.min()) & (st <= pt.max())).sum())
+            pct = covered / max(len(st), 1) * 100
+            if covered == 0:
+                print(f"      !! ZERO overlap: signals {st.min()} -> {st.max()}, prices "
+                      f"{pt.min()} -> {pt.max()}. skipping the backtest -- get a price file "
+                      f"that covers the signal window.")
+                return 1
+            if pct < 90:
+                print(f"      !! PARTIAL PRICE COVERAGE: only {covered:,} of {len(st):,} signal "
+                      f"rows ({pct:.0f}%) fall inside the price file "
+                      f"({pt.min().date()} -> {pt.max().date()}).")
+                print(f"      !! the report below covers ONLY that slice -- do not read it as "
+                      f"the full period. update the OHLCV file to fix this.")
+            else:
+                print(f"      price coverage: {covered:,}/{len(st):,} signal rows ({pct:.0f}%)")
+    except Exception as exc:
+        print(f"      (coverage check skipped: {exc})")
+
     bt_out = out_dir / "backtest"
     cmd = [sys.executable, "-u", str(script_path), str(signal_csv), str(price_path), str(bt_out)]
     print(f"\n{'=' * 70}\nBACKTEST  {' '.join(cmd[1:])}\n{'=' * 70}", flush=True)
@@ -399,7 +429,13 @@ def main():
                                meta={"scored_dataset_version": a.oos_tag or "oos"})
         p = write_oos(tbl, a.oos_tag, bundle.get("model_type", ""), version, a.out, task=None)
         if a.backtest:
-            run_backtest(a.backtest, p, a.price, a.out, task=None)
+            # same resolution as pipeline mode: an explicit --price wins; else the price dataset
+            # (fetched via ClearML if importable); else config's PRICE_FILE. --price_dataset_id
+            # used to be ACCEPTED here and silently ignored.
+            price = resolve_price(a.price or getattr(C, "PRICE_FILE", ""),
+                                  a.price_dataset_id or getattr(C, "PRICE_DATASET_ID", ""),
+                                  Dataset)
+            run_backtest(a.backtest, p, price, a.out, task=None)
         print(f"\ndone (local oos). table: {p}")
         return
 

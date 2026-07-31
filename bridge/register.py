@@ -129,29 +129,48 @@ def inspect(path, allow: list | None = None) -> dict:
         t = str(df[c].dtype)
         (cat_cols if t in ("object", "str", "string", "category", "bool") else num_cols).append(c)
 
-    # measure the real bar period. a 5-min value written onto five 1-min rows repeats across
-    # those rows -- that repetition is what gives the clock away.
-    #
-    # EVERY column, not just the numbers. this used to pass cols=num_cols, so a TEXT column was
-    # never measured at all -- and then the registry printed a confident `clock:` for a feature
-    # whose one categorical column had never been looked at. gap_state is exactly that column.
-    # a clock that was never measured is not a measurement, it is a guess wearing a lab coat.
-    clock = infer_bar_minutes(df) if len(df.columns) else 1
+    # IS THIS FILE ALREADY PROCESSED BY THE FEATURE TEAM? decided BEFORE the clock work, because
+    # a pre-aligned file never goes through bar_close -- its clock feeds nothing, and measuring
+    # 569 columns x 915k rows three times over (the V9 file) costs real minutes for a number
+    # nobody uses. detection: if essentially every column already contains '__', it has been
+    # through their pipeline (merged, aligned, 'source__column' named).
+    _cols = list(df.columns)
+    _dunder = sum(1 for c in _cols if "__" in str(c))
+    pre = bool(_cols) and _dunder >= max(1, int(0.9 * len(_cols)))
 
-    # per-column, so a mixed parquet (a 5-min signal next to the 1-min price it came from) is
-    # visible to the human reading the ballot, instead of being flattened to one number.
-    per_col = {c: f"{m}min" for c, m in column_clocks(df).items()}
+    if pre:
+        clock, per_col, unsure = 1, None, None
+        print(f"      pre-processed matrix ({_dunder}/{len(_cols)} columns carry '__') -- "
+              f"clock measurement SKIPPED (pre_aligned files never go through bar_close)")
+    else:
+        # measure the real bar period. a 5-min value written onto five 1-min rows repeats across
+        # those rows -- that repetition is what gives the clock away.
+        #
+        # EVERY column, not just the numbers. this used to pass cols=num_cols, so a TEXT column
+        # was never measured at all -- and then the registry printed a confident `clock:` for a
+        # feature whose one categorical column had never been looked at. gap_state is exactly
+        # that column. a clock never measured is not a measurement, it is a guess in a lab coat.
+        # (column_clocks runs ONCE; infer_bar_minutes = max of it and the row spacing --
+        # it used to be called separately, re-measuring every column a second time.)
+        from bridge.align import row_spacing_minutes
+        per_col_map = column_clocks(df) if len(df.columns) else {}
+        clock = max([row_spacing_minutes(df), *per_col_map.values()], default=1) \
+            if len(df.columns) else 1
+        per_col = {c: f"{m}min" for c, m in per_col_map.items()}
 
-    # is the measurement WORTH anything? a column that hardly ever changes cannot be told apart
-    # from a column on a slow clock -- so we say so, instead of pretending we know.
-    reports = {c: clock_report(df[c]) for c in df.columns}
-    unsure = sorted(c for c, r in reports.items() if not r["confident"])
+        # is the measurement WORTH anything? a column that hardly ever changes cannot be told
+        # apart from a column on a slow clock -- so we say so, instead of pretending we know.
+        reports = {c: clock_report(df[c]) for c in df.columns}
+        unsure = sorted(c for c, r in reports.items() if not r["confident"])
 
     # count the NaN per column, so the human can see whether a policy is even needed
     na = {c: int(df[c].isna().sum()) for c in df.columns}
     has_na = any(v > 0 for v in na.values())
 
+    # (`pre` was decided ABOVE, before the clock work -- one detector, one answer.)
     return {
+        "pre_prefixed": pre,             # columns already 'source__column' -> do NOT prefix again
+        "pre_aligned": pre,              # already bar_close-aligned by them -> do NOT shift again
         "clock": f"{clock}min",
         "clock_measured": f"{clock}min",
         "clock_per_column": per_col,
@@ -265,6 +284,13 @@ def main():
             "group": group,
             "clock": keep_clock,
             "clock_measured": info["clock"],
+            # already-processed matrices (V7/V8/V9), detected by inspect() from the '__' naming.
+            # WITHOUT these two lines the detection was computed and thrown away -- the registry
+            # entry had neither key, so build_dataset re-aligned (values one bar stale, silently)
+            # and double-prefixed every column. a human can overrule by editing registry.yaml;
+            # the two-arg .get keeps an explicit false through a rescan, same as clock/na_policy.
+            "pre_prefixed": old.get("pre_prefixed", info["pre_prefixed"]),
+            "pre_aligned": old.get("pre_aligned", info["pre_aligned"]),
             # keep whatever the human already set; only default it the first time
             "na_policy": old.get("na_policy", C.DEFAULT_NA_POLICY),
             "desc": old.get("desc", ""),

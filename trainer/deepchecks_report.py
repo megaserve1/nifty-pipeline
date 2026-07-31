@@ -90,6 +90,11 @@ def build_datasets(df: pd.DataFrame, bundle: dict, sample: int):
     """(train_ds, test_ds, n_train, n_test) as deepchecks Datasets, split like training did."""
     from deepchecks.tabular import Dataset as DcDataset
     from predict import prepare                        # the EXACT training preprocessing
+    from trainer.export_scored_tables import normalise_time_column
+
+    # the handed-over matrices (V7/V8/V9) store time as a DatetimeIndex named 'datetime';
+    # everything below reads a 'timestamp' COLUMN. same normaliser as the scoring step.
+    df = normalise_time_column(df)
 
     feats = list(bundle["features"])
     le = bundle["label_encoder"]

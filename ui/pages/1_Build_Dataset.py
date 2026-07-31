@@ -84,9 +84,22 @@ def version_info(v: str):
         m = json.loads(man.read_text())
         full = m.get("feature_columns", [])
         summary = {"columns": len(full), "rows": m.get("rows"), "labels": m.get("labels_name")}
-    prefix = f"{source}__"
-    raw = [c[len(prefix):] for c in (full or []) if c.startswith(prefix)]
+    if (registry().get(source) or {}).get("pre_prefixed"):
+        # a pre-prefixed source (V7/V8/V9): built names ARE the registry names -- nothing to strip
+        raw = list(full or [])
+    else:
+        prefix = f"{source}__"
+        raw = [c[len(prefix):] for c in (full or []) if c.startswith(prefix)]
     return source, raw, (doc.get("labels_name") or ""), summary
+
+
+def built_name(source: str, col: str) -> str:
+    """the column name as it exists in the BUILT parquet. normal sources get 'source__col';
+    a pre_prefixed source (V7/V8/V9 -- already named by the feature team) keeps the name as-is.
+    writing 'V8_TRAIN__bar_conviction_raw__x' into a recipe would match NOTHING at build time."""
+    if (registry().get(source) or {}).get("pre_prefixed"):
+        return col
+    return f"{source}__{col}"
 
 
 def recipe_doc(features_list, columns_full, labels, parent, omit_columns=False):
@@ -283,7 +296,7 @@ if mode == "Fresh selection":
     for f in ticked:
         by_source.setdefault(feat_src[f], []).append(f)
     features_list = sorted(by_source)
-    columns_full = [f"{s}__{f}" for s in features_list for f in by_source[s]]
+    columns_full = [built_name(s, f) for s in features_list for f in by_source[s]]
     omit_columns = False
 else:
     # clone one built version: single source, change it by scope (whole / minus some / only some)
@@ -314,7 +327,7 @@ else:
                                   default=keep_default, key=f"keep::{source}::{parent}")
             ticked = keep
     features_list = [source]
-    columns_full = [f"{source}__{c}" for c in ticked]
+    columns_full = [built_name(source, c) for c in ticked]
     omit_columns = (set(ticked) == set(all_raw))
 
 # ---- selection summary ------------------------------------------------------

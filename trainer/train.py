@@ -443,7 +443,7 @@ def main():
 
     feat_cols = man["feature_columns"] if man else [c for c in df.columns if "__" in c]
     cat_cols = (man or {}).get("categorical_columns", [])
-    y_raw = df[C.LABEL_COL].astype(str)
+    y_raw = df[C.LABEL_COL].astype(str).str.strip()   # 6 of 7 raw labels carry a trailing space
     # THE ROW WEIGHTS. two sources, config decides which:
     #   config.CLASS_WEIGHTS set -> a fixed weight per CLASS, mapped BY NAME (never by class index:
     #                               LabelEncoder sorts alphabetically, so an index-keyed dict would

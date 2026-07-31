@@ -132,8 +132,21 @@ def _numify(s: pd.Series):
 
 
 def _matches(name: str, patterns) -> bool:
+    """test the full name AND the part after the last '__'.
+
+    the pre-merged matrices (V7/V8/V9) arrive with 'source__column' names, and every '^'-anchored
+    pattern is dead against those: '^label_int' can never match 'trend_direction_raw__label_int',
+    '^session$' can never match 'vwap_microstructure_raw__session'. measured on the real V9 file:
+    a raw DATE-AS-TEXT column sailed straight through because of exactly this. so the SUFFIX --
+    the name the feature team actually gave the column -- is screened too.
+    """
     low = name.lower()
-    return any(re.search(p, low) for p in patterns)
+    if any(re.search(p, low) for p in patterns):
+        return True
+    if "__" in low:
+        suffix = low.rsplit("__", 1)[-1]
+        return any(re.search(p, suffix) for p in patterns)
+    return False
 
 
 def screen(df: pd.DataFrame, price_col: str | None = None, allow: list | None = None) -> dict:

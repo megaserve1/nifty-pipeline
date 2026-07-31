@@ -50,9 +50,12 @@ def main():
     ap.add_argument("--oos_tag", default="", help="short name, e.g. 2025h2 (goes in the filename)")
     ap.add_argument("--model_task_ids", default="", help="comma-separated training task ids")
     ap.add_argument("--version", default="", help="instead of ids: find the trainers for this vN")
-    ap.add_argument("--backtest", default="", help="backtest script to run on each table")
-    ap.add_argument("--price_dataset_id", default="",
-                    help="ClearML dataset id of the OHLC prices the backtest needs")
+    # DEFAULT FROM CONFIG, not blank. with '' defaults, forgetting these flags queued tasks that
+    # wrote the table, skipped the backtest, and still finished green -- config already knows both.
+    ap.add_argument("--backtest", default=C.BACKTEST_SCRIPT,
+                    help="backtest script to run on each table (default: config.BACKTEST_SCRIPT)")
+    ap.add_argument("--price_dataset_id", default=C.PRICE_DATASET_ID,
+                    help="ClearML dataset id of the OHLC prices (default: config.PRICE_DATASET_ID)")
     ap.add_argument("--queue", default=None, help=f"default: {C.OOS_QUEUE}")
     a = ap.parse_args()
 
