@@ -357,14 +357,20 @@ def test_apply_hpo_refuses_a_range_edge_winner(tmp_path, monkeypatch):
     # space a discrete list [3, 7, 10, 14], so 10 became a MIDDLE rung and the test failed --
     # not because the guard broke, but because the test knew a number the yaml no longer had.
     # asking hyperparams for the current extreme means re-tuning can never break this again.
+    # AND DO NOT HARDCODE THE KNOB NAME EITHER. this used to ask for max_depth specifically, and
+    # h8 (2026-07-31) dropped it from xgboost's search space (fixed at 0 = unlimited) -- so the
+    # test died on KeyError while the guard it is testing was perfectly healthy. take whatever
+    # discrete knob the CURRENT yaml searches; the guard is about range edges, not about any one
+    # parameter. same lesson as the paragraph above, one level up.
     space = {p.name.split("/", 1)[1]: p for p in H.search_space("xgboost")}
-    md = space["max_depth"]
-    edge = getattr(md, "values", None)[-1] if getattr(md, "values", None) else md.max_value
+    knob = next((n for n, p in sorted(space.items()) if getattr(p, "values", None)), None)
+    assert knob, "xgboost has no discrete search knob -- cannot test the range-edge guard"
+    edge = space[knob].values[-1]
 
     winner = tmp_path / "best_params_xgboost.json"
     winner.write_text(json.dumps({"model_type": "xgboost", "dataset_version": "v3",
                                   "val_trading_cost": 30, "test_trading_cost": 33,
-                                  "params": {"max_depth": edge}}))
+                                  "params": {knob: edge}}))
     # POINT THE SUBPROCESS AT A THROWAWAY TUNED DIR. monkeypatch cannot reach a subprocess -- it
     # re-imports hyperparams in its own interpreter -- so when this test's winner was NOT refused
     # (h2 turned max_depth 10 from a range edge into a middle rung), apply_hpo promoted it into

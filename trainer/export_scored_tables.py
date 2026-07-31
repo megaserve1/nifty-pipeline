@@ -353,11 +353,17 @@ def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int
         if out.strip():
             # park it as a report too, so it survives console truncation on a long run
             task.get_logger().report_text(out, print_console=False)
-        # their CSVs land in a timestamped folder -- upload them or they die with the worker
+        # their CSVs land in a timestamped folder -- upload them or they die with the worker.
+        # RGLOB, not glob: the 3-version suite writes comparison.csv + full_report.txt at the top
+        # and then one SUBFOLDER per version (V1_.../metrics.csv, trades.csv, ...). a flat glob
+        # would upload two files and silently drop fifteen.
         for d in sorted(bt_out.glob("backtest_*")):
-            for f in sorted(d.glob("*.csv")) + sorted(d.glob("*.txt")):
-                task.upload_artifact(f"backtest_{f.stem}", str(f))
-                print(f"      uploaded {f.name}")
+            for f in sorted(d.rglob("*.csv")) + sorted(d.rglob("*.txt")):
+                # name the artifact by its path inside the run folder, so V1/metrics and
+                # V2/metrics do not overwrite each other under one name.
+                rel = f.relative_to(d).with_suffix("")
+                task.upload_artifact(f"backtest_{str(rel).replace('/', '_')}", str(f))
+                print(f"      uploaded {rel}")
     if r.returncode != 0:
         print(f"      !! backtest exited {r.returncode} -- output above.")
     return r.returncode

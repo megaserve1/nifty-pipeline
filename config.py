@@ -106,7 +106,7 @@ MODEL_TYPES = ["xgboost", "catboost"]   # random_forest turned OFF -- xgboost + 
 # ---- ClearML ------------------------------------------------------------------
 # project name. defaults to production; set NIFTY_PROJECT to point a whole run at a throwaway test
 # project (register/build/publish/train all follow it). unset it to go back -- no code change.
-CLEARML_PROJECT   = os.environ.get("NIFTY_PROJECT", "Nifty Production")
+CLEARML_PROJECT   = os.environ.get("NIFTY_PROJECT", "nifty_main")
 CLEARML_DATASET   = "nifty_signal_dataset"
 # the OOS (out-of-sample) set the backtest scores against. IT MUST NOT SHARE THE TRAINING DATASET
 # NAME: auto_trigger watches CLEARML_DATASET, so publishing OOS rows under that name would start
