@@ -83,7 +83,9 @@ DEEPCHECKS_SAMPLE  = 50_000
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
 BACKTEST_SCRIPT   = "scripts/backtest_single.py"
-PRICE_DATASET_ID  = "f7471a4a6cc4422ebdaa34456ee2f678"   # nifty_ohlcv, bytes in gs://<bucket>/datasets
+PRICE_DATASET_ID  = "38fd089b7bc94153a8378d6fce27a8bf"   # nifty_ohlcv 2015-01-09 -> 2026-02-24
+                                        # (covers the FULL master-OOS window and the V7/V8/V9
+                                        # training range. bytes in gs://<bucket>/datasets.)
                                         # ClearML dataset id of the OHLCV prices -- ANY worker can
                                         #   fetch this. wins over PRICE_FILE below.
 PRICE_FILE        = ""                  # OR a LOCAL path to the OHLCV parquet. only works while
