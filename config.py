@@ -35,13 +35,70 @@ CONFIGS_DIR  = ROOT / "configs"
 # they were built from DIFFERENT files. A lineage record that lies is worse than none. The name
 # now moves when the file does, and it cannot be forgotten because there is nothing to remember.
 # (LABELS_FILE is defined below, in the [BRIDGE] section -- Python resolves this at call time.)
+def label_menu() -> dict:
+    """the label sets that EXIST, read from data/labels/registry.yaml -- the one source of truth.
+
+    config does not keep its own copy of this. a hard-coded default here (a filename, or even a
+    handle) goes stale the moment the label team swaps a file, and every recipe frozen without an
+    explicit --labels then names something that is not there. the menu is the register; this reads
+    it. read lazily, on call, so config stays importable even if the menu is missing.
+    """
+    p = LABELS_DIR / "registry.yaml"
+    if not p.exists():
+        return {}
+    try:
+        import yaml
+        return yaml.safe_load(p.read_text()) or {}
+    except Exception:
+        return {}
+
+
 def labels_name() -> str:
-    import re
-    stem = LABELS_FILE.rsplit(".", 1)[0]
-    # strip ANY  YYYY-MM-DD_HHMM  stamp so the logical name is stable across re-labels. hard-coding
-    # one date meant a new labels file kept its full dated name -- the exact staleness this guards
-    # against. the labels_sha256 in the manifest is what proves two files differ, not this name.
-    return re.sub(r"^(labels_1min_)\d{4}-\d{2}-\d{2}_\d{4}_", r"\1", stem)
+    """the DEFAULT label handle. DERIVED, never hard-coded.
+
+    the rules, in order:
+      1. a handle marked `default: true` in the menu wins.
+      2. exactly one label set in the menu -> that one, obviously.
+      3. several, none marked -> REFUSE. picking one silently would decide something the person
+         freezing the version is supposed to decide (same features + a different label is a
+         DIFFERENT version), and a wrong guess is invisible until the numbers disagree.
+    """
+    # the override hook wins, for both this and _find_labels -- one pin, one answer. a pinned
+    # value may be a handle ("L1") or a literal filename ("labels_mini.csv"); the stem is the name.
+    if LABELS_FILE:
+        return LABELS_FILE.rsplit(".", 1)[0] if "." in LABELS_FILE else LABELS_FILE
+
+    menu = label_menu()
+    if not menu:
+        raise SystemExit(
+            f"no label menu at {LABELS_DIR/'registry.yaml'} -- add one entry per label set:\n"
+            f"  L1:\n    file: L1.parquet\n    note: \"what it is, in plain words\"")
+    marked = [k for k, v in menu.items() if isinstance(v, dict) and v.get("default")]
+    if marked:
+        return marked[0]
+    if len(menu) == 1:
+        return next(iter(menu))
+    raise SystemExit(
+        f"{len(menu)} label sets exist ({', '.join(sorted(menu))}) and none is marked default.\n"
+        f"  say which one:   python core/make_version.py --from-sheet --labels L1\n"
+        f"  or mark one in {LABELS_DIR/'registry.yaml'} with  default: true")
+
+# ---- how the data is cut into train / val / test -------------------------------
+# "time"           TRAIN | embargo | VAL | embargo | TEST, oldest to newest. the honest default:
+#                  one boundary, one gap, and the gap is >= the longest feature lookback.
+# "bundle_random"  whole 15-minute candles assigned at RANDOM. no minute is split across slices,
+#                  but there is NO embargo and none is possible (see bundle_random_split) --
+#                  train and test end up interleaved, minutes apart, while the features look back
+#                  20 sessions. ON TRIAL. run scripts/forward_holdout_test.py before trusting a
+#                  number that came out of it; the quick experiment showed it inflating ranking
+#                  metrics ~2x, which is either a leak or a real gain and only the forward slice
+#                  can tell you which.
+# CHOSEN 2026-07-31 after scripts/forward_holdout_test.py: on the forward hold-out, bundle_random
+# scored macro_f1 0.139 / cost 88.2 vs time's 0.135 / 90.1, and showed NO inflation (its dev score
+# 0.115 was LOWER than its forward 0.139 -- a leaking split shows the opposite).
+SPLIT_STRATEGY = "bundle_random"
+BUNDLE_MINUTES = 15        # one bundle = one candle. only used by bundle_random.
+SPLIT_SEED     = 42        # recorded in the model bundle: a different seed = a DIFFERENT split.
 
 # ---- the three models ---------------------------------------------------------
 MODEL_TYPES = ["xgboost", "catboost"]   # random_forest turned OFF -- xgboost + catboost only
@@ -55,11 +112,38 @@ CLEARML_DATASET   = "nifty_signal_dataset"
 # NAME: auto_trigger watches CLEARML_DATASET, so publishing OOS rows under that name would start
 # TRAINING on out-of-sample data.
 CLEARML_OOS_DATASET = "nifty_oos_dataset"
+CLEARML_PRICE_DATASET = "nifty_ohlcv"       # the OHLCV the backtest prices trades against
+
+
+def resolve_dataset_id(dataset_name: str, pinned: str = "") -> str:
+    """the id of a ClearML dataset, resolved BY NAME at call time.
+
+    WHY NOT PIN THE ID IN THIS FILE. an id is a fact that lives in ClearML, and a copy of it here
+    goes stale the moment the dataset is re-uploaded. that is not hypothetical: on 2026-07-31 the
+    OHLCV was replaced with a longer file, the old dataset was deleted, and config still named the
+    dead id -- every worker would have failed to fetch prices. a NAME survives a re-upload; the id
+    does not. same reasoning as labels_name() reading the label menu instead of holding a filename.
+
+    `pinned` is the escape hatch: set the *_DATASET_ID constant to freeze one exact version (for
+    reproducing an old result). empty = always take the newest under that name.
+    """
+    if pinned:
+        return pinned
+    from clearml import Dataset               # imported lazily: config must stay usable offline
+    try:
+        return Dataset.get(dataset_project=CLEARML_PROJECT, dataset_name=dataset_name).id
+    except Exception:
+        # PRICES AND THE OOS SET ARE REFERENCE DATA, NOT PROJECT DATA. they are uploaded once and
+        # used by every project (production, a throwaway test project, whatever NIFTY_PROJECT is
+        # today), so refusing to look outside the current project would mean re-uploading the same
+        # 40 MB per project. fall back to a name search across projects.
+        return Dataset.get(dataset_name=dataset_name).id
 # the master OOS currently registered (MASTER_OOS 2025-01-01 -> 2026-02-24, 593 feature columns,
 # NO labels -- by design: the backtest evaluates from predictions, it does not need true labels).
 # it matches the V7/V8/V9 feature naming, NOT our v1-v6 datasets, so only a model trained on those
 # can score it. bytes live in gs://<bucket>/datasets.
-OOS_DATASET_ID    = "563f70e7ddb44e699e3a5d3c73f76573"
+OOS_DATASET_ID    = ""      # empty = resolve CLEARML_OOS_DATASET by name (the newest).
+                            # set an id here only to FREEZE one exact version for reproducing.
 TRAIN_QUEUE       = "training"          # a clearml-agent must listen here, or nothing runs
 SHAP_QUEUE        = "training"          # SHAP runs on the same queue by default
 EXPORT_QUEUE      = "training"          # scored-tables export runs on the same queue by default
@@ -83,11 +167,9 @@ DEEPCHECKS_SAMPLE  = 50_000
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
 BACKTEST_SCRIPT   = "scripts/backtest_single.py"
-PRICE_DATASET_ID  = "38fd089b7bc94153a8378d6fce27a8bf"   # nifty_ohlcv 2015-01-09 -> 2026-02-24
-                                        # (covers the FULL master-OOS window and the V7/V8/V9
-                                        # training range. bytes in gs://<bucket>/datasets.)
-                                        # ClearML dataset id of the OHLCV prices -- ANY worker can
-                                        #   fetch this. wins over PRICE_FILE below.
+PRICE_DATASET_ID  = ""      # empty = resolve CLEARML_PRICE_DATASET ("nifty_ohlcv") by name,
+                            # so a re-upload is picked up automatically instead of leaving a dead
+                            # id here. set an id only to freeze one exact version.
 PRICE_FILE        = ""                  # OR a LOCAL path to the OHLCV parquet. only works while
                                         #   the agent runs on THIS machine -- a worker on another
                                         #   box has no such file and the backtest is skipped.
@@ -261,10 +343,13 @@ LABELS_DIR  = DATA_DIR / "labels"
 # fixed. 12.4% is on the LOW side (20-40% was the aim -- weight_raw 12,000-33,000 rather than
 # 7,000), so expect it still to lean toward over-trading. Do not argue about it: run
 # trainer/local_check.py and read the "minutes it would trade" line. That is the evidence.
-LABELS_FILE = "labels_1min_2026-07-17_1139_A20_Ex_z2_En_zNA_anchor_7class.csv"
-
-# the previous file, kept so a result can be reproduced against it.
-LABELS_FILE_ZERO_NOTRADE = "labels_1min_2026-07-03_1535_A20_Ex_z2_En_zNA_7class.csv"
+# NOTHING IS HARD-CODED HERE ANY MORE.
+# this used to be the literal filename of whichever labels were current. that is a copy of a fact
+# that lives in data/labels/registry.yaml, and a copy goes stale: the label team swapped the file
+# and every recipe frozen without --labels pointed at something that no longer existed. the menu
+# is the register; labels_name() reads it. LABELS_FILE is kept ONLY as an override hook (tests
+# monkeypatch it, and an odd setup can pin one file) -- empty means "ask the menu".
+LABELS_FILE = ""
 
 
 def _find_labels() -> Path:
@@ -279,15 +364,19 @@ def _find_labels() -> Path:
             return p
         tried.append(f"$NIFTY_LABELS -> {p}")
 
-    p = LABELS_DIR / LABELS_FILE                   # 2. THE RIGHT PLACE. in the repo, DVC-tracked.
-    if p.exists():
-        return p
-    tried.append(str(p))
+    # the handle comes from the MENU unless something pinned LABELS_FILE. a handle has no
+    # extension, so try both; a pinned literal filename is used exactly as given.
+    want = LABELS_FILE or labels_name()
+    names = ([want] if "." in want
+             else [f"{want}.parquet", f"{want}.csv", want])
 
-    p = Path.home() / "Downloads" / LABELS_FILE    # 3. the old spot. works, but only on ONE box.
-    if p.exists():
-        return p
-    tried.append(str(p))
+    for base in (LABELS_DIR,                       # 2. THE RIGHT PLACE. in the repo, DVC-tracked.
+                 Path.home() / "Downloads"):       # 3. the old spot. works, but only on ONE box.
+        for n in names:
+            p = base / n
+            if p.exists():
+                return p
+            tried.append(str(p))
 
     # Do not return a path that does not exist -- that produces a FileNotFoundError 200 lines
     # later, from inside pandas, and it tells you nothing about what to do.
@@ -296,9 +385,9 @@ def _find_labels() -> Path:
         + "\n    ".join(tried)
         + f"\n\n  put it in the project so every machine can find it:\n"
           f"      mkdir -p {LABELS_DIR}\n"
-          f"      mv ~/Downloads/{LABELS_FILE} {LABELS_DIR}/\n"
-          f"      dvc add {LABELS_DIR / LABELS_FILE}\n"
-          f"      git add {LABELS_DIR / LABELS_FILE}.dvc && git commit -m 'labels'\n"
+          f"      mv ~/Downloads/{names[0]} {LABELS_DIR}/\n"
+          f"      dvc add {LABELS_DIR / names[0]}\n"
+          f"      git add {LABELS_DIR / names[0]}.dvc && git commit -m 'labels'\n"
           f"      dvc push\n\n"
           f"  then on any other machine:  git clone ... && dvc pull\n")
 
@@ -373,30 +462,33 @@ INDEX_COL       = "unique_index"
 # A name -> weight map cannot be silently reordered, so that class of bug is impossible here.
 # THESE ARE BALANCED (INVERSE-FREQUENCY) WEIGHTS -- sklearn's class_weight="balanced" formula:
 #
-#         weight_i = N / (K * n_i)        N = 513,611 rows, K = 7 classes, n_i = rows in class i
+#         weight_i = N / (K * n_i)        N = 1,021,847 rows, K = 7 classes, n_i = rows in class i
 #
-# computed on the anchor labels and rounded to 2dp. the property that makes them worth using:
-# weight_i * n_i is CONSTANT, so every class commands the SAME ~14.3% share of the loss. that lifts
-# the ENTRY classes from ~20% of the loss (under conviction weights) to 42.9% -- the rare classes
-# the models were completely blind to.
+# the property that makes them worth using: weight_i * n_i is CONSTANT, so every class commands the
+# SAME ~14.3% share of the loss. that lifts the ENTRY classes -- the ones the models were completely
+# blind to -- from a few percent of the loss to 42.9% between them.
 #
-# >>> DO NOT ROUND THESE TO INTEGERS. <<<  NO_TRADE (0.21) would round to 0, and 353,407 rows --
-# 69% of the dataset -- would contribute NOTHING to the loss. the model could then never learn
-# "don't trade" and would try to trade every minute. 2dp is the floor.
+# >>> DO NOT ROUND NO_TRADE TO AN INTEGER. <<<  it would become 0, and 761,735 rows (74.5% of the
+# dataset) would contribute NOTHING to the loss. the model could then never learn "don't trade" and
+# would try to trade every minute. that exact failure is why this line is a decimal.
 #
-# NOTE: derived from the CURRENT label counts. if the labels change, recompute:
+# RECOMPUTED 2026-07-31 for the new L1 (1,021,847 rows, 2015-01-09 -> 2026-02-24). the previous
+# numbers were computed on the 513,611-row file and were stale the moment it was replaced.
+# to recompute after any label change:
 #         weight_i = len(labels) / (7 * rows_in_class_i)
+#
+# THE SWITCH: set this to {} and the trainer falls back to the labels file's own per-row 'weight'
+# column (signal strength: SUPER > SUB > SMALL) instead of these per-class weights. the new L1
+# already gives NO_TRADE 0.0638 there rather than 0, so that fallback is now a real option.
 CLASS_WEIGHTS = {
-    "ENTRY_SUB":   12,      # rarest      (5,895 rows)   exact 12.4466
-    "ENTRY_SMALL":  5,      #            (13,614 rows)   exact  5.3895
-    "ENTRY_SUPER":  4,      #            (19,603 rows)   exact  3.7429
-    "EXIT_SUB":     3,      #            (25,320 rows)   exact  2.8978
-    "EXIT_SMALL":   2,      #            (34,830 rows)   exact  2.1066
-    "EXIT_SUPER":   1,      #            (60,942 rows)   exact  1.2040
-    "NO_TRADE":     0.2,    # most common (353,407 rows) exact  0.2076
-                            # ^ STAYS DECIMAL ON PURPOSE. rounded to 0 it would delete 353,407 rows
-                            #   (69% of the data) from the loss and the model could never learn
-                            #   "don't trade". every other class is a whole number; this one is not.
+    "ENTRY_SUB":    19,     # rarest        (  7,845 rows,  0.8%)  exact 18.6078
+    "ENTRY_SMALL":  14,     #               ( 10,665 rows,  1.0%)  exact 13.6876
+    "EXIT_SMALL":    8,     #               ( 18,135 rows,  1.8%)  exact  8.0495
+    "ENTRY_SUPER":   4,     #               ( 34,380 rows,  3.4%)  exact  4.2460
+    "EXIT_SUB":      2,     #               ( 65,578 rows,  6.4%)  exact  2.2260
+    "EXIT_SUPER":    1,     #               (123,509 rows, 12.1%)  exact  1.1819
+    "NO_TRADE":      0.192,  # most common  (761,735 rows, 74.5%)  exact  0.1916
+                            # ^ STAYS DECIMAL ON PURPOSE (see above).
 }
 
 # ---- what a feature's NaN MEANS ------------------------------------------------

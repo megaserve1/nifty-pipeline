@@ -223,7 +223,7 @@ def test_the_whole_chain_register_freeze_build_certify_load(world, monkeypatch):
 
     # ---- 7. LOAD THE WAY TRAIN.PY DOES -------------------------------------------------
     from trainer.objective import three_way_split
-    tr, va, te, info = three_way_split(ts, 0.0, 0.3, C.EMBARGO_SESSIONS)
+    tr, va, te, info = three_way_split(ts, 0.0, 0.3, C.EMBARGO_SESSIONS, strategy="time")
     assert int(va.sum()) == 0 and int(tr.sum()) > 0 and int(te.sum()) > 0
     tr_days = set(pd.DatetimeIndex(ts[tr]).normalize())
     te_days = set(pd.DatetimeIndex(ts[te]).normalize())

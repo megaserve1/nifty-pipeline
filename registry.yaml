@@ -36,7 +36,6 @@ v7_train:
   - trend_maturity_bucket__maturity_name
   - volume_quality_bucket__Volume_Quality
   - vwap_microstructure_bucket__vwap_microstructure
-  - rrg_features__RRG_Regime
   clock: 1min
   clock_measured: 1min
   clock_override: null
@@ -67,13 +66,12 @@ v7_train:
   - trend_maturity_bucket__maturity_name
   - volume_quality_bucket__Volume_Quality
   - vwap_microstructure_bucket__vwap_microstructure
-  - candle_pattern_raw__vote_sum
-  - rrg_features__RRG_Regime
+  - vol_level_raw__vol_level_pct60d_ord
+  - vol_level_raw__vol_level_ord
+  - fade_risk_raw__fade_risk
   - nifty_context_features__Expiry_Flag
-  - vsa_dev_bucket_features__vsa_dev
+  - candle_pattern_raw__vote_sum
   - dc_pos_275_bucket_features__dc_pos_275_bucket
-  - features_47__basis_zscore_30
-  - nifty_context_features__Sma_50_Close_dist_atr_14
   desc: ''
   file: V7_TRAIN.parquet
   group: _root
@@ -82,18 +80,17 @@ v7_train:
     candle_pattern_bucket__live_label: 1
     candle_pattern_raw__vote_sum: 1
     dc_pos_275_bucket_features__dc_pos_275_bucket: 275
-    features_47__basis_zscore_30: 11
     level_proximity_bucket__range_state: 375
     momentum_state_bucket__state: 5
-    nifty_context_features__Sma_50_Close_dist_atr_14: 49
     pullback_severity_bucket__pullback_severity: 5
     structural_position_bucket__structural_position_120m: 156
     structural_position_bucket__structural_position_1d: 375
     structural_position_bucket__structural_position_60m: 157
     trend_direction_bucket__trend_direction: 5
     trend_maturity_bucket__maturity_name: 5
+    vol_level_raw__vol_level_ord: 7500
+    vol_level_raw__vol_level_pct60d_ord: 4059
     volume_quality_bucket__Volume_Quality: 7500
-    vsa_dev_bucket_features__vsa_dev: 15900
   na_policy: sentinel
   pre_aligned: true
   pre_prefixed: true

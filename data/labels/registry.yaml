@@ -1,30 +1,26 @@
 # data/labels/registry.yaml -- THE LABEL MENU.
 #
-# a person (technical or not) picks a label by its HANDLE (L1, L2, L3, ...) and its explanation --
-# never the file name. a dataset version records the handle in its recipe (labels_name: L3), and
+# a person (technical or not) picks a label by its HANDLE (L1, L2, ...) and its explanation --
+# never the file name. a dataset version records the handle in its recipe (labels_name: L1), and
 # build_dataset resolves data/labels/<handle>.{csv,parquet} and hashes it. the sha256 below is the
 # REAL identity: it catches the exact file even if someone swaps one later.
 #
-# to add a label: drop data/labels/L<n>.csv (or .parquet), add an entry here, dvc add + git commit.
+# to add a label: drop data/labels/L<n>.csv (or .parquet), add an entry here, then commit.
 #
-# NOTE: the `note:` fields are DRAFTED from each file name (A20 = 20-bar forward window, Ex_z2 =
-# exit threshold z=2, En_zNA = entry z none, anchor = anchored, 7class = 7 classes). CONFIRM /
-# rewrite them in your own words -- this is what a non-technical picker reads.
+# 2026-07-31: the three earlier entries (L1.csv / L2.csv, 2020-2025 only, and the L3 raw dump whose
+# label column held threshold strings rather than classes) were REPLACED by one file spanning the
+# whole history. they were left pointing at files that no longer exist, and a recipe naming L2 or
+# L3 would have failed the build -- so they are removed rather than kept as dead entries.
 
 L1:
-  file: L1.csv
-  source: labels_1min_2026-07-17_1139_A20_Ex_z2_En_zNA_anchor_7class.csv
-  note: "20-bar forward window, exit threshold z=2, entry z=none, ANCHORED, 7 classes. (current default)"
-  sha256: "0797b842b441a181b9117374da9467551c3e57ad44adbd5b1d65db50858ea4ce"
-
-L2:
-  file: L2.csv
-  source: labels_1min_2026-07-18_1642_A20_Ex_z2_En_zNA_7class.csv
-  note: "20-bar forward window, exit threshold z=2, entry z=none, NOT anchored, 7 classes."
-  sha256: "19e12473c26722399af3307a9ffc2790f9e3a1b69904fe29d5ea6cfb2de54c33"
-
-L3:
-  file: L3.parquet
-  source: labels_1min_2026-07-24_1539_A20_Ex_z2_En_zNA.parquet
-  note: "20-bar forward window, exit threshold z=2, entry z=none. CONFIRM the class scheme (name has no _7class)."
-  sha256: "828720b2f374e71684d3f38a825b09df6bee5792a550a2160e5e407f5eb4ecee"
+  file: L1.parquet
+  note: "20-bar forward window, exit threshold z=2, entry z=none, 7 classes. 2015-01-09 -> 2026-02-24 -- covers the FULL V7/V8/V9 training range AND the master OOS window. (current default)"
+  rows: 1021847
+  span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
+  # NO_TRADE now carries weight 0.0638, NOT 0. this matters more than it looks: a zero-weight class
+  # contributes nothing to the loss, so the model could never learn to stay out and wanted to trade
+  # every single minute. that was the one open number in the label policy; this file closes it.
+  no_trade_weight: 0.0638
+  class_share: {NO_TRADE: 0.745, EXIT_SUPER: 0.121, EXIT_SUB: 0.064, ENTRY_SUPER: 0.034,
+                EXIT_SMALL: 0.018, ENTRY_SMALL: 0.010, ENTRY_SUB: 0.008}
+  sha256: "ebbaec9fc4daa1b0b2968ea9733ff9d3d228b377d0b666c7b6f4b28e2848c60d"

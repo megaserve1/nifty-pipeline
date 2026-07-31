@@ -81,8 +81,81 @@ OBJECTIVE_SIGN = "min"               # trading_cost is a COST. lower is better.
 
 
 # ---------------------------------------------------------------- the split
+def bundle_random_split(ts: pd.Series, val_fraction: float, test_fraction: float,
+                        bundle_minutes: int = 15, seed: int = 42):
+    """cut by whole BUNDLES, assigned at RANDOM. the alternative strategy, on trial.
+
+    THE IDEA. minutes inside one 15-minute candle are near-copies of each other, so splitting them
+    across train and test leaks. group each candle's minutes into a BUNDLE and send the whole
+    bundle to one side -- if 2c goes to test, 2a..2o all go to test. no minute is split.
+
+    THERE IS NO EMBARGO HERE, AND THAT IS NOT AN OVERSIGHT -- IT IS THE WHOLE RISK.
+    a time split has ONE boundary, so one gap protects it. random assignment interleaves train and
+    test all through the series, so every test bundle has training bundles minutes away on both
+    sides. the features look back 20 SESSIONS (~7,500 minutes = ~500 bundles), so an honest purge
+    would have to drop ~500 bundles around EVERY test bundle -- which would delete the dataset.
+    so this strategy cannot be made safe by a gap. either the leak is small enough not to matter,
+    or the strategy is wrong; that is a question for measurement, not argument, which is what
+    scripts/forward_holdout_test.py exists to settle. the manifest and the model bundle record
+    which strategy was used so no result can be mistaken for the other kind.
+
+    the seed is recorded and re-used by every consumer (shap, scored tables, deepchecks) -- a
+    different seed would reproduce a DIFFERENT split and mislabel which rows were test.
+    """
+    import numpy as np
+
+    ts = pd.to_datetime(ts)
+    if not 0 < test_fraction < 1:
+        raise ValueError("test_fraction must be between 0 and 1")
+    if not 0 <= val_fraction < 1:
+        raise ValueError("val_fraction must be 0 (off) or between 0 and 1")
+
+    bundle = ts.dt.floor(f"{bundle_minutes}min")          # every minute -> its candle
+    keys = pd.Index(bundle.unique()).sort_values()
+    rng = np.random.default_rng(seed)
+    shuffled = rng.permutation(len(keys))
+
+    n_test = int(round(len(keys) * test_fraction))
+    n_val = int(round(len(keys) * val_fraction))
+    test_keys = set(keys[shuffled[:n_test]])
+    val_keys = set(keys[shuffled[n_test:n_test + n_val]])
+
+    test = bundle.isin(test_keys)
+    val = bundle.isin(val_keys)
+    train = ~test & ~val
+
+    for name, m in (("train", train), ("test", test)) + ((("val", val),) if val_fraction else ()):
+        if int(m.sum()) == 0:
+            raise ValueError(f"the {name} slice is EMPTY -- {len(keys):,} bundles, "
+                             f"val_fraction={val_fraction} test_fraction={test_fraction}")
+    overlap = int((train & val).sum() + (val & test).sum() + (train & test).sum())
+    if overlap:
+        raise AssertionError(f"{overlap} rows are in two slices at once -- that is a leak")
+
+    info = {
+        "strategy": "bundle_random",
+        "bundle_minutes": bundle_minutes,
+        "seed": seed,
+        "n_bundles": int(len(keys)),
+        "embargo_sessions": 0,
+        "embargo_note": "NONE -- impossible under random assignment, see bundle_random_split()",
+        "n_train": int(train.sum()), "n_val": int(val.sum()), "n_test": int(test.sum()),
+        "n_embargoed": 0,
+        "train_end": str(ts[train].max()),
+        "val_start": str(ts[val].min()) if int(val.sum()) else None,
+        "val_end": str(ts[val].max()) if int(val.sum()) else None,
+        # NOT a time cut -- test rows are scattered. kept for the same key shape as the time split;
+        # consumers that treat it as "everything after this is test" would be WRONG here, which is
+        # why they must read `strategy` first.
+        "test_start": str(ts[test].min()),
+        "val_enabled": bool(int(val.sum())),
+    }
+    return train, val, test, info
+
+
 def three_way_split(ts: pd.Series, val_fraction: float, test_fraction: float,
-                    embargo_sessions: int):
+                    embargo_sessions: int, strategy: str = None,
+                    bundle_minutes: int = None, seed: int = None):
     """cut the data into  TRAIN | embargo | VALIDATION | embargo | TEST.
 
     WHY A THIRD SLICE. THIS IS THE POINT OF THE WHOLE EXERCISE.
@@ -131,6 +204,20 @@ def three_way_split(ts: pd.Series, val_fraction: float, test_fraction: float,
     returns (train_mask, val_mask, test_mask, info) -- three BOOLEAN masks that never overlap.
     """
     from trainer.purged_cv import embargo_end
+    import config as _C
+
+    # THE SWITCH. default comes from config, so one setting changes every caller -- but a caller
+    # that KNOWS its strategy (a consumer rebuilding a saved split from a model bundle) passes it
+    # explicitly, because rebuilding a random split with today's config instead of the recorded
+    # one would silently mislabel which rows were test.
+    strategy = strategy or getattr(_C, "SPLIT_STRATEGY", "time")
+    if strategy == "bundle_random":
+        return bundle_random_split(
+            ts, val_fraction, test_fraction,
+            bundle_minutes=bundle_minutes or getattr(_C, "BUNDLE_MINUTES", 15),
+            seed=seed if seed is not None else getattr(_C, "SPLIT_SEED", 42))
+    if strategy != "time":
+        raise ValueError(f"unknown SPLIT_STRATEGY {strategy!r} -- use 'time' or 'bundle_random'")
 
     if not 0 < test_fraction < 1:
         raise ValueError("test_fraction must be between 0 and 1")
@@ -181,6 +268,7 @@ def three_way_split(ts: pd.Series, val_fraction: float, test_fraction: float,
         raise AssertionError(f"{overlap} rows are in two slices at once -- that is a leak")
 
     info = {
+        "strategy": "time",
         "val_cut": str(val_cut),
         "test_cut": str(test_cut),
         "embargo_sessions": embargo_sessions,

@@ -46,7 +46,7 @@ def find_model_tasks(Task, version: str) -> list:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--oos_dataset_id", required=True, help="ClearML dataset id of the OOS set")
+    ap.add_argument("--oos_dataset_id", default="", help="ClearML dataset id of the OOS set")
     ap.add_argument("--oos_tag", default="", help="short name, e.g. 2025h2 (goes in the filename)")
     ap.add_argument("--model_task_ids", default="", help="comma-separated training task ids")
     ap.add_argument("--version", default="", help="instead of ids: find the trainers for this vN")
@@ -54,8 +54,9 @@ def main():
     # wrote the table, skipped the backtest, and still finished green -- config already knows both.
     ap.add_argument("--backtest", default=C.BACKTEST_SCRIPT,
                     help="backtest script to run on each table (default: config.BACKTEST_SCRIPT)")
-    ap.add_argument("--price_dataset_id", default=C.PRICE_DATASET_ID,
-                    help="ClearML dataset id of the OHLC prices (default: config.PRICE_DATASET_ID)")
+    ap.add_argument("--price_dataset_id", default="",
+                    help="ClearML dataset id of the OHLC prices "
+                         f"(default: resolve '{C.CLEARML_PRICE_DATASET}' by name)")
     ap.add_argument("--queue", default=None, help=f"default: {C.OOS_QUEUE}")
     a = ap.parse_args()
 
@@ -66,6 +67,13 @@ def main():
     if base is None:
         raise SystemExit(f"no base task '{C.BASE_OOS_NAME}'. run:  "
                          f"python trainer/register_base_trainer.py --force")
+
+    # resolve by NAME when no id was given -- never fall back to a constant that can go stale
+    price_id = a.price_dataset_id or C.resolve_dataset_id(
+        C.CLEARML_PRICE_DATASET, getattr(C, "PRICE_DATASET_ID", ""))
+    oos_id = a.oos_dataset_id or C.resolve_dataset_id(
+        C.CLEARML_OOS_DATASET, getattr(C, "OOS_DATASET_ID", ""))
+    print(f"  prices : {price_id}\n  oos    : {oos_id}")
 
     if a.model_task_ids:
         pairs = [(t.strip(), "") for t in a.model_task_ids.split(",") if t.strip()]
@@ -84,10 +92,10 @@ def main():
         run.set_parameters({
             "Args/mode": "oos",
             "Args/model_task_id": tid,
-            "Args/oos_dataset_id": a.oos_dataset_id,
+            "Args/oos_dataset_id": oos_id,
             "Args/oos_tag": tag,
             "Args/backtest": a.backtest,
-            "Args/price_dataset_id": a.price_dataset_id,
+            "Args/price_dataset_id": price_id,
         })
         Task.enqueue(run, queue_name=queue)
         print(f"  queued  {run.name}   (model task {tid})")

@@ -152,7 +152,10 @@ def score_dataset(df: pd.DataFrame, bundle: dict, oos: bool = False, meta: dict 
         if not sp:
             print("      !! old bundle: no recorded split. rebuilding from CURRENT config -- if config "
                   "changed since training, the train/test labels below are for the WRONG rows.")
-        tr, va, te, info = three_way_split(ts, val_frac, test_frac, embargo)
+        tr, va, te, info = three_way_split(
+            ts, val_frac, test_frac, embargo,
+            strategy=sp.get("strategy"), bundle_minutes=sp.get("bundle_minutes"),
+            seed=sp.get("seed"))
         split = np.full(len(df), "embargo", dtype=object)  # anything in neither slice is embargoed
         split[tr.to_numpy()] = "train"
         split[va.to_numpy()] = "val"

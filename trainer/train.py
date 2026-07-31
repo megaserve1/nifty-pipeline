@@ -715,9 +715,17 @@ def main():
         # CURRENT config -- so a config edit between training and explaining (it happened the
         # very day this was written: TEST_FRACTION 0.2->0.3) silently made SHAP explain rows
         # the model had TRAINED on. the bundle now carries the cut, and consumers use IT.
+        # THE WHOLE SPLIT RECIPE, not just the cut. under bundle_random the test rows are
+        # SCATTERED, so "everything after test_start" is meaningless -- a consumer must rebuild
+        # the same random assignment, which needs the strategy, the bundle size and the SEED.
+        # rebuilt from today's config instead, it would produce a DIFFERENT split and quietly
+        # mislabel which rows the model was tested on.
         "split": {"test_start": split_info["test_start"],
                   "val_fraction": C.VAL_FRACTION, "test_fraction": C.TEST_FRACTION,
-                  "embargo_sessions": C.EMBARGO_SESSIONS},
+                  "embargo_sessions": C.EMBARGO_SESSIONS,
+                  "strategy": split_info.get("strategy", "time"),
+                  "bundle_minutes": split_info.get("bundle_minutes"),
+                  "seed": split_info.get("seed")},
     }, out)
     if not out.exists() or out.stat().st_size == 0:
         raise SystemExit("the model file was not written -- refusing to report success")
@@ -820,7 +828,13 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     # if BOTH the backtest script and the price dataset are configured, the export also runs the
     # backtest on the TEST table and prints its report into that task's console. blank -> tables only.
     bt = getattr(C, "BACKTEST_SCRIPT", "")
-    px_id = getattr(C, "PRICE_DATASET_ID", "")
+    # RESOLVE BY NAME, do not read a pinned id. an id copied into config dies when the dataset is
+    # re-uploaded -- that happened to the OHLCV on 2026-07-31 and would have broken every backtest.
+    try:
+        px_id = C.resolve_dataset_id(C.CLEARML_PRICE_DATASET, getattr(C, "PRICE_DATASET_ID", ""))
+    except Exception as _exc:
+        px_id = ""
+        print(f"  (no '{C.CLEARML_PRICE_DATASET}' dataset found: {_exc})")
     px_file = getattr(C, "PRICE_FILE", "")
     if bt and (px_id or px_file):
         params["Args/backtest"] = bt

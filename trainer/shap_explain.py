@@ -123,7 +123,12 @@ def main():
         # left -- say loudly that this is a weaker guarantee.
         print("      !! old bundle: no recorded split. rebuilding from CURRENT config -- if "
               "config changed since training, these SHAP numbers explain the WRONG rows.")
-        _, _, te, _ = three_way_split(ts, C.VAL_FRACTION, C.TEST_FRACTION, C.EMBARGO_SESSIONS)
+        _, _, te, _ = three_way_split(
+            ts, split.get("val_fraction", C.VAL_FRACTION),
+            split.get("test_fraction", C.TEST_FRACTION),
+            split.get("embargo_sessions", C.EMBARGO_SESSIONS),
+            strategy=split.get("strategy"), bundle_minutes=split.get("bundle_minutes"),
+            seed=split.get("seed"))
     test = df[te].reset_index(drop=True)
     print(f"      explaining the TEST rows only: {len(test):,}")
 

@@ -271,7 +271,7 @@ def _minute_index(start="2020-01-01", days=1400):
 def test_three_way_split_never_puts_a_row_in_two_slices():
     ts = _minute_index()
     tr, va, te, info = three_way_split(ts, val_fraction=0.15, test_fraction=0.20,
-                                       embargo_sessions=C.EMBARGO_SESSIONS)
+                                       embargo_sessions=C.EMBARGO_SESSIONS, strategy="time")
     assert not (tr & va).any()
     assert not (va & te).any()
     assert not (tr & te).any()
@@ -292,7 +292,7 @@ def test_three_way_split_is_in_time_order_and_leaves_a_real_gap():
     """
     ts = _minute_index()
     tr, va, te, info = three_way_split(ts, val_fraction=0.15, test_fraction=0.20,
-                                       embargo_sessions=C.EMBARGO_SESSIONS)
+                                       embargo_sessions=C.EMBARGO_SESSIONS, strategy="time")
     train_end = ts[tr].max()
     val_start, val_end = ts[va].min(), ts[va].max()
     test_start = ts[te].min()
@@ -319,7 +319,8 @@ def test_three_way_split_refuses_rather_than_returning_an_empty_validation_set()
     ts = _minute_index(days=200)                    # ~10 months
     with pytest.raises(ValueError, match="EMPTY|empty"):
         # a 1% val slice of 10 months is ~3 days, and the 25-session embargo eats all of it
-        three_way_split(ts, val_fraction=0.01, test_fraction=0.20, embargo_sessions=C.EMBARGO_SESSIONS)
+        three_way_split(ts, val_fraction=0.01, test_fraction=0.20,
+                        embargo_sessions=C.EMBARGO_SESSIONS, strategy="time")
 
 
 def test_the_split_costs_about_two_embargoes_and_no_more():
@@ -329,7 +330,7 @@ def test_the_split_costs_about_two_embargoes_and_no_more():
     there are now TWO of them.
     """
     ts = _minute_index()
-    tr, va, te, info = three_way_split(ts, 0.15, 0.20, C.EMBARGO_SESSIONS)
+    tr, va, te, info = three_way_split(ts, 0.15, 0.20, C.EMBARGO_SESSIONS, strategy="time")
     lost = info["n_embargoed"] / len(ts)
     assert 0.01 < lost < 0.06, f"the embargoes are eating {lost:.1%} of the data"
 

@@ -106,6 +106,8 @@ def build_datasets(df: pd.DataFrame, bundle: dict, sample: int):
         float(sp.get("val_fraction", C.VAL_FRACTION)),
         float(sp.get("test_fraction", C.TEST_FRACTION)),
         int(sp.get("embargo_sessions", C.EMBARGO_SESSIONS)),
+        strategy=sp.get("strategy"), bundle_minutes=sp.get("bundle_minutes"),
+        seed=sp.get("seed"),
     )
 
     X = prepare(df, bundle)                            # same columns/encoding/sentinels as training

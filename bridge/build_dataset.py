@@ -218,6 +218,7 @@ def main():
     # ---- 2. one feature at a time: NaN policy, then align -------------------
     print(f"[2/5] aligning {len(feats)} features   (no-lookahead rule: bar_close)")
     pieces, per_feature, drop_rows = [], [], pd.Series(False, index=lab.index)
+    feature_spans = {}          # name -> (first, last) timestamp actually present in the file
 
     for name in feats:
         meta = reg.get(name)
@@ -230,6 +231,7 @@ def main():
                              f"the feature team must drop it in {C.FEATURES_DIR}")
 
         raw = read_time_index(pd.read_parquet(path))
+        feature_spans[name] = (raw.index.min(), raw.index.max())
 
         # ---- THE LEAK GUARD, A SECOND TIME. ----------------------------------------
         # register.py already refused these, but this file reads the PARQUET, not the registry's
@@ -485,6 +487,38 @@ def main():
     # ---- 3. glue side by side ----------------------------------------------
     print("[3/5] assembling")
     X = pd.concat(pieces, axis=1)
+
+    # CLIP THE SPINE TO WHERE THE FEATURES ACTUALLY EXIST.
+    #
+    # the labels are the spine -- one row per label minute -- and that is right, until the label
+    # file covers MORE TIME than the features do. then every extra minute becomes a row with every
+    # feature NaN. measured on the real files: L1 runs to 2026-02-24, the V7/V8/V9 matrices stop at
+    # 2024-12-31, so 106,505 rows (10.4%) were completely empty. worse, they are the NEWEST rows,
+    # so they land in the TEST slice -- a third of the test set would have been the model predicting
+    # from nothing, and the score would have looked like a result.
+    #
+    # that period is also the OOS window, which is scored separately on purpose. it must not be in
+    # the training dataset at all.
+    #
+    # so: keep only the label minutes that lie inside EVERY selected feature's own span. dropping
+    # is silent-proof -- the count is printed and the span goes on the certificate.
+    if feature_spans:
+        first = max(s[0] for s in feature_spans.values())    # latest start
+        last = min(s[1] for s in feature_spans.values())     # earliest end
+        inside = (label_ts >= first) & (label_ts <= last)
+        n_out = int((~inside).sum())
+        if n_out:
+            pct = n_out / len(label_ts) * 100
+            print(f"      !! {n_out:,} label minute(s) ({pct:.1f}%) lie OUTSIDE the feature data "
+                  f"and would have had NO features at all -- dropped.")
+            for nm, (a, b) in sorted(feature_spans.items()):
+                print(f"         {nm}: {a} -> {b}")
+            print(f"         labels:  {label_ts.min()} -> {label_ts.max()}")
+            print(f"         keeping: {first} -> {last}")
+            X = X[inside.to_numpy()].reset_index(drop=True)
+            lab = lab[inside.to_numpy()].reset_index(drop=True)
+            drop_rows = drop_rows[inside.to_numpy()].reset_index(drop=True)
+            label_ts = label_ts[inside].reset_index(drop=True)
 
     # COLUMN SELECTION (recipe 'columns'): keep only the ticked columns. THIS is what lets the UI
     # (or a recipe) pick individual features, not just whole sources. absent -> keep every column
