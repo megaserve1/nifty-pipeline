@@ -653,6 +653,14 @@ def publish(version: str, models: list, do_train: bool = True,
         if "_test" in version:
             ds.add_tags(["test"])       # a '_test' version -> a visible 'test' tag in ClearML, so
             print(f"      tagged 'test' -- labelled test dataset (numeric version {sv})")
+        # THE LABEL SET IS PART OF THE DATASET'S IDENTITY, not a footnote: same features + a
+        # different label = a different version. it lives in the recipe, but a recipe is a file on
+        # someone's disk -- the tag is what makes "show me everything built on L2" one click in
+        # ClearML, and what stops two versions that differ ONLY by label looking identical there.
+        _lbl = man.get("labels_name")      # the certificate -- the label ACTUALLY built with
+        if _lbl:
+            ds.add_tags([str(_lbl)])
+            print(f"      tagged '{_lbl}' -- the label set this version was built on")
         if C.STORAGE_MODE == "gcs":
             # a LINK to the bytes DVC already pushed. there is ONE copy of the data, it lives in
             # your bucket, and app.clear.ml only ever holds the pointer and the metadata.

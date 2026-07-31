@@ -283,7 +283,8 @@ def main():
     print("[4/4] running the suites")
     run_suites(train_ds, test_ds, bundle["model"], f"{mtype}_v{version}", a.out, task=task,
                which=[x.strip() for x in a.suites.split(",") if x.strip()])
-    task.add_tags([mtype, "deepchecks", f"v{version}"])
+    _lbl = bundle.get("labels_name")
+    task.add_tags([mtype, "deepchecks", f"v{version}"] + ([str(_lbl)] if _lbl else []))
     print(f"\ndone. the html reports are artifacts on this task, under "
           f"{C.deepchecks_output_uri()} . download one and open it in a browser.")
     task.close()

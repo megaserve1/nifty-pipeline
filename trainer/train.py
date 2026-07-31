@@ -594,7 +594,12 @@ def main():
     # the misleading version label.
     is_hpo_trial = "(base)" in (task.name or "")
     version_tag = "hpo" if is_hpo_trial else hp_version
-    task.add_tags([a.model_type, f"v{a.dataset_version or ds.version}", version_tag])
+    # THE LABEL SET IS PART OF WHAT THIS RUN IS. same features + a different label = a different
+    # model, and with v7/v7.1/v7.2 differing ONLY by label, a run tagged just
+    # [xgboost, v7.1, h3] cannot be told apart from its siblings without opening the dataset.
+    label_tag = (man or {}).get("labels_name")
+    task.add_tags([a.model_type, f"v{a.dataset_version or ds.version}", version_tag]
+                  + ([str(label_tag)] if label_tag else []))
 
     # ---- 6. train, score, save ----------------------------------------------
     print(f"[6/6] training {a.model_type} on {len(Xtr):,} rows x {len(feat_cols)} features")
@@ -701,6 +706,10 @@ def main():
         "model_type": a.model_type,
         "dataset_id": a.dataset_id,
         "dataset_version": a.dataset_version or ds.version,
+        # THE LABEL SET TRAVELS WITH THE MODEL, same reasoning as "split" below: every consumer
+        # (shap, scored tables, deepchecks) has the bundle but NOT the manifest, and a model is
+        # not identified by its features alone -- v7/v7.1/v7.2 differ only by this.
+        "labels_name": (man or {}).get("labels_name"),
         "metrics": metrics,
         # THE SPLIT TRAVELS WITH THE MODEL. shap_explain used to rebuild the test mask from
         # CURRENT config -- so a config edit between training and explaining (it happened the

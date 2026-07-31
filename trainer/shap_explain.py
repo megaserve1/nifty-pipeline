@@ -234,7 +234,9 @@ def main():
 
     task.upload_artifact("mistake_ranking", rank)
     task.upload_artifact("feature_shares", shares)
-    task.add_tags([mtype, "shap", f"v{a.dataset_version or bundle.get('dataset_version','')}"])
+    _lbl = bundle.get("labels_name")          # the label set travels in the bundle
+    task.add_tags([mtype, "shap", f"v{a.dataset_version or bundle.get('dataset_version','')}"]
+                  + ([str(_lbl)] if _lbl else []))
     print(f"\ndone. worst mistake: {A} -> {B}. "
           f"top feature pushing it: {shares.iloc[0]['feature']} ({shares.iloc[0]['share_%']}%)")
     task.close()

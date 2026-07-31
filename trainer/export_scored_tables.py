@@ -505,7 +505,9 @@ def main():
         })
         mtype = bundle.get("model_type", "")
         p = write_oos(tbl, a.oos_tag, mtype, version, a.out, task=task)
-        task.add_tags([mtype or "?", "scored_oos", a.oos_tag or "oos", f"v{version}"])
+        _lbl = bundle.get("labels_name")
+        task.add_tags([mtype or "?", "scored_oos", a.oos_tag or "oos", f"v{version}"]
+                      + ([str(_lbl)] if _lbl else []))
 
         print("[5/5] backtest")
         # the OHLC prices live on GCP as their own ClearML dataset -- pull them the same way we
@@ -540,7 +542,9 @@ def main():
 
     print("[4/4] writing + uploading the two tables to GCS")
     paths = write_and_report(train_tbl, test_tbl, version, a.out, task=task)
-    task.add_tags([bundle.get("model_type", "?"), "scored_tables", f"v{version}"])
+    _lbl = bundle.get("labels_name")
+    task.add_tags([bundle.get("model_type", "?"), "scored_tables", f"v{version}"]
+                  + ([str(_lbl)] if _lbl else []))
 
     # BACKTEST THE TEST TABLE, not the train one -- backtesting rows the model was fitted on is
     # meaningless. its report prints straight into this task's CONSOLE tab.
