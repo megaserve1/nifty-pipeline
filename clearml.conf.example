@@ -2,6 +2,13 @@
 #   1. copy to  ~/clearml.conf   on every machine that runs a script or an agent
 #   2. fill in the credentials from ClearML -> Settings -> Workspace -> Create Credentials
 #   3. NEVER commit the filled-in file (.gitignore already blocks clearml.conf)
+#
+# A WORKER MACHINE needs all three of these, not just the credentials:
+#   * api.credentials      -- to talk to ClearML at all
+#   * agent.git_user/pass  -- the repo is PRIVATE. an agent clones the code snapshot from GitHub
+#                             for every task, and without these it fails on `git clone` with an
+#                             authentication error that looks nothing like a permissions problem.
+#   * sdk.google.storage.project + keyless ADC -- to read the dataset and write the model
 
 api {
     web_server:   https://app.clear.ml
@@ -18,7 +25,7 @@ sdk {
     development {
         # Model artifacts land in YOUR bucket. app.clear.ml only ever holds metadata,
         # so no market data or model bytes leave company GCP.
-        default_output_uri: "gs://demo-nifty-pipeline/clearml"
+        default_output_uri: "gs://live-nifty-pipeline/clearml"
     }
 
     google.storage {
@@ -37,5 +44,21 @@ sdk {
         # This is the trap where `dvc pull` works but Dataset.get_local_copy() fails
         # on the very same machine.
         project: "mega-ml"
+    }
+}
+
+agent {
+    # THE REPO IS PRIVATE (github.com/megaserve1/nifty-pipeline). every task an agent runs starts
+    # by cloning the exact commit recorded on the base task, so the agent needs to authenticate.
+    # use a GitHub PERSONAL ACCESS TOKEN as the password -- github stopped accepting account
+    # passwords over https. scope: `repo` (read is enough).
+    git_user: "YOUR_GITHUB_USERNAME"
+    git_pass: "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
+
+    # keep each task's venv between runs -- a cold agent reinstalls xgboost/catboost/clearml
+    # every single task, which is minutes of wall-clock before any training starts.
+    venvs_cache {
+        path: ~/.clearml/venvs-cache
+        max_entries: 10
     }
 }

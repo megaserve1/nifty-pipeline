@@ -14,6 +14,13 @@ import streamlit as st
 
 st.set_page_config(page_title="Nifty pipeline", page_icon="🧭", layout="wide")
 
+# the password gate. FIRST thing after set_page_config -- streamlit serves this file at its
+# own URL, so a gate on Home.py alone would not protect it.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from _auth import require_auth   # noqa: E402
+require_auth()
+
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 import config as C   # noqa: E402

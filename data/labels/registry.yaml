@@ -1,26 +1,49 @@
 # data/labels/registry.yaml -- THE LABEL MENU.
 #
-# a person (technical or not) picks a label by its HANDLE (L1, L2, ...) and its explanation --
-# never the file name. a dataset version records the handle in its recipe (labels_name: L1), and
-# build_dataset resolves data/labels/<handle>.{csv,parquet} and hashes it. the sha256 below is the
-# REAL identity: it catches the exact file even if someone swaps one later.
+# a person picks a label by its HANDLE (L1, L2, L3) and the note -- never the file name. a dataset
+# version records the handle in its recipe (labels_name: L1), and build_dataset resolves
+# data/labels/<handle>.{csv,parquet} and hashes it. the sha256 below is the REAL identity: it
+# catches the exact file even if someone swaps one later.
 #
-# to add a label: drop data/labels/L<n>.csv (or .parquet), add an entry here, then commit.
+# to add a label: drop data/labels/L<n>.csv, add an entry here, commit.
 #
-# 2026-07-31: the three earlier entries (L1.csv / L2.csv, 2020-2025 only, and the L3 raw dump whose
-# label column held threshold strings rather than classes) were REPLACED by one file spanning the
-# whole history. they were left pointing at files that no longer exist, and a recipe naming L2 or
-# L3 would have failed the build -- so they are removed rather than kept as dead entries.
+# 2026-08-01: rewritten for the three-file drop. the previous menu had ONE entry pointing at
+# L1.parquet, which no longer exists -- any build naming it would have failed on a missing file.
+# NOTE the classes differ between them: L1 and L2 are 7-class, L3 is 6-class. no `default:` is
+# marked on purpose, so --labels must be given explicitly and a run can never pick one by accident.
 
 L1:
-  file: L1.parquet
-  note: "20-bar forward window, exit threshold z=2, entry z=none, 7 classes. 2015-01-09 -> 2026-02-24 -- covers the FULL V7/V8/V9 training range AND the master OOS window. (current default)"
+  file: L1.csv
+  note: "20-bar forward window, exit z=2, entry z=none, 7 classes. the baseline."
   rows: 1021847
+  n_classes: 7
   span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
-  # NO_TRADE now carries weight 0.0638, NOT 0. this matters more than it looks: a zero-weight class
-  # contributes nothing to the loss, so the model could never learn to stay out and wanted to trade
-  # every single minute. that was the one open number in the label policy; this file closes it.
+  # NO_TRADE carries real weight, not 0 -- a zero-weight class contributes nothing to the loss and
+  # the model could never learn to stay out of the market.
   no_trade_weight: 0.0638
-  class_share: {NO_TRADE: 0.745, EXIT_SUPER: 0.121, EXIT_SUB: 0.064, ENTRY_SUPER: 0.034,
-                EXIT_SMALL: 0.018, ENTRY_SMALL: 0.010, ENTRY_SUB: 0.008}
-  sha256: "ebbaec9fc4daa1b0b2968ea9733ff9d3d228b377d0b666c7b6f4b28e2848c60d"
+  class_share: {NO_TRADE: 0.7454, EXIT_SUPER: 0.1209, EXIT_SUB: 0.0642, ENTRY_SUPER: 0.0336, EXIT_SMALL: 0.0177, ENTRY_SMALL: 0.0104, ENTRY_SUB: 0.0077}
+  sha256: "2261cc74765f60534b69f1aba86c76d551375bbf68c5b0c99b7d8e3a46383c0c"
+
+L2:
+  file: L2.csv
+  note: "same window as L1 but a LOOSER entry rule -- ENTRY_SUPER 3.4% -> 4.4%, ENTRY_SUB 0.77% -> 0.99%, ENTRY_SMALL 1.04% -> 1.24%, all taken out of NO_TRADE (74.5% -> 73.1%). more trades offered; exits are identical to L1."
+  rows: 1021847
+  n_classes: 7
+  span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
+  # NO_TRADE carries real weight, not 0 -- a zero-weight class contributes nothing to the loss and
+  # the model could never learn to stay out of the market.
+  no_trade_weight: 0.0638
+  class_share: {NO_TRADE: 0.7308, EXIT_SUPER: 0.1209, EXIT_SUB: 0.0641, ENTRY_SUPER: 0.0443, EXIT_SMALL: 0.0176, ENTRY_SMALL: 0.0124, ENTRY_SUB: 0.0099}
+  sha256: "c601cf5fe1440abd866a9ae76d02df651fc4031669191443ba1d395985042e1e"
+
+L3:
+  file: L3.csv
+  note: "SIX classes, NOT seven -- ENTRY_SMALL and EXIT_SMALL are merged into one SMALL class (28,800 = 10,665 + 18,135). everything else matches L1 exactly. the trainer's class count and CLASS_WEIGHTS both change with this one, so do not mix it with L1/L2 runs."
+  rows: 1021847
+  n_classes: 6
+  span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
+  # NO_TRADE carries real weight, not 0 -- a zero-weight class contributes nothing to the loss and
+  # the model could never learn to stay out of the market.
+  no_trade_weight: 0.0638
+  class_share: {NO_TRADE: 0.7454, EXIT_SUPER: 0.1209, EXIT_SUB: 0.0642, ENTRY_SUPER: 0.0336, SMALL: 0.0282, ENTRY_SUB: 0.0077}
+  sha256: "cc53968ddcef79cfe9dfea62aa43dcd68ee5468251ea0a0fcd79b349fd615860"

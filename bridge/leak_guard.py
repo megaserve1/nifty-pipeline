@@ -60,10 +60,16 @@ switched off, so the test is deliberately hard to trip.
 """
 from __future__ import annotations
 
+import pathlib
 import re
+import sys
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+import config as C   # noqa: E402   FEATURE_SOURCES / column_part live there, one list for
+                     #              leak_guard and register.py both
 
 # --- 1. the future, and the answer -------------------------------------------------
 # matched against the LOWERCASED column name.
@@ -139,13 +145,19 @@ def _matches(name: str, patterns) -> bool:
     '^session$' can never match 'vwap_microstructure_raw__session'. measured on the real V9 file:
     a raw DATE-AS-TEXT column sailed straight through because of exactly this. so the SUFFIX --
     the name the feature team actually gave the column -- is screened too.
+
+    THE 2026-08-01 DROP REMOVED THE '__'. 'vwap_microstructure_raw__session' arrived as
+    'vwap_microstructure_session', and with the separator gone this function had nothing to split
+    on -- it tested the whole string, matched nothing, and let three columns through, one of them
+    trend_direction_label_int, a LABEL. so the split now comes from config.FEATURE_SOURCES (the
+    list of source names) and works with '__' or plain '_'.
     """
     low = name.lower()
     if any(re.search(p, low) for p in patterns):
         return True
-    if "__" in low:
-        suffix = low.rsplit("__", 1)[-1]
-        return any(re.search(p, suffix) for p in patterns)
+    col = C.column_part(name).lower()          # 'session', 'label_int', 'bar_range' ...
+    if col != low:
+        return any(re.search(p, col) for p in patterns)
     return False
 
 

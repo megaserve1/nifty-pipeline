@@ -319,6 +319,51 @@ OUT_DIR      = ROOT / "output"
 # We do NOT run notebooks any more. We ingest the parquets they hand us.
 FEATURES_DIR = DATA_DIR / "features"
 
+# ---------------------------------------------------------------------------------------------
+# THE FEATURE SOURCES -- where a column's source name ends and its own name begins.
+#
+# the feature team's handed-over matrices name columns <source><sep><column>. the separator USED
+# to be '__', and two things read it:
+#     leak_guard  -- its patterns are anchored (^session$, ^label_int), so they must be applied to
+#                    the COLUMN part. given 'vwap_microstructure_session' with no separator it
+#                    tests the whole string, matches nothing, and passes a calendar column.
+#     register.py -- "does almost every column carry '__'" is how it recognises an already merged
+#                    and aligned matrix (pre_aligned), so it does not shift the data a second time.
+#
+# the 2026-08-01 drop removed the separator (bar_conviction__bar_range -> bar_conviction_bar_range).
+# rather than rewrite 1.6 GB of their parquets on every drop, we list the sources here and strip
+# the prefix ourselves. this works with '__' AND with '_', so it survives either convention.
+#
+# WHY NOT JUST SPLIT ON '_' AND TEST EVERY PIECE: 'candle_pattern_live_label' would end at the
+# piece 'label', match ^label$, and be banned -- and it is a real feature that has always been
+# trained on. knowing the source is the only way to find the true column name.
+#
+# ADD A NAME HERE when the feature team adds a source. anything that matches none of these is
+# reported, never guessed.
+FEATURE_SOURCES = [
+    "bar_conviction", "breakout_state", "candle_pattern", "fade_risk", "flow_state",
+    "gap_state", "intraday_positioning", "level_proximity", "momentum_state",
+    "pullback_severity", "smc_structure", "stress_signal", "structural_position",
+    "trend_direction", "trend_maturity", "vol_level", "volume_quality", "vwap_microstructure",
+    # the extra sources that arrived with V9 -- these still carry '__' and work either way
+    "features_47", "nifty_features_v3", "nifty_technical_features", "rrg_features",
+    "nifty_context_features", "dc_pos_275_bucket_features", "vsa_dev_bucket_features",
+]
+
+
+def column_part(name: str) -> str:
+    """'bar_conviction_bar_range' -> 'bar_range'.  '...__session' -> 'session'.
+
+    returns the name UNCHANGED when no source matches -- the caller then tests the whole string,
+    which is the old behaviour and never silently drops a check.
+    """
+    if "__" in name:
+        return name.split("__", 1)[1]
+    for s in sorted(FEATURE_SOURCES, key=len, reverse=True):
+        if name.startswith(s + "_") and len(name) > len(s) + 1:
+            return name[len(s) + 1:]
+    return name
+
 # the labels + weights (bridge-only; core never opens this file)
 #
 # THIS USED TO BE  Path.home() / "Downloads" / "labels_....csv"  AND THAT WAS A BUG.

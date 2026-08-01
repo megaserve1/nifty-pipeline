@@ -5,3 +5,16 @@ primaryColor = "#4f46e5"        # indigo -- matches the CSS accent so checkboxes
 
 [browser]
 gatherUsageStats = false        # do not phone home
+
+[server]
+# LISTEN ON EVERY INTERFACE, not just loopback. without this the page is reachable only from the
+# machine running it -- which is exactly the "the link works for me and nobody else" symptom.
+# set here rather than as a flag so it cannot be forgotten on the next launch.
+address = "0.0.0.0"
+port = 8501
+headless = true                 # do not try to open a browser on the server itself
+# the page is on a trusted office LAN, and CORS/XSRF checks reject the cross-origin websocket
+# some browsers open when the app is reached by IP rather than localhost -- which shows up as a
+# page that loads and then never connects ("Please wait...").
+enableCORS = false
+enableXsrfProtection = false

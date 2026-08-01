@@ -41,30 +41,69 @@ if not pathlib.Path(PYBIN).exists():
 
 
 # ---------------------------------------------------------------- data the page reads
+# CACHE KEYED ON THE FILE'S mtime, not cached forever.
+# these two yaml files change OUTSIDE this page -- register.py rewrites registry.yaml whenever the
+# feature team drops or moves a parquet. a plain @st.cache_data holds the first read for the life
+# of the server, so the page kept showing the old menu (589 ungrouped features) long after
+# register.py had rewritten it, and the only cure was restarting streamlit. passing the mtime in
+# makes the cache miss the moment the file is written -- exact, no polling, no staleness.
 @st.cache_data(show_spinner=False)
+def _read_yaml(path_str: str, mtime: float) -> dict:
+    return yaml.safe_load(pathlib.Path(path_str).read_text()) or {}
+
+
+def _fresh(path: pathlib.Path) -> dict:
+    if not path.exists():
+        return {}
+    return _read_yaml(str(path), path.stat().st_mtime)
+
+
 def registry() -> dict:
-    return yaml.safe_load(C.REGISTRY.read_text()) or {}
+    return _fresh(C.REGISTRY)
 
 
-@st.cache_data(show_spinner=False)
 def label_menu() -> dict:
     """L1/L2/L3 -> plain-english note, from data/labels/registry.yaml."""
-    p = C.LABELS_DIR / "registry.yaml"
-    if not p.exists():
-        return {}
-    return {k: (v or {}).get("note", "") for k, v in (yaml.safe_load(p.read_text()) or {}).items()}
+    return {k: (v or {}).get("note", "")
+            for k, v in _fresh(C.LABELS_DIR / "registry.yaml").items()}
 
 
 @st.cache_data(show_spinner=False)
 def unique_features():
     """ONE deduped feature list across all registered files, plus which file each comes from.
-    returns (sorted names, {feature: source_file}). first file that has a name wins -- this is the
-    placeholder mapping until the real bucket/bucket_raw/raw groups are registered."""
+    returns (sorted names, {feature: source_file}). first file that has a name wins."""
     feat_src = {}
     for src, meta in (registry() or {}).items():
         for c in (meta or {}).get("columns") or []:
             feat_src.setdefault(c, src)
     return sorted(feat_src), feat_src
+
+
+def groups():
+    """{group: {"features": [...], "src": {feature: source_file}, "sources": [...]}}
+
+    the GROUP is the sub-folder of data/features the parquet came from -- register.py records it,
+    we only read it. so the dropdowns follow the folders: drop a fourth folder in and a fourth
+    dropdown appears here on its own. nothing about bucket/raw is written into this page.
+
+    a file left loose at the top of data/features has no folder, and register.py calls that
+    '_root'. those still show, under 'ungrouped', so nothing is ever silently hidden.
+    """
+    out = {}
+    for src, meta in (registry() or {}).items():
+        meta = meta or {}
+        g = meta.get("group") or "_root"
+        g = "ungrouped" if g == "_root" else g
+        slot = out.setdefault(g, {"features": [], "src": {}, "sources": []})
+        slot["sources"].append(src)
+        for c in meta.get("columns") or []:
+            if c not in slot["src"]:          # same name twice inside one group: first file wins
+                slot["src"][c] = src
+                slot["features"].append(c)
+    for slot in out.values():
+        slot["features"].sort()
+    # biggest group last reads better left-to-right (bucket 30 -> bucket_raw 411 -> raw 565)
+    return dict(sorted(out.items(), key=lambda kv: len(kv[1]["features"])))
 
 
 def versions() -> list:                  # not cached -- new versions appear as you build
@@ -220,6 +259,13 @@ CSS = """
 
 # ================================================================ the page
 st.set_page_config(page_title="Nifty · feature selection", layout="wide")
+
+# the password gate. FIRST thing after set_page_config -- streamlit serves this file at its
+# own URL, so a gate on Home.py alone would not protect it.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+from _auth import require_auth   # noqa: E402
+require_auth()
+
 st.markdown(CSS, unsafe_allow_html=True)
 st.markdown('<div class="fs-hero"><h1>Feature selection → build → run</h1>'
             '<p>pick features, freeze a dataset version, then build the dataset — or '
@@ -271,30 +317,48 @@ with st.container(border=True):
 # ---- STEP 3 · features ------------------------------------------------------
 step(3, "Features")
 if mode == "Fresh selection":
-    # ONE deduped list, shown through three GROUP dropdowns. groups aren't registered yet, so each
-    # dropdown shows every feature for now; once bucket/bucket_raw/raw are registered each shows only
-    # its own. the file a feature comes from is resolved behind the scenes (feat_src).
-    all_feats, feat_src = unique_features()
-    n_all = len(all_feats)
-    st.caption(f"{n_all} unique features across {len(reg)} file(s). groups (bucket / bucket_raw / "
-               "raw) aren't registered yet, so each dropdown shows all of them for now.")
-    picked = set()
+    # ONE dropdown PER REGISTERED GROUP. the group is the data/features sub-folder the parquet came
+    # from, recorded by register.py -- so this list follows the folders and nothing is named here.
+    grp = groups()
+    if not grp:
+        st.warning("registry.yaml is empty — run `python bridge/register.py` first.", icon="⚠️")
+        st.stop()
+    st.caption(" · ".join(f"**{g}** {len(d['features'])}" for g, d in grp.items()) +
+               f"  —  {len(reg)} registered file(s)")
+    if "ungrouped" in grp:
+        st.info("some parquets sit loose in data/features so they have no group. put each one in a "
+                "sub-folder (data/features/bucket/, /bucket_raw/, /raw/) and re-run "
+                "`python bridge/register.py` — the folder name becomes the group.", icon="📁")
+
+    picked_src = {}          # feature -> source file, so a build knows which parquet to open
     with st.container(border=True):
-        for g, col in zip(("bucket", "bucket_raw", "raw"), st.columns(3)):
+        for (g, d), col in zip(grp.items(), st.columns(len(grp))):
+            feats = d["features"]
             with col:
-                st.markdown(f"**{g}**")
-                if st.checkbox(f"select all — {g}", key=f"all_{g}"):
-                    picked |= set(all_feats)
-                    st.caption(f"all {n_all} selected")
+                st.markdown(f"**{g}**  ·  {len(feats)}")
+                st.caption(", ".join(d["sources"]))
+                if st.checkbox(f"select all {len(feats)}", key=f"all_{g}"):
+                    for f in feats:
+                        picked_src.setdefault(f, d["src"][f])
                 else:
-                    sel = st.multiselect(g, options=all_feats, default=[], key=f"ms_{g}",
+                    sel = st.multiselect(g, options=feats, default=[], key=f"ms_{g}",
                                          label_visibility="collapsed", placeholder="type to search…")
-                    picked |= set(sel)
-    ticked = sorted(picked)
+                    for f in sel:
+                        picked_src.setdefault(f, d["src"][f])
+
+    ticked = sorted(picked_src)
+    n_all = len({f for d in grp.values() for f in d["features"]})   # unique across every group
+    # the same raw column exists in more than one group (v9 is a superset of v8). picking it in
+    # both would emit the column twice under one built name, so the first group wins and we say so.
+    dupes = sum(1 for g, d in grp.items() for f in d["features"]
+                if f in picked_src and picked_src[f] != d["src"][f])
+    if dupes:
+        st.caption(f"{dupes} feature(s) exist in more than one group — each is taken once, "
+                   "from the group listed first.")
     # group the ticked features by the file they come from; build aligns those files then filters
     by_source = {}
     for f in ticked:
-        by_source.setdefault(feat_src[f], []).append(f)
+        by_source.setdefault(picked_src[f], []).append(f)
     features_list = sorted(by_source)
     columns_full = [built_name(s, f) for s in features_list for f in by_source[s]]
     omit_columns = False

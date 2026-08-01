@@ -135,12 +135,17 @@ def inspect(path, allow: list | None = None) -> dict:
     # nobody uses. detection: if essentially every column already contains '__', it has been
     # through their pipeline (merged, aligned, 'source__column' named).
     _cols = list(df.columns)
-    _dunder = sum(1 for c in _cols if "__" in str(c))
-    pre = bool(_cols) and _dunder >= max(1, int(0.9 * len(_cols)))
+    # NOT just "does it carry '__'" any more. the 2026-08-01 drop shipped the same matrices with
+    # the separator removed (bar_conviction__bar_range -> bar_conviction_bar_range), which took
+    # this count from 404/404 to 1/404 -- so the file would have been treated as a fresh feature,
+    # re-aligned a second time, and every column lagged one extra bar in silence.
+    # config.column_part() recognises BOTH conventions off one list of source names.
+    _known = sum(1 for c in _cols if "__" in str(c) or C.column_part(str(c)) != str(c))
+    pre = bool(_cols) and _known >= max(1, int(0.9 * len(_cols)))
 
     if pre:
         clock, per_col, unsure = 1, None, None
-        print(f"      pre-processed matrix ({_dunder}/{len(_cols)} columns carry '__') -- "
+        print(f"      pre-processed matrix ({_known}/{len(_cols)} columns name a known source) -- "
               f"clock measurement SKIPPED (pre_aligned files never go through bar_close)")
     else:
         # measure the real bar period. a 5-min value written onto five 1-min rows repeats across
@@ -191,6 +196,8 @@ def main():
     ap.add_argument("--list", action="store_true", help="print the menu and stop")
     ap.add_argument("--rescan", action="store_true",
                     help="re-measure every feature, even ones already in the menu")
+    ap.add_argument("--prune", action="store_true",
+                    help="also DROP menu entries whose parquet is no longer in data/features")
     a = ap.parse_args()
 
     reg = load_registry()
@@ -247,10 +254,20 @@ def main():
                   f"{seen_this_scan[name]} and {rel_file}. rename one of them.")
             continue
         if name in reg and reg[name]["file"] != rel_file:
-            print(f"  DUPLICATE refused: '{name}' is already {reg[name]['file']}, "
-                  f"now also {rel_file}. rename one of them (or delete the registry entry "
-                  f"if the file was renamed on purpose).")
-            continue
+            # SAME NAME, DIFFERENT PATH. two very different situations, and treating them alike
+            # was wrong: if the old file is still there, two files really are fighting over one
+            # name and we must refuse. if the old file is GONE, this is the same feature MOVED --
+            # almost always into a group sub-folder -- and refusing it would strand the entry
+            # pointing at a path that no longer exists (and --prune would then delete it).
+            if (C.FEATURES_DIR / reg[name]["file"]).exists():
+                print(f"  DUPLICATE refused: '{name}' is already {reg[name]['file']}, "
+                      f"now also {rel_file}. rename one of them (or delete the registry entry "
+                      f"if the file was renamed on purpose).")
+                continue
+            print(f"  MOVED  {name:32s} {reg[name]['file']}  ->  {rel_file}   [group: "
+                  f"{reg[name].get('group', '_root')} -> {group}]")
+            reg[name]["file"] = rel_file
+            reg[name]["group"] = group      # the folder IS the group -- that is the whole point
         seen_this_scan[name] = rel_file
 
         if name in reg and not a.rescan:
@@ -326,8 +343,28 @@ def main():
                   f"({worst[1]:,} rows, {worst[1]/info['rows']*100:.1f}%)  "
                   f"-> na_policy: {reg[name]['na_policy']}")
 
+    # ---- entries whose parquet has gone -------------------------------------
+    # a scan only ADDS and UPDATES. take a feature out of data/features and its menu entry stays
+    # for ever: it still shows in the UI and in make_version, and a recipe naming it fails the
+    # build with a missing file. so we always REPORT the orphans, and drop them only when asked --
+    # never silently, because the file may simply have been moved aside for an afternoon.
+    on_disk = {p.relative_to(C.FEATURES_DIR).as_posix() for p in C.FEATURES_DIR.rglob("*.parquet")}
+    orphans = [n for n, m in reg.items() if (m or {}).get("file") not in on_disk]
+    if orphans:
+        if a.prune:
+            for n in orphans:
+                print(f"  - DROP  {n:32s} (file gone: {reg[n].get('file')})")
+                del reg[n]
+        else:
+            print(f"\n{len(orphans)} menu entr(y/ies) point at a file that is no longer in "
+                  f"{C.FEATURES_DIR.name}/:")
+            for n in orphans:
+                print(f"     {n:32s} -> {reg[n].get('file')}")
+            print("   they still show in the UI. re-run with --prune to drop them.")
+
     save_registry(reg)
     print(f"\ndone. {added} new, {updated} re-measured, {skipped} already known, "
+          f"{len(orphans) if a.prune else 0} dropped, "
           f"{len(reg)} total  ->  {C.REGISTRY.name}")
     print("\nNEXT: open registry.yaml and set  na_policy  +  desc  for anything new.")
     print("      only the people who wrote the feature know what its NaN means.")

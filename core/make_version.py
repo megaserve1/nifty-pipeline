@@ -253,9 +253,24 @@ def mode_from_sheet():
 
 
 def derive(base: str, drop: list, add: list, quiet: bool = False) -> str:
-    """v2 minus a feature, plus a feature -> a VARIATION: v2.1, v2.2, ..."""
+    """v2 minus a feature, plus a feature -> a VARIATION: v2.1, v2.2, ...
+
+    THE LABEL COUNTS AS A CHANGE TOO. same features on a different label set is a genuinely
+    different dataset -- different targets, different class balance, a different model. this used
+    to be refused as "identical to v2", because the check only compared feature lists, which dates
+    from when there was one label file. now `--from v7 --labels L2` gives v7.1, with the same
+    features and the label swapped, and `parent: v7` recorded so the lineage is on the record.
+
+    a derive with NO --labels inherits the parent's label, rather than falling back to the
+    configured default -- a variation should change one thing, and if you did not name a label you
+    did not mean to change it.
+    """
+    global _CHOSEN_LABELS
     doc = load_version(base)
     have = set(doc["features"])
+    base_labels = doc.get("labels_name")
+    new_labels = _CHOSEN_LABELS or base_labels
+    _CHOSEN_LABELS = new_labels          # so freeze() writes the inherited one, not the default
 
     # a drop that removes nothing, or an add that adds nothing, is almost always a typo.
     # say so -- a silently empty change would give you a version identical to its parent.
@@ -267,16 +282,26 @@ def derive(base: str, drop: list, add: list, quiet: bool = False) -> str:
         print(f"      !! {base} already contains {no_op_add} -- nothing to add")
 
     feats = (have - set(drop)) | set(add)
-    if feats == have:
-        raise SystemExit(f"this would produce a version IDENTICAL to {base}. "
-                         f"check the names against:  python bridge/register.py --list")
+    label_changed = new_labels != base_labels
+    if feats == have and not label_changed:
+        raise SystemExit(f"this would produce a version IDENTICAL to {base} -- same features, "
+                         f"same label ({base_labels}).\n"
+                         f"  change the features:  --drop a,b / --add c\n"
+                         f"  or change the label:  --labels L2\n"
+                         f"  feature names:        python bridge/register.py --list")
 
     if not quiet:
-        print(f"derive from {base}: {len(have)} features "
-              f"- {len(have - feats)} + {len(feats - have)} -> {len(feats)}")
+        if feats == have:
+            print(f"derive from {base}: features UNCHANGED ({len(have)}), "
+                  f"label {base_labels} -> {new_labels}")
+        else:
+            print(f"derive from {base}: {len(have)} features "
+                  f"- {len(have - feats)} + {len(feats - have)} -> {len(feats)}"
+                  + (f", label {base_labels} -> {new_labels}" if label_changed else ""))
     src = (f"derived from {base}"
            + (f" -drop {','.join(drop)}" if drop else "")
-           + (f" +add {','.join(add)}" if add else ""))
+           + (f" +add {','.join(add)}" if add else "")
+           + (f" labels {base_labels}->{new_labels}" if label_changed else ""))
     return freeze(sorted(feats), source=src, parent=base)
 
 
