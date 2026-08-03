@@ -451,8 +451,24 @@ def dry_run(version: str, models: list, do_train: bool = True, queue: str = None
     print(f"  to do it for real:  python core/publish_version.py --version {version}")
 
 
+def free_agents(queue_name: str) -> int:
+    """how many agents actually listen on this queue. the HPO optimiser dispatches at most N
+    trials at a time and hpo.py defaults N to 1 -- so on a four-agent pool three machines sat
+    idle for an entire 50-trial search while the queue stayed empty. counting them is what makes
+    --tune use the pool it already has."""
+    try:
+        from clearml.backend_api.session.client import APIClient
+        n = 0
+        for w in (APIClient().workers.get_all() or []):
+            if any(getattr(q, "name", q) == queue_name for q in (getattr(w, "queues", None) or [])):
+                n += 1
+        return max(1, n)
+    except Exception:
+        return 1
+
+
 def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo: bool = False,
-             trials: int = 15, queue: str = None) -> None:
+             trials: int = 15, queue: str = None, concurrent: int = 0) -> None:
     """for each model: search hyperparameters, then promote the winner. THE CACHE LIVES HERE.
 
     it calls trainer/hpo.py and trainer/apply_hpo.py as SUBPROCESSES -- the exact commands you
@@ -469,6 +485,7 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
     # WARN BEFORE THE COST. each model that is not cached runs `trials` full training jobs on
     # the queue -- dozens of agent-hours across three models. say so before spending it.
     queue = queue or C.TRAIN_QUEUE            # 'queue' used to be undefined here -> NameError the
+    conc = concurrent or free_agents(queue or C.TRAIN_QUEUE)
     to_run = [m for m in models if re_hpo or H.tuned_sha(m) != parquet_sha256]   # moment HPO ran
     if to_run:
         print(f"\n  !! --tune will run HPO for {to_run}: up to {trials} training jobs EACH, on "
@@ -482,7 +499,7 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
                   f"(--re-hpo to force)")
             continue
         why = "re-hpo forced" if re_hpo else ("no cached tune" if not cached else "data changed")
-        print(f"  {mtype:14s} tuning ({why}) -- {trials} trials ...")
+        print(f"  {mtype:14s} tuning ({why}) -- {trials} trials, {conc} at a time ...")
 
         winner = C.ROOT / f"best_params_{mtype}.json"
         r = subprocess.run([sys.executable, str(C.ROOT / "trainer" / "hpo.py"),
@@ -490,6 +507,10 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
                             # STRIPPED like enqueue_all does -- trials tagged 'v7' while real
                             # runs say '7' makes the same dataset look like two different ones.
                             "--dataset_version", str(version).lstrip("v"), "--trials", str(trials),
+                            # ONE AT A TIME IS THE DEFAULT IN hpo.py, AND IT IS THE WRONG ONE HERE.
+                            # publish knows how many agents are listening; passing it means the
+                            # search finishes in wall-clock/agents instead of wall-clock.
+                            "--concurrent", str(conc),
                             "--queue", queue],       # or the trials ignore publish's --queue
                            cwd=str(C.ROOT))
         if r.returncode != 0 or not winner.exists():
@@ -507,6 +528,7 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
 
 def publish(version: str, models: list, do_train: bool = True,
             tune: bool = False, re_hpo: bool = False, hpo_trials: int = 15,
+            hpo_concurrent: int = 0,
             queue: str = None, no_champion: bool = False) -> str:
     queue = queue or C.TRAIN_QUEUE
     from clearml import Dataset
@@ -693,7 +715,7 @@ def publish(version: str, models: list, do_train: bool = True,
     # publishing the same dataset does NOT burn hours re-searching.
     if tune:
         run_tune(models, ds_id, version, man.get("parquet_sha256"), queue=queue, re_hpo=re_hpo,
-                 trials=hpo_trials)
+                 trials=hpo_trials, concurrent=hpo_concurrent)
 
     # ---- 5. train ------------------------------------------------------------
     if not do_train:
@@ -733,6 +755,10 @@ def main():
                          "unchanged.")
     ap.add_argument("--hpo-trials", type=int, default=15,
                     help="with --tune: trials per model (default 15).")
+    ap.add_argument("--hpo-concurrent", type=int, default=0,
+                    help="with --tune: trials in flight at once. 0 = match the number of agents "
+                         "listening on the queue. never set it higher than that -- the extra "
+                         "trials only queue.")
     ap.add_argument("--queue", default=C.TRAIN_QUEUE,
                     help=f"which agent pool to train on (default '{C.TRAIN_QUEUE}'). use a "
                          f"separate queue -- e.g. 'lossbased' -- to run on a dedicated machine "
@@ -761,7 +787,8 @@ def main():
         dry_run(a.version, models, do_train=not a.no_train, queue=a.queue, no_champion=a.no_champion)
         return
     publish(a.version, models, do_train=not a.no_train,
-            tune=a.tune, re_hpo=a.re_hpo, hpo_trials=a.hpo_trials, queue=a.queue,
+            tune=a.tune, re_hpo=a.re_hpo, hpo_trials=a.hpo_trials,
+            hpo_concurrent=a.hpo_concurrent, queue=a.queue,
             no_champion=a.no_champion)
 
 

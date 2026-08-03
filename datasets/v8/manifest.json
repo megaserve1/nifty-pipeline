@@ -1,0 +1,4399 @@
+{
+  "manifest_schema_version": 1,
+  "built_at": "2026-08-01T13:25:06+00:00",
+  "version": "v8",
+  "recipe_sha256": "cf517dbab94b835506b33501ea5251e2bbe24f3224318136c350ab8791aa3d84",
+  "parquet_sha256": "552770caa95c663ad5defef1b0e8d04f7643683516b83bee3920a761b95823af",
+  "rows": 915347,
+  "n_features": 403,
+  "schema": [
+    {
+      "col": "unique_index",
+      "dtype": "int64"
+    },
+    {
+      "col": "timestamp",
+      "dtype": "datetime64[us]"
+    },
+    {
+      "col": "primary_label",
+      "dtype": "str"
+    },
+    {
+      "col": "weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "weight_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_bar_range",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_atr_prev",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_significance",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_clv",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_direction",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_signed_body",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_f_body",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_f_range",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_force_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_reason",
+      "dtype": "str"
+    },
+    {
+      "col": "bar_conviction_conviction_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_bar_conviction_ord",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_dom_support",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_dist_to_res_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_dist_to_sup_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_brk_level",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_stop_level",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mfe_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mae_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_atr_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_bars_since_bo",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_is_confirmed",
+      "dtype": "str"
+    },
+    {
+      "col": "breakout_state_is_survived",
+      "dtype": "str"
+    },
+    {
+      "col": "breakout_state_mark_bo",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_fail",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_fade",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_conf",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_surv",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_upgrade",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_rt",
+      "dtype": "float64"
+    },
+    {
+      "col": "breakout_state_mark_lost",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_is_green",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_body_size",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_total_range",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_body_perc",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_upper_wick",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_lower_wick",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_upper_wick_perc",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_lower_wick_perc",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_ema_5",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_ema_20",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_ema_diff",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_vwap",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_vwap_slope",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_rsi_14",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_vote_ema",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_vote_vwap",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_vote_rsi",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_vote_sum",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_label_1min",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_label_streak",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_is_uptrend",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_is_downtrend",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_bullish_engulfing",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_morning_star",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_abandoned_baby_bull",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_piercing_line",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_three_white_soldiers",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_marubozu_green",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_kicker_bullish",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_hammer",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_inverted_hammer",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_bullish_harami",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_confirmed_dragonfly",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_tweezer_bottom",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_confirmed_bullish_doji",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_confirmed_bullish_spinning_top",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_bearish_engulfing",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_evening_star",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_dark_cloud_cover",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_three_black_crows",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_marubozu_red",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_shooting_star",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_hanging_man",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_bearish_harami",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_confirmed_gravestone",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_tweezer_top",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_confirmed_bearish_doji",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_confirmed_bearish_spinning_top",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_bull_strength_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_bear_strength_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_bars_since_bull_signal",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_bars_since_bear_signal",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_verification_event",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_verification_active",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_verification_armed",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_verification_lock_level",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_verification_arm_thresh",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_verification_conf_thresh",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_bars_in_verification",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_n_confirmation_events",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_n_false_events",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_n_verifications_active",
+      "dtype": "float64"
+    },
+    {
+      "col": "candle_pattern_n_verifications_armed",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_ema9",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_ema_gap_pct",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_trend_state",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_clue_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_leg_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_trigger",
+      "dtype": "str"
+    },
+    {
+      "col": "fade_risk_fade_dir",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_episode_len",
+      "dtype": "float64"
+    },
+    {
+      "col": "fade_risk_fade_risk",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_anchored_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_anchored_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_frozen_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_frozen_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_same_slot_vol_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_window_vol_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_window_rng_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_window_oi_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_absorption_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_efficiency_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_inside_share",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_box_width_slot_norm",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_prior_leg_in_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_volatility_regime",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_dyn_vol_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_dyn_rng_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_dyn_box_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_dyn_abs_thr",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_raw_sell_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_raw_buy_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_raw_accumulation",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_raw_distribution",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_phase_state_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_phase_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_acc_confirmed",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_dist_confirmed",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_acc_resolved_up",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_acc_failed_down",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_dist_resolved_dn",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_dist_failed_up",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_Flow_State",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_has_gap_up_below",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_has_gap_down_above",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_unfilled_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_low",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_size",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_size_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_distance",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_up_gap_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_down_gap_high",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_down_gap_size",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_down_gap_size_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_down_gap_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_down_gap_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_nearest_down_gap_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_gap_area",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_up_gap_area_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_down_gap_area_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_gap_area_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_down_unfilled_count_local_k3",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_unfilled_count_local_k3",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_total_gap_area_local_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_gap_fill_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_gap_up_stack",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_gap_up_total_unfilled_pts",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_gap_up_stack_local_k3",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_gap_up_total_unfilled_pts_local_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "gap_state_gap_down_total_unfilled_pts_local_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "intraday_positioning_zone_id",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_res_level_name",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_res_level_tf",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_res_polarity",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_res_distance_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_res_weighted_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_res_weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_bars_in_res_zone",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_sup_level_name",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_sup_level_tf",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_sup_polarity",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_sup_weighted_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_sup_weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "level_proximity_bars_in_sup_zone",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_sma_1m",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_sma_1m_slope",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_prev_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_abs_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_abs_prev_spd",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_delta_speed",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_same_dir",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_is_bullish",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_is_bearish",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_range_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_range_atr_sma_prev",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_range_contracting",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_er",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_fast_er",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_er_falling_fast",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_er_noisy",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_er_supports_accel",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bull_close_qual",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bear_close_qual",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bull_close_weak",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bear_close_weak",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bear_sma_support",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bear_sma_weak",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_bull_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_bear_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_active_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_active_c1",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_active_c2",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_active_c3",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_active_c4",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_active_c5",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_speed_dropping_fast",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_accel_score_weak",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_close_weak",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_sma_weak",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_decel_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_immediate_decel",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_raw_state",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_pending_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_bars_in_state",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_accel_memory",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_weak_accel_bars",
+      "dtype": "float64"
+    },
+    {
+      "col": "momentum_state_allowed_raw_state",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_is_accel",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_is_decel",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_is_steady",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_state_dir",
+      "dtype": "str"
+    },
+    {
+      "col": "pullback_severity_ema",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_body_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_above_ema",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_bull_run_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_sustained_run",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_has_clearance",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_clearance_count",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_clearance_ok",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_body_ok",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_is_trend",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_locked",
+      "dtype": "float64"
+    },
+    {
+      "col": "pullback_severity_pullback_severity_ord",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_smc_event",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_smc_last_event",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_dist_to_cont_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_dist_to_rev_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_struct_range_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_struct_pos",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_break_ext_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_retrace_frac",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_event_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_choch_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_sweep_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_bos_streak_norm",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_hh_hl_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_event_rate",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_state",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_htf_event",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_htf_last_event",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_htf_dist_to_cont_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_dist_to_rev_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_struct_range_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_struct_pos",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_break_ext_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_retrace_frac",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_event_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_state_age_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_choch_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_sweep_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_bos_streak_norm",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_hh_hl_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_htf_event_rate",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_mtf_align",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_mtf_align_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_mtf_fresh_align",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_mtf_pos_spread",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_mtf_range_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_smc_state",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_m5_smc_event",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_m5_smc_last_event",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_m5_dist_to_cont_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_dist_to_rev_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_struct_range_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_break_ext_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_retrace_frac",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_event_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_choch_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_sweep_recency",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_bos_streak_norm",
+      "dtype": "float64"
+    },
+    {
+      "col": "smc_structure_m5_event_rate",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_drawdown_big",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_drawdown_fast",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_bars_underwater",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_vol_scale",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_state_big",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_state_fast",
+      "dtype": "float64"
+    },
+    {
+      "col": "stress_signal_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_lookback_high_60m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_lookback_low_60m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_high_60m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_low_60m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_high_60m_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_low_60m_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_structure_location_60m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_near_60m_high",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_near_60m_low",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_lookback_high_120m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_lookback_low_120m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_atr_21",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_high_120m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_low_120m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_high_120m_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_low_120m_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_structure_location_120m",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_near_120m_high",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_near_120m_low",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_lookback_high_1d",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_lookback_low_1d",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_atr_75",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_high_1d",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_low_1d",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_high_1d_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_dist_low_1d_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_structure_location_1d",
+      "dtype": "float64"
+    },
+    {
+      "col": "structural_position_near_1d_high",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_near_1d_low",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_direction_ema_fast",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_ema_slow",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_ema_sep",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_er",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_er_mean",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_er_std",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_er_downvol",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_er_thr_dyn",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_er_low",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_direction_weak_run",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_label_int",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_direction_reason",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_maturity_vwap",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_direction_score",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_ema_pressure",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_er",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_state",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_state_name",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_maturity_break_event",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_maturity_code",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_exhaustion_event",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_extension_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_peak_ext_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_signed_di_gap",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_mom_fade_frac",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_giveback_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_mature_bars",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_trend_age",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_vwap_dist_atr",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_bars_since_fresh",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_bars_since_mature",
+      "dtype": "float64"
+    },
+    {
+      "col": "trend_maturity_bars_since_exhausted",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_rv_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_atr_pct",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_india_vix_zscore_20",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_rv_rank_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_atr_rank_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_realized_60",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_implied_vix",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_rv_rank_60d",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_atr_rank_60d",
+      "dtype": "float64"
+    },
+    {
+      "col": "vol_level_vol_level_pct60d_score",
+      "dtype": "float32"
+    },
+    {
+      "col": "vol_level_vol_level_pct60d_ord",
+      "dtype": "float32"
+    },
+    {
+      "col": "vol_level_vol_level_ord",
+      "dtype": "float32"
+    },
+    {
+      "col": "volume_quality_vol_z",
+      "dtype": "float64"
+    },
+    {
+      "col": "volume_quality_range_z",
+      "dtype": "float64"
+    },
+    {
+      "col": "volume_quality_close_pos",
+      "dtype": "float64"
+    },
+    {
+      "col": "volume_quality_close_clean",
+      "dtype": "str"
+    },
+    {
+      "col": "volume_quality_close_rejection",
+      "dtype": "str"
+    },
+    {
+      "col": "volume_quality_session_phase",
+      "dtype": "str"
+    },
+    {
+      "col": "vwap_microstructure_session",
+      "dtype": "str"
+    },
+    {
+      "col": "vwap_microstructure_vwap_band_state",
+      "dtype": "str"
+    },
+    {
+      "col": "vwap_microstructure_vwap_excursion_ratio",
+      "dtype": "float64"
+    },
+    {
+      "col": "vwap_microstructure_reversion_strength",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_bar_conviction",
+      "dtype": "str"
+    },
+    {
+      "col": "breakout_state_breakout_state",
+      "dtype": "str"
+    },
+    {
+      "col": "candle_pattern_live_label",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_bucket_sell_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_bucket_buy_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_acc_share60",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_is_distribution",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_Flow_State_Label",
+      "dtype": "str"
+    },
+    {
+      "col": "gap_state_gap_state",
+      "dtype": "str"
+    },
+    {
+      "col": "intraday_positioning_Intraday_Positioning",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_res_state",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_sup_state",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_range_state",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_state",
+      "dtype": "str"
+    },
+    {
+      "col": "pullback_severity_pullback_severity",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_smc_state",
+      "dtype": "str"
+    },
+    {
+      "col": "stress_signal_label_combined",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_structural_position_60m",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_structural_position_120m",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_structural_position_1d",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_direction_trend_direction",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_maturity_maturity_name",
+      "dtype": "str"
+    },
+    {
+      "col": "volume_quality_Volume_Quality",
+      "dtype": "str"
+    },
+    {
+      "col": "vwap_microstructure_vwap_microstructure",
+      "dtype": "str"
+    },
+    {
+      "col": "dc_pos_275_bucket_features__dc_pos_275_bucket",
+      "dtype": "float32"
+    },
+    {
+      "col": "candle_pattern_verification_lock_level_is_locked",
+      "dtype": "str"
+    },
+    {
+      "col": "pullback_severity_locked_is_locked",
+      "dtype": "str"
+    }
+  ],
+  "feature_columns": [
+    "bar_conviction_bar_range",
+    "bar_conviction_atr_prev",
+    "bar_conviction_significance",
+    "bar_conviction_clv",
+    "bar_conviction_direction",
+    "bar_conviction_signed_body",
+    "bar_conviction_f_body",
+    "bar_conviction_f_range",
+    "bar_conviction_force_count",
+    "bar_conviction_reason",
+    "bar_conviction_conviction_score",
+    "bar_conviction_bar_conviction_ord",
+    "breakout_state_dom_support",
+    "breakout_state_dist_to_res_atr",
+    "breakout_state_dist_to_sup_atr",
+    "breakout_state_brk_level",
+    "breakout_state_stop_level",
+    "breakout_state_mfe_atr",
+    "breakout_state_mae_atr",
+    "breakout_state_atr_ratio",
+    "breakout_state_bars_since_bo",
+    "breakout_state_is_confirmed",
+    "breakout_state_is_survived",
+    "breakout_state_mark_bo",
+    "breakout_state_mark_fail",
+    "breakout_state_mark_fade",
+    "breakout_state_mark_conf",
+    "breakout_state_mark_surv",
+    "breakout_state_mark_upgrade",
+    "breakout_state_mark_rt",
+    "breakout_state_mark_lost",
+    "candle_pattern_is_green",
+    "candle_pattern_body_size",
+    "candle_pattern_total_range",
+    "candle_pattern_body_perc",
+    "candle_pattern_upper_wick",
+    "candle_pattern_lower_wick",
+    "candle_pattern_upper_wick_perc",
+    "candle_pattern_lower_wick_perc",
+    "candle_pattern_ema_5",
+    "candle_pattern_ema_20",
+    "candle_pattern_ema_diff",
+    "candle_pattern_vwap",
+    "candle_pattern_vwap_slope",
+    "candle_pattern_rsi_14",
+    "candle_pattern_vote_ema",
+    "candle_pattern_vote_vwap",
+    "candle_pattern_vote_rsi",
+    "candle_pattern_vote_sum",
+    "candle_pattern_label_1min",
+    "candle_pattern_label_streak",
+    "candle_pattern_is_uptrend",
+    "candle_pattern_is_downtrend",
+    "candle_pattern_bullish_engulfing",
+    "candle_pattern_morning_star",
+    "candle_pattern_abandoned_baby_bull",
+    "candle_pattern_piercing_line",
+    "candle_pattern_three_white_soldiers",
+    "candle_pattern_marubozu_green",
+    "candle_pattern_kicker_bullish",
+    "candle_pattern_hammer",
+    "candle_pattern_inverted_hammer",
+    "candle_pattern_bullish_harami",
+    "candle_pattern_confirmed_dragonfly",
+    "candle_pattern_tweezer_bottom",
+    "candle_pattern_confirmed_bullish_doji",
+    "candle_pattern_confirmed_bullish_spinning_top",
+    "candle_pattern_bearish_engulfing",
+    "candle_pattern_evening_star",
+    "candle_pattern_dark_cloud_cover",
+    "candle_pattern_three_black_crows",
+    "candle_pattern_marubozu_red",
+    "candle_pattern_shooting_star",
+    "candle_pattern_hanging_man",
+    "candle_pattern_bearish_harami",
+    "candle_pattern_confirmed_gravestone",
+    "candle_pattern_tweezer_top",
+    "candle_pattern_confirmed_bearish_doji",
+    "candle_pattern_confirmed_bearish_spinning_top",
+    "candle_pattern_bull_strength_raw",
+    "candle_pattern_bear_strength_raw",
+    "candle_pattern_bars_since_bull_signal",
+    "candle_pattern_bars_since_bear_signal",
+    "candle_pattern_verification_event",
+    "candle_pattern_verification_active",
+    "candle_pattern_verification_armed",
+    "candle_pattern_verification_lock_level",
+    "candle_pattern_verification_arm_thresh",
+    "candle_pattern_verification_conf_thresh",
+    "candle_pattern_bars_in_verification",
+    "candle_pattern_n_confirmation_events",
+    "candle_pattern_n_false_events",
+    "candle_pattern_n_verifications_active",
+    "candle_pattern_n_verifications_armed",
+    "fade_risk_ema9",
+    "fade_risk_ema_gap_pct",
+    "fade_risk_trend_state",
+    "fade_risk_clue_score",
+    "fade_risk_leg_atr",
+    "fade_risk_trigger",
+    "fade_risk_fade_dir",
+    "fade_risk_episode_len",
+    "fade_risk_fade_risk",
+    "flow_state_anchored_high",
+    "flow_state_anchored_low",
+    "flow_state_frozen_high",
+    "flow_state_frozen_low",
+    "flow_state_same_slot_vol_ratio",
+    "flow_state_window_vol_ratio",
+    "flow_state_window_rng_ratio",
+    "flow_state_window_oi_ratio",
+    "flow_state_absorption_score",
+    "flow_state_efficiency_ratio",
+    "flow_state_inside_share",
+    "flow_state_box_width_slot_norm",
+    "flow_state_prior_leg_in_atr",
+    "flow_state_volatility_regime",
+    "flow_state_dyn_vol_thr",
+    "flow_state_dyn_rng_thr",
+    "flow_state_dyn_box_thr",
+    "flow_state_dyn_abs_thr",
+    "flow_state_raw_sell_footprints",
+    "flow_state_raw_buy_footprints",
+    "flow_state_raw_accumulation",
+    "flow_state_raw_distribution",
+    "flow_state_phase_state_raw",
+    "flow_state_phase_age",
+    "flow_state_acc_confirmed",
+    "flow_state_dist_confirmed",
+    "flow_state_acc_resolved_up",
+    "flow_state_acc_failed_down",
+    "flow_state_dist_resolved_dn",
+    "flow_state_dist_failed_up",
+    "flow_state_Flow_State",
+    "gap_state_has_gap_up_below",
+    "gap_state_has_gap_down_above",
+    "gap_state_total_unfilled_count",
+    "gap_state_nearest_up_gap_low",
+    "gap_state_nearest_up_gap_high",
+    "gap_state_nearest_up_gap_size",
+    "gap_state_nearest_up_gap_size_atr",
+    "gap_state_nearest_up_gap_distance",
+    "gap_state_nearest_up_gap_distance_atr",
+    "gap_state_nearest_up_gap_ratio",
+    "gap_state_nearest_up_gap_age",
+    "gap_state_nearest_down_gap_high",
+    "gap_state_nearest_down_gap_size",
+    "gap_state_nearest_down_gap_size_atr",
+    "gap_state_nearest_down_gap_distance_atr",
+    "gap_state_nearest_down_gap_ratio",
+    "gap_state_nearest_down_gap_age",
+    "gap_state_total_gap_area",
+    "gap_state_total_up_gap_area_atr",
+    "gap_state_total_down_gap_area_atr",
+    "gap_state_total_gap_area_atr",
+    "gap_state_down_unfilled_count_local_k3",
+    "gap_state_total_unfilled_count_local_k3",
+    "gap_state_total_gap_area_local_atr",
+    "gap_state_gap_fill_ratio",
+    "gap_state_gap_up_stack",
+    "gap_state_gap_up_total_unfilled_pts",
+    "gap_state_gap_up_stack_local_k3",
+    "gap_state_gap_up_total_unfilled_pts_local_atr",
+    "gap_state_gap_down_total_unfilled_pts_local_atr",
+    "intraday_positioning_zone_id",
+    "level_proximity_res_level_name",
+    "level_proximity_res_level_tf",
+    "level_proximity_res_polarity",
+    "level_proximity_res_distance_atr",
+    "level_proximity_res_weighted_score",
+    "level_proximity_res_weight",
+    "level_proximity_bars_in_res_zone",
+    "level_proximity_sup_level_name",
+    "level_proximity_sup_level_tf",
+    "level_proximity_sup_polarity",
+    "level_proximity_sup_weighted_score",
+    "level_proximity_sup_weight",
+    "level_proximity_bars_in_sup_zone",
+    "momentum_state_sma_1m",
+    "momentum_state_sma_1m_slope",
+    "momentum_state_speed",
+    "momentum_state_prev_speed",
+    "momentum_state_abs_speed",
+    "momentum_state_abs_prev_spd",
+    "momentum_state_delta_speed",
+    "momentum_state_same_dir",
+    "momentum_state_is_bullish",
+    "momentum_state_is_bearish",
+    "momentum_state_range_atr",
+    "momentum_state_range_atr_sma_prev",
+    "momentum_state_range_contracting",
+    "momentum_state_er",
+    "momentum_state_fast_er",
+    "momentum_state_er_falling_fast",
+    "momentum_state_er_noisy",
+    "momentum_state_er_supports_accel",
+    "momentum_state_bull_close_qual",
+    "momentum_state_bear_close_qual",
+    "momentum_state_bull_close_weak",
+    "momentum_state_bear_close_weak",
+    "momentum_state_bear_sma_support",
+    "momentum_state_bear_sma_weak",
+    "momentum_state_bull_score",
+    "momentum_state_bear_score",
+    "momentum_state_active_score",
+    "momentum_state_active_c1",
+    "momentum_state_active_c2",
+    "momentum_state_active_c3",
+    "momentum_state_active_c4",
+    "momentum_state_active_c5",
+    "momentum_state_speed_dropping_fast",
+    "momentum_state_accel_score_weak",
+    "momentum_state_close_weak",
+    "momentum_state_sma_weak",
+    "momentum_state_decel_score",
+    "momentum_state_immediate_decel",
+    "momentum_state_raw_state",
+    "momentum_state_pending_count",
+    "momentum_state_bars_in_state",
+    "momentum_state_accel_memory",
+    "momentum_state_weak_accel_bars",
+    "momentum_state_allowed_raw_state",
+    "momentum_state_is_accel",
+    "momentum_state_is_decel",
+    "momentum_state_is_steady",
+    "momentum_state_state_dir",
+    "pullback_severity_ema",
+    "pullback_severity_body_ratio",
+    "pullback_severity_above_ema",
+    "pullback_severity_bull_run_count",
+    "pullback_severity_sustained_run",
+    "pullback_severity_has_clearance",
+    "pullback_severity_clearance_count",
+    "pullback_severity_clearance_ok",
+    "pullback_severity_body_ok",
+    "pullback_severity_is_trend",
+    "pullback_severity_locked",
+    "pullback_severity_pullback_severity_ord",
+    "smc_structure_smc_event",
+    "smc_structure_smc_last_event",
+    "smc_structure_dist_to_cont_atr",
+    "smc_structure_dist_to_rev_atr",
+    "smc_structure_struct_range_atr",
+    "smc_structure_struct_pos",
+    "smc_structure_break_ext_atr",
+    "smc_structure_retrace_frac",
+    "smc_structure_event_recency",
+    "smc_structure_choch_recency",
+    "smc_structure_sweep_recency",
+    "smc_structure_bos_streak_norm",
+    "smc_structure_hh_hl_score",
+    "smc_structure_event_rate",
+    "smc_structure_htf_state",
+    "smc_structure_htf_event",
+    "smc_structure_htf_last_event",
+    "smc_structure_htf_dist_to_cont_atr",
+    "smc_structure_htf_dist_to_rev_atr",
+    "smc_structure_htf_struct_range_atr",
+    "smc_structure_htf_struct_pos",
+    "smc_structure_htf_break_ext_atr",
+    "smc_structure_htf_retrace_frac",
+    "smc_structure_htf_event_recency",
+    "smc_structure_htf_state_age_recency",
+    "smc_structure_htf_choch_recency",
+    "smc_structure_htf_sweep_recency",
+    "smc_structure_htf_bos_streak_norm",
+    "smc_structure_htf_hh_hl_score",
+    "smc_structure_htf_event_rate",
+    "smc_structure_mtf_align",
+    "smc_structure_mtf_align_score",
+    "smc_structure_mtf_fresh_align",
+    "smc_structure_mtf_pos_spread",
+    "smc_structure_mtf_range_ratio",
+    "smc_structure_m5_smc_state",
+    "smc_structure_m5_smc_event",
+    "smc_structure_m5_smc_last_event",
+    "smc_structure_m5_dist_to_cont_atr",
+    "smc_structure_m5_dist_to_rev_atr",
+    "smc_structure_m5_struct_range_atr",
+    "smc_structure_m5_break_ext_atr",
+    "smc_structure_m5_retrace_frac",
+    "smc_structure_m5_event_recency",
+    "smc_structure_m5_choch_recency",
+    "smc_structure_m5_sweep_recency",
+    "smc_structure_m5_bos_streak_norm",
+    "smc_structure_m5_event_rate",
+    "stress_signal_drawdown_big",
+    "stress_signal_drawdown_fast",
+    "stress_signal_bars_underwater",
+    "stress_signal_vol_scale",
+    "stress_signal_state_big",
+    "stress_signal_state_fast",
+    "stress_signal_score",
+    "structural_position_lookback_high_60m",
+    "structural_position_lookback_low_60m",
+    "structural_position_dist_high_60m",
+    "structural_position_dist_low_60m",
+    "structural_position_dist_high_60m_atr",
+    "structural_position_dist_low_60m_atr",
+    "structural_position_structure_location_60m",
+    "structural_position_near_60m_high",
+    "structural_position_near_60m_low",
+    "structural_position_lookback_high_120m",
+    "structural_position_lookback_low_120m",
+    "structural_position_atr_21",
+    "structural_position_dist_high_120m",
+    "structural_position_dist_low_120m",
+    "structural_position_dist_high_120m_atr",
+    "structural_position_dist_low_120m_atr",
+    "structural_position_structure_location_120m",
+    "structural_position_near_120m_high",
+    "structural_position_near_120m_low",
+    "structural_position_lookback_high_1d",
+    "structural_position_lookback_low_1d",
+    "structural_position_atr_75",
+    "structural_position_dist_high_1d",
+    "structural_position_dist_low_1d",
+    "structural_position_dist_high_1d_atr",
+    "structural_position_dist_low_1d_atr",
+    "structural_position_structure_location_1d",
+    "structural_position_near_1d_high",
+    "structural_position_near_1d_low",
+    "trend_direction_ema_fast",
+    "trend_direction_ema_slow",
+    "trend_direction_ema_sep",
+    "trend_direction_er",
+    "trend_direction_er_mean",
+    "trend_direction_er_std",
+    "trend_direction_er_downvol",
+    "trend_direction_er_thr_dyn",
+    "trend_direction_er_low",
+    "trend_direction_weak_run",
+    "trend_direction_label_int",
+    "trend_direction_reason",
+    "trend_maturity_vwap",
+    "trend_maturity_direction_score",
+    "trend_maturity_ema_pressure",
+    "trend_maturity_er",
+    "trend_maturity_state",
+    "trend_maturity_state_name",
+    "trend_maturity_break_event",
+    "trend_maturity_maturity_code",
+    "trend_maturity_exhaustion_event",
+    "trend_maturity_extension_atr",
+    "trend_maturity_peak_ext_atr",
+    "trend_maturity_signed_di_gap",
+    "trend_maturity_mom_fade_frac",
+    "trend_maturity_giveback_atr",
+    "trend_maturity_mature_bars",
+    "trend_maturity_trend_age",
+    "trend_maturity_vwap_dist_atr",
+    "trend_maturity_bars_since_fresh",
+    "trend_maturity_bars_since_mature",
+    "trend_maturity_bars_since_exhausted",
+    "vol_level_rv_60",
+    "vol_level_atr_pct",
+    "vol_level_india_vix_zscore_20",
+    "vol_level_rv_rank_60",
+    "vol_level_atr_rank_60",
+    "vol_level_realized_60",
+    "vol_level_implied_vix",
+    "vol_level_rv_rank_60d",
+    "vol_level_atr_rank_60d",
+    "vol_level_vol_level_pct60d_score",
+    "vol_level_vol_level_pct60d_ord",
+    "vol_level_vol_level_ord",
+    "volume_quality_vol_z",
+    "volume_quality_range_z",
+    "volume_quality_close_pos",
+    "volume_quality_close_clean",
+    "volume_quality_close_rejection",
+    "volume_quality_session_phase",
+    "vwap_microstructure_session",
+    "vwap_microstructure_vwap_band_state",
+    "vwap_microstructure_vwap_excursion_ratio",
+    "vwap_microstructure_reversion_strength",
+    "bar_conviction_bar_conviction",
+    "breakout_state_breakout_state",
+    "candle_pattern_live_label",
+    "flow_state_bucket_sell_footprints",
+    "flow_state_bucket_buy_footprints",
+    "flow_state_acc_share60",
+    "flow_state_is_distribution",
+    "flow_state_Flow_State_Label",
+    "gap_state_gap_state",
+    "intraday_positioning_Intraday_Positioning",
+    "level_proximity_res_state",
+    "level_proximity_sup_state",
+    "level_proximity_range_state",
+    "momentum_state_state",
+    "pullback_severity_pullback_severity",
+    "smc_structure_smc_state",
+    "stress_signal_label_combined",
+    "structural_position_structural_position_60m",
+    "structural_position_structural_position_120m",
+    "structural_position_structural_position_1d",
+    "trend_direction_trend_direction",
+    "trend_maturity_maturity_name",
+    "volume_quality_Volume_Quality",
+    "vwap_microstructure_vwap_microstructure",
+    "dc_pos_275_bucket_features__dc_pos_275_bucket",
+    "candle_pattern_verification_lock_level_is_locked",
+    "pullback_severity_locked_is_locked"
+  ],
+  "categorical_columns": [
+    "bar_conviction_reason",
+    "breakout_state_is_confirmed",
+    "breakout_state_is_survived",
+    "candle_pattern_is_green",
+    "candle_pattern_label_1min",
+    "candle_pattern_is_uptrend",
+    "candle_pattern_is_downtrend",
+    "candle_pattern_bullish_engulfing",
+    "candle_pattern_morning_star",
+    "candle_pattern_abandoned_baby_bull",
+    "candle_pattern_piercing_line",
+    "candle_pattern_three_white_soldiers",
+    "candle_pattern_marubozu_green",
+    "candle_pattern_kicker_bullish",
+    "candle_pattern_hammer",
+    "candle_pattern_inverted_hammer",
+    "candle_pattern_bullish_harami",
+    "candle_pattern_confirmed_dragonfly",
+    "candle_pattern_tweezer_bottom",
+    "candle_pattern_confirmed_bullish_doji",
+    "candle_pattern_confirmed_bullish_spinning_top",
+    "candle_pattern_bearish_engulfing",
+    "candle_pattern_evening_star",
+    "candle_pattern_dark_cloud_cover",
+    "candle_pattern_three_black_crows",
+    "candle_pattern_marubozu_red",
+    "candle_pattern_shooting_star",
+    "candle_pattern_hanging_man",
+    "candle_pattern_bearish_harami",
+    "candle_pattern_confirmed_gravestone",
+    "candle_pattern_tweezer_top",
+    "candle_pattern_confirmed_bearish_doji",
+    "candle_pattern_confirmed_bearish_spinning_top",
+    "candle_pattern_verification_event",
+    "candle_pattern_verification_active",
+    "candle_pattern_verification_armed",
+    "fade_risk_trigger",
+    "flow_state_raw_accumulation",
+    "flow_state_raw_distribution",
+    "flow_state_acc_confirmed",
+    "flow_state_dist_confirmed",
+    "flow_state_acc_resolved_up",
+    "flow_state_acc_failed_down",
+    "flow_state_dist_resolved_dn",
+    "flow_state_dist_failed_up",
+    "level_proximity_res_level_name",
+    "level_proximity_res_level_tf",
+    "level_proximity_res_polarity",
+    "level_proximity_sup_level_name",
+    "level_proximity_sup_level_tf",
+    "level_proximity_sup_polarity",
+    "momentum_state_same_dir",
+    "momentum_state_is_bullish",
+    "momentum_state_is_bearish",
+    "momentum_state_range_contracting",
+    "momentum_state_er_falling_fast",
+    "momentum_state_er_noisy",
+    "momentum_state_er_supports_accel",
+    "momentum_state_bull_close_qual",
+    "momentum_state_bear_close_qual",
+    "momentum_state_bull_close_weak",
+    "momentum_state_bear_close_weak",
+    "momentum_state_bear_sma_support",
+    "momentum_state_bear_sma_weak",
+    "momentum_state_active_c1",
+    "momentum_state_active_c2",
+    "momentum_state_active_c3",
+    "momentum_state_active_c4",
+    "momentum_state_active_c5",
+    "momentum_state_speed_dropping_fast",
+    "momentum_state_accel_score_weak",
+    "momentum_state_close_weak",
+    "momentum_state_sma_weak",
+    "momentum_state_immediate_decel",
+    "momentum_state_raw_state",
+    "momentum_state_allowed_raw_state",
+    "momentum_state_is_accel",
+    "momentum_state_is_decel",
+    "momentum_state_is_steady",
+    "momentum_state_state_dir",
+    "smc_structure_smc_event",
+    "smc_structure_smc_last_event",
+    "smc_structure_htf_state",
+    "smc_structure_htf_event",
+    "smc_structure_htf_last_event",
+    "smc_structure_mtf_align",
+    "smc_structure_m5_smc_state",
+    "smc_structure_m5_smc_event",
+    "smc_structure_m5_smc_last_event",
+    "structural_position_near_60m_high",
+    "structural_position_near_60m_low",
+    "structural_position_near_120m_high",
+    "structural_position_near_120m_low",
+    "structural_position_near_1d_high",
+    "structural_position_near_1d_low",
+    "trend_direction_er_low",
+    "trend_direction_reason",
+    "trend_maturity_state_name",
+    "volume_quality_close_clean",
+    "volume_quality_close_rejection",
+    "volume_quality_session_phase",
+    "vwap_microstructure_session",
+    "vwap_microstructure_vwap_band_state",
+    "bar_conviction_bar_conviction",
+    "breakout_state_breakout_state",
+    "candle_pattern_live_label",
+    "flow_state_Flow_State_Label",
+    "gap_state_gap_state",
+    "intraday_positioning_Intraday_Positioning",
+    "level_proximity_res_state",
+    "level_proximity_sup_state",
+    "level_proximity_range_state",
+    "momentum_state_state",
+    "pullback_severity_pullback_severity",
+    "smc_structure_smc_state",
+    "stress_signal_label_combined",
+    "structural_position_structural_position_60m",
+    "structural_position_structural_position_120m",
+    "structural_position_structural_position_1d",
+    "trend_direction_trend_direction",
+    "trend_maturity_maturity_name",
+    "volume_quality_Volume_Quality",
+    "vwap_microstructure_vwap_microstructure",
+    "candle_pattern_verification_lock_level_is_locked",
+    "pullback_severity_locked_is_locked"
+  ],
+  "label_col": "primary_label",
+  "weight_cols": [
+    "weight",
+    "weight_raw"
+  ],
+  "per_feature": [
+    {
+      "name": "v8_train",
+      "file": "raw_bucket/V8_TRAIN.parquet",
+      "column_clocks": {},
+      "clock_minutes": 1,
+      "clock_source": "measured",
+      "clock_measured": {},
+      "clock_overrides": {},
+      "na_policy": "sentinel",
+      "na_treatment": {
+        "policy": "sentinel",
+        "for_model": "native",
+        "columns": {
+          "bar_conviction_reason": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "breakout_state_is_confirmed": {
+            "filled": "MISSING",
+            "n": 12205
+          },
+          "breakout_state_is_survived": {
+            "filled": "MISSING",
+            "n": 12205
+          },
+          "candle_pattern_is_green": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_label_1min": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_is_uptrend": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_is_downtrend": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_bullish_engulfing": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_morning_star": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_abandoned_baby_bull": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_piercing_line": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_three_white_soldiers": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_marubozu_green": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_kicker_bullish": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_hammer": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_inverted_hammer": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_bullish_harami": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_confirmed_dragonfly": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_tweezer_bottom": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_confirmed_bullish_doji": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_confirmed_bullish_spinning_top": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_bearish_engulfing": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_evening_star": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_dark_cloud_cover": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_three_black_crows": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_marubozu_red": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_shooting_star": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_hanging_man": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_bearish_harami": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_confirmed_gravestone": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_tweezer_top": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_confirmed_bearish_doji": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_confirmed_bearish_spinning_top": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_verification_event": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_verification_active": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "candle_pattern_verification_armed": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "momentum_state_same_dir": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_is_bullish": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_is_bearish": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_range_contracting": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_er_falling_fast": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_er_noisy": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_er_supports_accel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_bull_close_qual": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_bear_close_qual": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_bull_close_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_bear_close_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_bear_sma_support": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_bear_sma_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_active_c1": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_active_c2": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_active_c3": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_active_c4": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_active_c5": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_speed_dropping_fast": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_accel_score_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_close_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_sma_weak": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_immediate_decel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_raw_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_allowed_raw_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_is_accel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_is_decel": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_is_steady": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "momentum_state_state_dir": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "smc_structure_m5_smc_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "smc_structure_m5_smc_event": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "smc_structure_m5_smc_last_event": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "trend_direction_er_low": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "trend_direction_reason": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "trend_maturity_state_name": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "bar_conviction_bar_conviction": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "candle_pattern_live_label": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "level_proximity_range_state": {
+            "filled": "MISSING",
+            "n": 375
+          },
+          "momentum_state_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "pullback_severity_pullback_severity": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "structural_position_structural_position_60m": {
+            "filled": "MISSING",
+            "n": 157
+          },
+          "structural_position_structural_position_120m": {
+            "filled": "MISSING",
+            "n": 156
+          },
+          "structural_position_structural_position_1d": {
+            "filled": "MISSING",
+            "n": 375
+          },
+          "trend_direction_trend_direction": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "trend_maturity_maturity_name": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "volume_quality_Volume_Quality": {
+            "filled": "MISSING",
+            "n": 7500
+          },
+          "bar_conviction_bar_range": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_atr_prev": {
+            "kept_nan": true,
+            "n": 75
+          },
+          "bar_conviction_significance": {
+            "kept_nan": true,
+            "n": 165
+          },
+          "bar_conviction_clv": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_direction": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_signed_body": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_f_body": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_f_range": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_force_count": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_conviction_score": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "bar_conviction_bar_conviction_ord": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "breakout_state_dom_support": {
+            "kept_nan": true,
+            "n": 50341
+          },
+          "breakout_state_dist_to_res_atr": {
+            "kept_nan": true,
+            "n": 54119
+          },
+          "breakout_state_dist_to_sup_atr": {
+            "kept_nan": true,
+            "n": 50341
+          },
+          "breakout_state_brk_level": {
+            "kept_nan": true,
+            "n": 673092
+          },
+          "breakout_state_stop_level": {
+            "kept_nan": true,
+            "n": 673092
+          },
+          "breakout_state_mfe_atr": {
+            "kept_nan": true,
+            "n": 673092
+          },
+          "breakout_state_mae_atr": {
+            "kept_nan": true,
+            "n": 673092
+          },
+          "breakout_state_atr_ratio": {
+            "kept_nan": true,
+            "n": 673092
+          },
+          "breakout_state_bars_since_bo": {
+            "kept_nan": true,
+            "n": 673092
+          },
+          "breakout_state_mark_bo": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_fail": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_fade": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_conf": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_surv": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_upgrade": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_rt": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "breakout_state_mark_lost": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "candle_pattern_body_size": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_total_range": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_body_perc": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_upper_wick": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_lower_wick": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_upper_wick_perc": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_lower_wick_perc": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_ema_5": {
+            "kept_nan": true,
+            "n": 202
+          },
+          "candle_pattern_ema_20": {
+            "kept_nan": true,
+            "n": 202
+          },
+          "candle_pattern_ema_diff": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_vwap": {
+            "kept_nan": true,
+            "n": 202
+          },
+          "candle_pattern_vwap_slope": {
+            "kept_nan": true,
+            "n": 12206
+          },
+          "candle_pattern_rsi_14": {
+            "kept_nan": true,
+            "n": 2
+          },
+          "candle_pattern_vote_ema": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_vote_vwap": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_vote_rsi": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_vote_sum": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_label_streak": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_bull_strength_raw": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_bear_strength_raw": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_bars_since_bull_signal": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_bars_since_bear_signal": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_verification_lock_level": {
+            "kept_nan": true,
+            "n": 470147
+          },
+          "candle_pattern_verification_arm_thresh": {
+            "kept_nan": true,
+            "n": 470147
+          },
+          "candle_pattern_verification_conf_thresh": {
+            "kept_nan": true,
+            "n": 470147
+          },
+          "candle_pattern_bars_in_verification": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_n_confirmation_events": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_n_false_events": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_n_verifications_active": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "candle_pattern_n_verifications_armed": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "fade_risk_ema9": {
+            "kept_nan": true,
+            "n": 12270
+          },
+          "fade_risk_ema_gap_pct": {
+            "kept_nan": true,
+            "n": 12205
+          },
+          "fade_risk_leg_atr": {
+            "kept_nan": true,
+            "n": 272423
+          },
+          "flow_state_anchored_high": {
+            "kept_nan": true,
+            "n": 30
+          },
+          "flow_state_anchored_low": {
+            "kept_nan": true,
+            "n": 30
+          },
+          "flow_state_frozen_high": {
+            "kept_nan": true,
+            "n": 874404
+          },
+          "flow_state_frozen_low": {
+            "kept_nan": true,
+            "n": 874404
+          },
+          "flow_state_same_slot_vol_ratio": {
+            "kept_nan": true,
+            "n": 3750
+          },
+          "flow_state_window_vol_ratio": {
+            "kept_nan": true,
+            "n": 3774
+          },
+          "flow_state_window_rng_ratio": {
+            "kept_nan": true,
+            "n": 3774
+          },
+          "flow_state_window_oi_ratio": {
+            "kept_nan": true,
+            "n": 475948
+          },
+          "flow_state_absorption_score": {
+            "kept_nan": true,
+            "n": 3774
+          },
+          "flow_state_inside_share": {
+            "kept_nan": true,
+            "n": 24
+          },
+          "flow_state_box_width_slot_norm": {
+            "kept_nan": true,
+            "n": 399
+          },
+          "flow_state_prior_leg_in_atr": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "flow_state_dyn_vol_thr": {
+            "kept_nan": true,
+            "n": 3874
+          },
+          "flow_state_dyn_rng_thr": {
+            "kept_nan": true,
+            "n": 3874
+          },
+          "flow_state_dyn_box_thr": {
+            "kept_nan": true,
+            "n": 499
+          },
+          "flow_state_dyn_abs_thr": {
+            "kept_nan": true,
+            "n": 3874
+          },
+          "flow_state_raw_sell_footprints": {
+            "kept_nan": true,
+            "n": 24
+          },
+          "flow_state_raw_buy_footprints": {
+            "kept_nan": true,
+            "n": 24
+          },
+          "gap_state_nearest_up_gap_low": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_high": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_size": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_size_atr": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_distance": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_distance_atr": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_ratio": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_up_gap_age": {
+            "kept_nan": true,
+            "n": 86066
+          },
+          "gap_state_nearest_down_gap_high": {
+            "kept_nan": true,
+            "n": 610092
+          },
+          "gap_state_nearest_down_gap_size": {
+            "kept_nan": true,
+            "n": 610092
+          },
+          "gap_state_nearest_down_gap_size_atr": {
+            "kept_nan": true,
+            "n": 610092
+          },
+          "gap_state_nearest_down_gap_distance_atr": {
+            "kept_nan": true,
+            "n": 610092
+          },
+          "gap_state_nearest_down_gap_ratio": {
+            "kept_nan": true,
+            "n": 610092
+          },
+          "gap_state_nearest_down_gap_age": {
+            "kept_nan": true,
+            "n": 610092
+          },
+          "gap_state_total_up_gap_area_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "gap_state_total_down_gap_area_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "gap_state_total_gap_area_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "gap_state_total_gap_area_local_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "gap_state_gap_fill_ratio": {
+            "kept_nan": true,
+            "n": 51899
+          },
+          "gap_state_gap_up_total_unfilled_pts_local_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "gap_state_gap_down_total_unfilled_pts_local_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "level_proximity_res_distance_atr": {
+            "kept_nan": true,
+            "n": 726301
+          },
+          "level_proximity_res_weighted_score": {
+            "kept_nan": true,
+            "n": 726301
+          },
+          "level_proximity_res_weight": {
+            "kept_nan": true,
+            "n": 726301
+          },
+          "level_proximity_sup_weighted_score": {
+            "kept_nan": true,
+            "n": 725845
+          },
+          "level_proximity_sup_weight": {
+            "kept_nan": true,
+            "n": 725845
+          },
+          "momentum_state_sma_1m": {
+            "kept_nan": true,
+            "n": 10
+          },
+          "momentum_state_sma_1m_slope": {
+            "kept_nan": true,
+            "n": 15
+          },
+          "momentum_state_speed": {
+            "kept_nan": true,
+            "n": 50
+          },
+          "momentum_state_prev_speed": {
+            "kept_nan": true,
+            "n": 95
+          },
+          "momentum_state_abs_speed": {
+            "kept_nan": true,
+            "n": 50
+          },
+          "momentum_state_abs_prev_spd": {
+            "kept_nan": true,
+            "n": 95
+          },
+          "momentum_state_delta_speed": {
+            "kept_nan": true,
+            "n": 95
+          },
+          "momentum_state_range_atr": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_range_atr_sma_prev": {
+            "kept_nan": true,
+            "n": 30
+          },
+          "momentum_state_er": {
+            "kept_nan": true,
+            "n": 195
+          },
+          "momentum_state_fast_er": {
+            "kept_nan": true,
+            "n": 245
+          },
+          "momentum_state_bull_score": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_bear_score": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_active_score": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_decel_score": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_pending_count": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_bars_in_state": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_accel_memory": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "momentum_state_weak_accel_bars": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_ema": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_body_ratio": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_above_ema": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_bull_run_count": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_sustained_run": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_has_clearance": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_clearance_count": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_clearance_ok": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_body_ok": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_is_trend": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "pullback_severity_locked": {
+            "kept_nan": true,
+            "n": 651493
+          },
+          "pullback_severity_pullback_severity_ord": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "smc_structure_dist_to_cont_atr": {
+            "kept_nan": true,
+            "n": 78
+          },
+          "smc_structure_dist_to_rev_atr": {
+            "kept_nan": true,
+            "n": 78
+          },
+          "smc_structure_struct_range_atr": {
+            "kept_nan": true,
+            "n": 102
+          },
+          "smc_structure_struct_pos": {
+            "kept_nan": true,
+            "n": 102
+          },
+          "smc_structure_break_ext_atr": {
+            "kept_nan": true,
+            "n": 78
+          },
+          "smc_structure_retrace_frac": {
+            "kept_nan": true,
+            "n": 78
+          },
+          "smc_structure_htf_dist_to_cont_atr": {
+            "kept_nan": true,
+            "n": 78
+          },
+          "smc_structure_htf_dist_to_rev_atr": {
+            "kept_nan": true,
+            "n": 78
+          },
+          "smc_structure_htf_struct_range_atr": {
+            "kept_nan": true,
+            "n": 18952
+          },
+          "smc_structure_htf_struct_pos": {
+            "kept_nan": true,
+            "n": 18952
+          },
+          "smc_structure_htf_break_ext_atr": {
+            "kept_nan": true,
+            "n": 1064
+          },
+          "smc_structure_htf_retrace_frac": {
+            "kept_nan": true,
+            "n": 1064
+          },
+          "smc_structure_mtf_pos_spread": {
+            "kept_nan": true,
+            "n": 18976
+          },
+          "smc_structure_mtf_range_ratio": {
+            "kept_nan": true,
+            "n": 18976
+          },
+          "smc_structure_m5_dist_to_cont_atr": {
+            "kept_nan": true,
+            "n": 75
+          },
+          "smc_structure_m5_dist_to_rev_atr": {
+            "kept_nan": true,
+            "n": 75
+          },
+          "smc_structure_m5_struct_range_atr": {
+            "kept_nan": true,
+            "n": 95
+          },
+          "smc_structure_m5_break_ext_atr": {
+            "kept_nan": true,
+            "n": 125
+          },
+          "smc_structure_m5_retrace_frac": {
+            "kept_nan": true,
+            "n": 125
+          },
+          "smc_structure_m5_event_recency": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "smc_structure_m5_choch_recency": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "smc_structure_m5_sweep_recency": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "smc_structure_m5_bos_streak_norm": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "smc_structure_m5_event_rate": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "stress_signal_score": {
+            "kept_nan": true,
+            "n": 3000
+          },
+          "structural_position_lookback_high_60m": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "structural_position_lookback_low_60m": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "structural_position_dist_high_60m": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "structural_position_dist_low_60m": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "structural_position_dist_high_60m_atr": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "structural_position_dist_low_60m_atr": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "structural_position_structure_location_60m": {
+            "kept_nan": true,
+            "n": 157
+          },
+          "structural_position_lookback_high_120m": {
+            "kept_nan": true,
+            "n": 120
+          },
+          "structural_position_lookback_low_120m": {
+            "kept_nan": true,
+            "n": 120
+          },
+          "structural_position_atr_21": {
+            "kept_nan": true,
+            "n": 20
+          },
+          "structural_position_dist_high_120m": {
+            "kept_nan": true,
+            "n": 120
+          },
+          "structural_position_dist_low_120m": {
+            "kept_nan": true,
+            "n": 120
+          },
+          "structural_position_dist_high_120m_atr": {
+            "kept_nan": true,
+            "n": 120
+          },
+          "structural_position_dist_low_120m_atr": {
+            "kept_nan": true,
+            "n": 120
+          },
+          "structural_position_structure_location_120m": {
+            "kept_nan": true,
+            "n": 156
+          },
+          "structural_position_lookback_high_1d": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "structural_position_lookback_low_1d": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "structural_position_atr_75": {
+            "kept_nan": true,
+            "n": 74
+          },
+          "structural_position_dist_high_1d": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "structural_position_dist_low_1d": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "structural_position_dist_high_1d_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "structural_position_dist_low_1d_atr": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "structural_position_structure_location_1d": {
+            "kept_nan": true,
+            "n": 375
+          },
+          "trend_direction_ema_fast": {
+            "kept_nan": true,
+            "n": 13
+          },
+          "trend_direction_ema_slow": {
+            "kept_nan": true,
+            "n": 13
+          },
+          "trend_direction_ema_sep": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_direction_er": {
+            "kept_nan": true,
+            "n": 165
+          },
+          "trend_direction_er_mean": {
+            "kept_nan": true,
+            "n": 235
+          },
+          "trend_direction_er_std": {
+            "kept_nan": true,
+            "n": 235
+          },
+          "trend_direction_er_downvol": {
+            "kept_nan": true,
+            "n": 245
+          },
+          "trend_direction_er_thr_dyn": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_direction_weak_run": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_direction_label_int": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_vwap": {
+            "kept_nan": true,
+            "n": 10
+          },
+          "trend_maturity_direction_score": {
+            "kept_nan": true,
+            "n": 10
+          },
+          "trend_maturity_ema_pressure": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_er": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_state": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_break_event": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_maturity_code": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_exhaustion_event": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_extension_atr": {
+            "kept_nan": true,
+            "n": 535517
+          },
+          "trend_maturity_peak_ext_atr": {
+            "kept_nan": true,
+            "n": 535517
+          },
+          "trend_maturity_signed_di_gap": {
+            "kept_nan": true,
+            "n": 535517
+          },
+          "trend_maturity_mom_fade_frac": {
+            "kept_nan": true,
+            "n": 535517
+          },
+          "trend_maturity_giveback_atr": {
+            "kept_nan": true,
+            "n": 535517
+          },
+          "trend_maturity_mature_bars": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_trend_age": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_vwap_dist_atr": {
+            "kept_nan": true,
+            "n": 10
+          },
+          "trend_maturity_bars_since_fresh": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_bars_since_mature": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "trend_maturity_bars_since_exhausted": {
+            "kept_nan": true,
+            "n": 5
+          },
+          "vol_level_rv_60": {
+            "kept_nan": true,
+            "n": 60
+          },
+          "vol_level_atr_pct": {
+            "kept_nan": true,
+            "n": 13
+          },
+          "vol_level_india_vix_zscore_20": {
+            "kept_nan": true,
+            "n": 7500
+          },
+          "vol_level_rv_rank_60": {
+            "kept_nan": true,
+            "n": 119
+          },
+          "vol_level_atr_rank_60": {
+            "kept_nan": true,
+            "n": 72
+          },
+          "vol_level_realized_60": {
+            "kept_nan": true,
+            "n": 119
+          },
+          "vol_level_implied_vix": {
+            "kept_nan": true,
+            "n": 7500
+          },
+          "vol_level_rv_rank_60d": {
+            "kept_nan": true,
+            "n": 4059
+          },
+          "vol_level_atr_rank_60d": {
+            "kept_nan": true,
+            "n": 4012
+          },
+          "vol_level_vol_level_pct60d_score": {
+            "kept_nan": true,
+            "n": 4059
+          },
+          "vol_level_vol_level_pct60d_ord": {
+            "kept_nan": true,
+            "n": 4059
+          },
+          "vol_level_vol_level_ord": {
+            "kept_nan": true,
+            "n": 7500
+          },
+          "volume_quality_vol_z": {
+            "kept_nan": true,
+            "n": 7500
+          },
+          "volume_quality_range_z": {
+            "kept_nan": true,
+            "n": 7500
+          },
+          "dc_pos_275_bucket_features__dc_pos_275_bucket": {
+            "kept_nan": true,
+            "n": 275
+          }
+        },
+        "na_in_built_output": {
+          "bar_conviction_bar_range": 106505,
+          "bar_conviction_atr_prev": 106575,
+          "bar_conviction_significance": 106665,
+          "bar_conviction_clv": 106505,
+          "bar_conviction_direction": 106505,
+          "bar_conviction_signed_body": 106505,
+          "bar_conviction_f_body": 106505,
+          "bar_conviction_f_range": 106505,
+          "bar_conviction_force_count": 106505,
+          "bar_conviction_reason": 106500,
+          "bar_conviction_conviction_score": 106505,
+          "bar_conviction_bar_conviction_ord": 106505,
+          "breakout_state_dom_support": 156841,
+          "breakout_state_dist_to_res_atr": 160619,
+          "breakout_state_dist_to_sup_atr": 156841,
+          "breakout_state_brk_level": 779592,
+          "breakout_state_stop_level": 779592,
+          "breakout_state_mfe_atr": 779592,
+          "breakout_state_mae_atr": 779592,
+          "breakout_state_atr_ratio": 779592,
+          "breakout_state_bars_since_bo": 779592,
+          "breakout_state_is_confirmed": 106500,
+          "breakout_state_is_survived": 106500,
+          "breakout_state_mark_bo": 118705,
+          "breakout_state_mark_fail": 118705,
+          "breakout_state_mark_fade": 118705,
+          "breakout_state_mark_conf": 118705,
+          "breakout_state_mark_surv": 118705,
+          "breakout_state_mark_upgrade": 118705,
+          "breakout_state_mark_rt": 118705,
+          "breakout_state_mark_lost": 118705,
+          "candle_pattern_is_green": 106500,
+          "candle_pattern_body_size": 106501,
+          "candle_pattern_total_range": 106501,
+          "candle_pattern_body_perc": 106501,
+          "candle_pattern_upper_wick": 106501,
+          "candle_pattern_lower_wick": 106501,
+          "candle_pattern_upper_wick_perc": 106501,
+          "candle_pattern_lower_wick_perc": 106501,
+          "candle_pattern_ema_5": 106702,
+          "candle_pattern_ema_20": 106702,
+          "candle_pattern_ema_diff": 106501,
+          "candle_pattern_vwap": 106702,
+          "candle_pattern_vwap_slope": 118706,
+          "candle_pattern_rsi_14": 106502,
+          "candle_pattern_vote_ema": 106501,
+          "candle_pattern_vote_vwap": 106501,
+          "candle_pattern_vote_rsi": 106501,
+          "candle_pattern_vote_sum": 106501,
+          "candle_pattern_label_1min": 106500,
+          "candle_pattern_label_streak": 106501,
+          "candle_pattern_is_uptrend": 106500,
+          "candle_pattern_is_downtrend": 106500,
+          "candle_pattern_bullish_engulfing": 106500,
+          "candle_pattern_morning_star": 106500,
+          "candle_pattern_abandoned_baby_bull": 106500,
+          "candle_pattern_piercing_line": 106500,
+          "candle_pattern_three_white_soldiers": 106500,
+          "candle_pattern_marubozu_green": 106500,
+          "candle_pattern_kicker_bullish": 106500,
+          "candle_pattern_hammer": 106500,
+          "candle_pattern_inverted_hammer": 106500,
+          "candle_pattern_bullish_harami": 106500,
+          "candle_pattern_confirmed_dragonfly": 106500,
+          "candle_pattern_tweezer_bottom": 106500,
+          "candle_pattern_confirmed_bullish_doji": 106500,
+          "candle_pattern_confirmed_bullish_spinning_top": 106500,
+          "candle_pattern_bearish_engulfing": 106500,
+          "candle_pattern_evening_star": 106500,
+          "candle_pattern_dark_cloud_cover": 106500,
+          "candle_pattern_three_black_crows": 106500,
+          "candle_pattern_marubozu_red": 106500,
+          "candle_pattern_shooting_star": 106500,
+          "candle_pattern_hanging_man": 106500,
+          "candle_pattern_bearish_harami": 106500,
+          "candle_pattern_confirmed_gravestone": 106500,
+          "candle_pattern_tweezer_top": 106500,
+          "candle_pattern_confirmed_bearish_doji": 106500,
+          "candle_pattern_confirmed_bearish_spinning_top": 106500,
+          "candle_pattern_bull_strength_raw": 106501,
+          "candle_pattern_bear_strength_raw": 106501,
+          "candle_pattern_bars_since_bull_signal": 106501,
+          "candle_pattern_bars_since_bear_signal": 106501,
+          "candle_pattern_verification_event": 106500,
+          "candle_pattern_verification_active": 106500,
+          "candle_pattern_verification_armed": 106500,
+          "candle_pattern_verification_lock_level": 576647,
+          "candle_pattern_verification_arm_thresh": 576647,
+          "candle_pattern_verification_conf_thresh": 576647,
+          "candle_pattern_bars_in_verification": 106501,
+          "candle_pattern_n_confirmation_events": 106501,
+          "candle_pattern_n_false_events": 106501,
+          "candle_pattern_n_verifications_active": 106501,
+          "candle_pattern_n_verifications_armed": 106501,
+          "fade_risk_ema9": 118770,
+          "fade_risk_ema_gap_pct": 118705,
+          "fade_risk_trend_state": 106500,
+          "fade_risk_clue_score": 106500,
+          "fade_risk_leg_atr": 378923,
+          "fade_risk_trigger": 106500,
+          "fade_risk_fade_dir": 106500,
+          "fade_risk_episode_len": 106500,
+          "fade_risk_fade_risk": 106500,
+          "flow_state_anchored_high": 106530,
+          "flow_state_anchored_low": 106530,
+          "flow_state_frozen_high": 980904,
+          "flow_state_frozen_low": 980904,
+          "flow_state_same_slot_vol_ratio": 110250,
+          "flow_state_window_vol_ratio": 110274,
+          "flow_state_window_rng_ratio": 110274,
+          "flow_state_window_oi_ratio": 582448,
+          "flow_state_absorption_score": 110274,
+          "flow_state_efficiency_ratio": 106500,
+          "flow_state_inside_share": 106524,
+          "flow_state_box_width_slot_norm": 106899,
+          "flow_state_prior_leg_in_atr": 106560,
+          "flow_state_volatility_regime": 106500,
+          "flow_state_dyn_vol_thr": 110374,
+          "flow_state_dyn_rng_thr": 110374,
+          "flow_state_dyn_box_thr": 106999,
+          "flow_state_dyn_abs_thr": 110374,
+          "flow_state_raw_sell_footprints": 106524,
+          "flow_state_raw_buy_footprints": 106524,
+          "flow_state_raw_accumulation": 106500,
+          "flow_state_raw_distribution": 106500,
+          "flow_state_phase_state_raw": 106500,
+          "flow_state_phase_age": 106500,
+          "flow_state_acc_confirmed": 106500,
+          "flow_state_dist_confirmed": 106500,
+          "flow_state_acc_resolved_up": 106500,
+          "flow_state_acc_failed_down": 106500,
+          "flow_state_dist_resolved_dn": 106500,
+          "flow_state_dist_failed_up": 106500,
+          "flow_state_Flow_State": 106500,
+          "gap_state_has_gap_up_below": 106500,
+          "gap_state_has_gap_down_above": 106500,
+          "gap_state_total_unfilled_count": 106500,
+          "gap_state_nearest_up_gap_low": 192566,
+          "gap_state_nearest_up_gap_high": 192566,
+          "gap_state_nearest_up_gap_size": 192566,
+          "gap_state_nearest_up_gap_size_atr": 192566,
+          "gap_state_nearest_up_gap_distance": 192566,
+          "gap_state_nearest_up_gap_distance_atr": 192566,
+          "gap_state_nearest_up_gap_ratio": 192566,
+          "gap_state_nearest_up_gap_age": 192566,
+          "gap_state_nearest_down_gap_high": 716592,
+          "gap_state_nearest_down_gap_size": 716592,
+          "gap_state_nearest_down_gap_size_atr": 716592,
+          "gap_state_nearest_down_gap_distance_atr": 716592,
+          "gap_state_nearest_down_gap_ratio": 716592,
+          "gap_state_nearest_down_gap_age": 716592,
+          "gap_state_total_gap_area": 106500,
+          "gap_state_total_up_gap_area_atr": 106875,
+          "gap_state_total_down_gap_area_atr": 106875,
+          "gap_state_total_gap_area_atr": 106875,
+          "gap_state_down_unfilled_count_local_k3": 106500,
+          "gap_state_total_unfilled_count_local_k3": 106500,
+          "gap_state_total_gap_area_local_atr": 106875,
+          "gap_state_gap_fill_ratio": 158399,
+          "gap_state_gap_up_stack": 106500,
+          "gap_state_gap_up_total_unfilled_pts": 106500,
+          "gap_state_gap_up_stack_local_k3": 106500,
+          "gap_state_gap_up_total_unfilled_pts_local_atr": 106875,
+          "gap_state_gap_down_total_unfilled_pts_local_atr": 106875,
+          "intraday_positioning_zone_id": 106500,
+          "level_proximity_res_level_name": 106500,
+          "level_proximity_res_level_tf": 106500,
+          "level_proximity_res_polarity": 106500,
+          "level_proximity_res_distance_atr": 832801,
+          "level_proximity_res_weighted_score": 832801,
+          "level_proximity_res_weight": 832801,
+          "level_proximity_bars_in_res_zone": 106500,
+          "level_proximity_sup_level_name": 106500,
+          "level_proximity_sup_level_tf": 106500,
+          "level_proximity_sup_polarity": 106500,
+          "level_proximity_sup_weighted_score": 832345,
+          "level_proximity_sup_weight": 832345,
+          "level_proximity_bars_in_sup_zone": 106500,
+          "momentum_state_sma_1m": 106510,
+          "momentum_state_sma_1m_slope": 106515,
+          "momentum_state_speed": 106550,
+          "momentum_state_prev_speed": 106595,
+          "momentum_state_abs_speed": 106550,
+          "momentum_state_abs_prev_spd": 106595,
+          "momentum_state_delta_speed": 106595,
+          "momentum_state_same_dir": 106500,
+          "momentum_state_is_bullish": 106500,
+          "momentum_state_is_bearish": 106500,
+          "momentum_state_range_atr": 106505,
+          "momentum_state_range_atr_sma_prev": 106530,
+          "momentum_state_range_contracting": 106500,
+          "momentum_state_er": 106695,
+          "momentum_state_fast_er": 106745,
+          "momentum_state_er_falling_fast": 106500,
+          "momentum_state_er_noisy": 106500,
+          "momentum_state_er_supports_accel": 106500,
+          "momentum_state_bull_close_qual": 106500,
+          "momentum_state_bear_close_qual": 106500,
+          "momentum_state_bull_close_weak": 106500,
+          "momentum_state_bear_close_weak": 106500,
+          "momentum_state_bear_sma_support": 106500,
+          "momentum_state_bear_sma_weak": 106500,
+          "momentum_state_bull_score": 106505,
+          "momentum_state_bear_score": 106505,
+          "momentum_state_active_score": 106505,
+          "momentum_state_active_c1": 106500,
+          "momentum_state_active_c2": 106500,
+          "momentum_state_active_c3": 106500,
+          "momentum_state_active_c4": 106500,
+          "momentum_state_active_c5": 106500,
+          "momentum_state_speed_dropping_fast": 106500,
+          "momentum_state_accel_score_weak": 106500,
+          "momentum_state_close_weak": 106500,
+          "momentum_state_sma_weak": 106500,
+          "momentum_state_decel_score": 106505,
+          "momentum_state_immediate_decel": 106500,
+          "momentum_state_raw_state": 106500,
+          "momentum_state_pending_count": 106505,
+          "momentum_state_bars_in_state": 106505,
+          "momentum_state_accel_memory": 106505,
+          "momentum_state_weak_accel_bars": 106505,
+          "momentum_state_allowed_raw_state": 106500,
+          "momentum_state_is_accel": 106500,
+          "momentum_state_is_decel": 106500,
+          "momentum_state_is_steady": 106500,
+          "momentum_state_state_dir": 106500,
+          "pullback_severity_ema": 106505,
+          "pullback_severity_body_ratio": 106505,
+          "pullback_severity_above_ema": 106505,
+          "pullback_severity_bull_run_count": 106505,
+          "pullback_severity_sustained_run": 106505,
+          "pullback_severity_has_clearance": 106505,
+          "pullback_severity_clearance_count": 106505,
+          "pullback_severity_clearance_ok": 106505,
+          "pullback_severity_body_ok": 106505,
+          "pullback_severity_is_trend": 106505,
+          "pullback_severity_locked": 757993,
+          "pullback_severity_pullback_severity_ord": 106505,
+          "smc_structure_smc_event": 106500,
+          "smc_structure_smc_last_event": 106500,
+          "smc_structure_dist_to_cont_atr": 106578,
+          "smc_structure_dist_to_rev_atr": 106578,
+          "smc_structure_struct_range_atr": 106602,
+          "smc_structure_struct_pos": 106602,
+          "smc_structure_break_ext_atr": 106578,
+          "smc_structure_retrace_frac": 106578,
+          "smc_structure_event_recency": 106500,
+          "smc_structure_choch_recency": 106500,
+          "smc_structure_sweep_recency": 106500,
+          "smc_structure_bos_streak_norm": 106500,
+          "smc_structure_hh_hl_score": 106500,
+          "smc_structure_event_rate": 106500,
+          "smc_structure_htf_state": 106500,
+          "smc_structure_htf_event": 106500,
+          "smc_structure_htf_last_event": 106500,
+          "smc_structure_htf_dist_to_cont_atr": 106578,
+          "smc_structure_htf_dist_to_rev_atr": 106578,
+          "smc_structure_htf_struct_range_atr": 125452,
+          "smc_structure_htf_struct_pos": 125452,
+          "smc_structure_htf_break_ext_atr": 107564,
+          "smc_structure_htf_retrace_frac": 107564,
+          "smc_structure_htf_event_recency": 106500,
+          "smc_structure_htf_state_age_recency": 106500,
+          "smc_structure_htf_choch_recency": 106500,
+          "smc_structure_htf_sweep_recency": 106500,
+          "smc_structure_htf_bos_streak_norm": 106500,
+          "smc_structure_htf_hh_hl_score": 106500,
+          "smc_structure_htf_event_rate": 106500,
+          "smc_structure_mtf_align": 106500,
+          "smc_structure_mtf_align_score": 106500,
+          "smc_structure_mtf_fresh_align": 106500,
+          "smc_structure_mtf_pos_spread": 125476,
+          "smc_structure_mtf_range_ratio": 125476,
+          "smc_structure_m5_smc_state": 106500,
+          "smc_structure_m5_smc_event": 106500,
+          "smc_structure_m5_smc_last_event": 106500,
+          "smc_structure_m5_dist_to_cont_atr": 106575,
+          "smc_structure_m5_dist_to_rev_atr": 106575,
+          "smc_structure_m5_struct_range_atr": 106595,
+          "smc_structure_m5_break_ext_atr": 106625,
+          "smc_structure_m5_retrace_frac": 106625,
+          "smc_structure_m5_event_recency": 106505,
+          "smc_structure_m5_choch_recency": 106505,
+          "smc_structure_m5_sweep_recency": 106505,
+          "smc_structure_m5_bos_streak_norm": 106505,
+          "smc_structure_m5_event_rate": 106505,
+          "stress_signal_drawdown_big": 106500,
+          "stress_signal_drawdown_fast": 106500,
+          "stress_signal_bars_underwater": 106500,
+          "stress_signal_vol_scale": 106500,
+          "stress_signal_state_big": 106500,
+          "stress_signal_state_fast": 106500,
+          "stress_signal_score": 109500,
+          "structural_position_lookback_high_60m": 106560,
+          "structural_position_lookback_low_60m": 106560,
+          "structural_position_dist_high_60m": 106560,
+          "structural_position_dist_low_60m": 106560,
+          "structural_position_dist_high_60m_atr": 106560,
+          "structural_position_dist_low_60m_atr": 106560,
+          "structural_position_structure_location_60m": 106657,
+          "structural_position_near_60m_high": 106500,
+          "structural_position_near_60m_low": 106500,
+          "structural_position_lookback_high_120m": 106620,
+          "structural_position_lookback_low_120m": 106620,
+          "structural_position_atr_21": 106520,
+          "structural_position_dist_high_120m": 106620,
+          "structural_position_dist_low_120m": 106620,
+          "structural_position_dist_high_120m_atr": 106620,
+          "structural_position_dist_low_120m_atr": 106620,
+          "structural_position_structure_location_120m": 106656,
+          "structural_position_near_120m_high": 106500,
+          "structural_position_near_120m_low": 106500,
+          "structural_position_lookback_high_1d": 106875,
+          "structural_position_lookback_low_1d": 106875,
+          "structural_position_atr_75": 106574,
+          "structural_position_dist_high_1d": 106875,
+          "structural_position_dist_low_1d": 106875,
+          "structural_position_dist_high_1d_atr": 106875,
+          "structural_position_dist_low_1d_atr": 106875,
+          "structural_position_structure_location_1d": 106875,
+          "structural_position_near_1d_high": 106500,
+          "structural_position_near_1d_low": 106500,
+          "trend_direction_ema_fast": 106513,
+          "trend_direction_ema_slow": 106513,
+          "trend_direction_ema_sep": 106505,
+          "trend_direction_er": 106665,
+          "trend_direction_er_mean": 106735,
+          "trend_direction_er_std": 106735,
+          "trend_direction_er_downvol": 106745,
+          "trend_direction_er_thr_dyn": 106505,
+          "trend_direction_er_low": 106500,
+          "trend_direction_weak_run": 106505,
+          "trend_direction_label_int": 106505,
+          "trend_direction_reason": 106500,
+          "trend_maturity_vwap": 106510,
+          "trend_maturity_direction_score": 106510,
+          "trend_maturity_ema_pressure": 106505,
+          "trend_maturity_er": 106505,
+          "trend_maturity_state": 106505,
+          "trend_maturity_state_name": 106500,
+          "trend_maturity_break_event": 106505,
+          "trend_maturity_maturity_code": 106505,
+          "trend_maturity_exhaustion_event": 106505,
+          "trend_maturity_extension_atr": 642017,
+          "trend_maturity_peak_ext_atr": 642017,
+          "trend_maturity_signed_di_gap": 642017,
+          "trend_maturity_mom_fade_frac": 642017,
+          "trend_maturity_giveback_atr": 642017,
+          "trend_maturity_mature_bars": 106505,
+          "trend_maturity_trend_age": 106505,
+          "trend_maturity_vwap_dist_atr": 106510,
+          "trend_maturity_bars_since_fresh": 106505,
+          "trend_maturity_bars_since_mature": 106505,
+          "trend_maturity_bars_since_exhausted": 106505,
+          "vol_level_rv_60": 106560,
+          "vol_level_atr_pct": 106513,
+          "vol_level_india_vix_zscore_20": 114000,
+          "vol_level_rv_rank_60": 106619,
+          "vol_level_atr_rank_60": 106572,
+          "vol_level_realized_60": 106619,
+          "vol_level_implied_vix": 114000,
+          "vol_level_rv_rank_60d": 110559,
+          "vol_level_atr_rank_60d": 110512,
+          "vol_level_vol_level_pct60d_score": 110559,
+          "vol_level_vol_level_pct60d_ord": 110559,
+          "vol_level_vol_level_ord": 114000,
+          "volume_quality_vol_z": 114000,
+          "volume_quality_range_z": 114000,
+          "volume_quality_close_pos": 106500,
+          "volume_quality_close_clean": 106500,
+          "volume_quality_close_rejection": 106500,
+          "volume_quality_session_phase": 106500,
+          "vwap_microstructure_session": 106500,
+          "vwap_microstructure_vwap_band_state": 106500,
+          "vwap_microstructure_vwap_excursion_ratio": 106500,
+          "vwap_microstructure_reversion_strength": 106500,
+          "bar_conviction_bar_conviction": 106500,
+          "breakout_state_breakout_state": 106500,
+          "candle_pattern_live_label": 106500,
+          "flow_state_bucket_sell_footprints": 106500,
+          "flow_state_bucket_buy_footprints": 106500,
+          "flow_state_acc_share60": 106500,
+          "flow_state_is_distribution": 106500,
+          "flow_state_Flow_State_Label": 106500,
+          "gap_state_gap_state": 106500,
+          "intraday_positioning_Intraday_Positioning": 106500,
+          "level_proximity_res_state": 106500,
+          "level_proximity_sup_state": 106500,
+          "level_proximity_range_state": 106500,
+          "momentum_state_state": 106500,
+          "pullback_severity_pullback_severity": 106500,
+          "smc_structure_smc_state": 106500,
+          "stress_signal_label_combined": 106500,
+          "structural_position_structural_position_60m": 106500,
+          "structural_position_structural_position_120m": 106500,
+          "structural_position_structural_position_1d": 106500,
+          "trend_direction_trend_direction": 106500,
+          "trend_maturity_maturity_name": 106500,
+          "volume_quality_Volume_Quality": 106500,
+          "vwap_microstructure_vwap_microstructure": 106500,
+          "dc_pos_275_bucket_features__dc_pos_275_bucket": 106775,
+          "candle_pattern_verification_lock_level_is_locked": 106500,
+          "pullback_severity_locked_is_locked": 106500
+        }
+      },
+      "categorical": [
+        "bar_conviction_reason",
+        "breakout_state_is_confirmed",
+        "breakout_state_is_survived",
+        "candle_pattern_is_green",
+        "candle_pattern_label_1min",
+        "candle_pattern_is_uptrend",
+        "candle_pattern_is_downtrend",
+        "candle_pattern_bullish_engulfing",
+        "candle_pattern_morning_star",
+        "candle_pattern_abandoned_baby_bull",
+        "candle_pattern_piercing_line",
+        "candle_pattern_three_white_soldiers",
+        "candle_pattern_marubozu_green",
+        "candle_pattern_kicker_bullish",
+        "candle_pattern_hammer",
+        "candle_pattern_inverted_hammer",
+        "candle_pattern_bullish_harami",
+        "candle_pattern_confirmed_dragonfly",
+        "candle_pattern_tweezer_bottom",
+        "candle_pattern_confirmed_bullish_doji",
+        "candle_pattern_confirmed_bullish_spinning_top",
+        "candle_pattern_bearish_engulfing",
+        "candle_pattern_evening_star",
+        "candle_pattern_dark_cloud_cover",
+        "candle_pattern_three_black_crows",
+        "candle_pattern_marubozu_red",
+        "candle_pattern_shooting_star",
+        "candle_pattern_hanging_man",
+        "candle_pattern_bearish_harami",
+        "candle_pattern_confirmed_gravestone",
+        "candle_pattern_tweezer_top",
+        "candle_pattern_confirmed_bearish_doji",
+        "candle_pattern_confirmed_bearish_spinning_top",
+        "candle_pattern_verification_event",
+        "candle_pattern_verification_active",
+        "candle_pattern_verification_armed",
+        "fade_risk_trigger",
+        "flow_state_raw_accumulation",
+        "flow_state_raw_distribution",
+        "flow_state_acc_confirmed",
+        "flow_state_dist_confirmed",
+        "flow_state_acc_resolved_up",
+        "flow_state_acc_failed_down",
+        "flow_state_dist_resolved_dn",
+        "flow_state_dist_failed_up",
+        "level_proximity_res_level_name",
+        "level_proximity_res_level_tf",
+        "level_proximity_res_polarity",
+        "level_proximity_sup_level_name",
+        "level_proximity_sup_level_tf",
+        "level_proximity_sup_polarity",
+        "momentum_state_same_dir",
+        "momentum_state_is_bullish",
+        "momentum_state_is_bearish",
+        "momentum_state_range_contracting",
+        "momentum_state_er_falling_fast",
+        "momentum_state_er_noisy",
+        "momentum_state_er_supports_accel",
+        "momentum_state_bull_close_qual",
+        "momentum_state_bear_close_qual",
+        "momentum_state_bull_close_weak",
+        "momentum_state_bear_close_weak",
+        "momentum_state_bear_sma_support",
+        "momentum_state_bear_sma_weak",
+        "momentum_state_active_c1",
+        "momentum_state_active_c2",
+        "momentum_state_active_c3",
+        "momentum_state_active_c4",
+        "momentum_state_active_c5",
+        "momentum_state_speed_dropping_fast",
+        "momentum_state_accel_score_weak",
+        "momentum_state_close_weak",
+        "momentum_state_sma_weak",
+        "momentum_state_immediate_decel",
+        "momentum_state_raw_state",
+        "momentum_state_allowed_raw_state",
+        "momentum_state_is_accel",
+        "momentum_state_is_decel",
+        "momentum_state_is_steady",
+        "momentum_state_state_dir",
+        "smc_structure_smc_event",
+        "smc_structure_smc_last_event",
+        "smc_structure_htf_state",
+        "smc_structure_htf_event",
+        "smc_structure_htf_last_event",
+        "smc_structure_mtf_align",
+        "smc_structure_m5_smc_state",
+        "smc_structure_m5_smc_event",
+        "smc_structure_m5_smc_last_event",
+        "structural_position_near_60m_high",
+        "structural_position_near_60m_low",
+        "structural_position_near_120m_high",
+        "structural_position_near_120m_low",
+        "structural_position_near_1d_high",
+        "structural_position_near_1d_low",
+        "trend_direction_er_low",
+        "trend_direction_reason",
+        "trend_maturity_state_name",
+        "volume_quality_close_clean",
+        "volume_quality_close_rejection",
+        "volume_quality_session_phase",
+        "vwap_microstructure_session",
+        "vwap_microstructure_vwap_band_state",
+        "bar_conviction_bar_conviction",
+        "breakout_state_breakout_state",
+        "candle_pattern_live_label",
+        "flow_state_Flow_State_Label",
+        "gap_state_gap_state",
+        "intraday_positioning_Intraday_Positioning",
+        "level_proximity_res_state",
+        "level_proximity_sup_state",
+        "level_proximity_range_state",
+        "momentum_state_state",
+        "pullback_severity_pullback_severity",
+        "smc_structure_smc_state",
+        "stress_signal_label_combined",
+        "structural_position_structural_position_60m",
+        "structural_position_structural_position_120m",
+        "structural_position_structural_position_1d",
+        "trend_direction_trend_direction",
+        "trend_maturity_maturity_name",
+        "volume_quality_Volume_Quality",
+        "vwap_microstructure_vwap_microstructure",
+        "candle_pattern_verification_lock_level_is_locked",
+        "pullback_severity_locked_is_locked"
+      ],
+      "parquet_sha256": "1f8ed41fc02bfb9c2abaca8de20e4862c8a9f10c9b407635e24dbf848d3cdd64",
+      "columns": [
+        "bar_conviction_bar_range",
+        "bar_conviction_atr_prev",
+        "bar_conviction_significance",
+        "bar_conviction_clv",
+        "bar_conviction_direction",
+        "bar_conviction_signed_body",
+        "bar_conviction_f_body",
+        "bar_conviction_f_range",
+        "bar_conviction_force_count",
+        "bar_conviction_reason",
+        "bar_conviction_conviction_score",
+        "bar_conviction_bar_conviction_ord",
+        "breakout_state_dom_support",
+        "breakout_state_dist_to_res_atr",
+        "breakout_state_dist_to_sup_atr",
+        "breakout_state_brk_level",
+        "breakout_state_stop_level",
+        "breakout_state_mfe_atr",
+        "breakout_state_mae_atr",
+        "breakout_state_atr_ratio",
+        "breakout_state_bars_since_bo",
+        "breakout_state_is_confirmed",
+        "breakout_state_is_survived",
+        "breakout_state_mark_bo",
+        "breakout_state_mark_fail",
+        "breakout_state_mark_fade",
+        "breakout_state_mark_conf",
+        "breakout_state_mark_surv",
+        "breakout_state_mark_upgrade",
+        "breakout_state_mark_rt",
+        "breakout_state_mark_lost",
+        "candle_pattern_is_green",
+        "candle_pattern_body_size",
+        "candle_pattern_total_range",
+        "candle_pattern_body_perc",
+        "candle_pattern_upper_wick",
+        "candle_pattern_lower_wick",
+        "candle_pattern_upper_wick_perc",
+        "candle_pattern_lower_wick_perc",
+        "candle_pattern_ema_5",
+        "candle_pattern_ema_20",
+        "candle_pattern_ema_diff",
+        "candle_pattern_vwap",
+        "candle_pattern_vwap_slope",
+        "candle_pattern_rsi_14",
+        "candle_pattern_vote_ema",
+        "candle_pattern_vote_vwap",
+        "candle_pattern_vote_rsi",
+        "candle_pattern_vote_sum",
+        "candle_pattern_label_1min",
+        "candle_pattern_label_streak",
+        "candle_pattern_is_uptrend",
+        "candle_pattern_is_downtrend",
+        "candle_pattern_bullish_engulfing",
+        "candle_pattern_morning_star",
+        "candle_pattern_abandoned_baby_bull",
+        "candle_pattern_piercing_line",
+        "candle_pattern_three_white_soldiers",
+        "candle_pattern_marubozu_green",
+        "candle_pattern_kicker_bullish",
+        "candle_pattern_hammer",
+        "candle_pattern_inverted_hammer",
+        "candle_pattern_bullish_harami",
+        "candle_pattern_confirmed_dragonfly",
+        "candle_pattern_tweezer_bottom",
+        "candle_pattern_confirmed_bullish_doji",
+        "candle_pattern_confirmed_bullish_spinning_top",
+        "candle_pattern_bearish_engulfing",
+        "candle_pattern_evening_star",
+        "candle_pattern_dark_cloud_cover",
+        "candle_pattern_three_black_crows",
+        "candle_pattern_marubozu_red",
+        "candle_pattern_shooting_star",
+        "candle_pattern_hanging_man",
+        "candle_pattern_bearish_harami",
+        "candle_pattern_confirmed_gravestone",
+        "candle_pattern_tweezer_top",
+        "candle_pattern_confirmed_bearish_doji",
+        "candle_pattern_confirmed_bearish_spinning_top",
+        "candle_pattern_bull_strength_raw",
+        "candle_pattern_bear_strength_raw",
+        "candle_pattern_bars_since_bull_signal",
+        "candle_pattern_bars_since_bear_signal",
+        "candle_pattern_verification_event",
+        "candle_pattern_verification_active",
+        "candle_pattern_verification_armed",
+        "candle_pattern_verification_lock_level",
+        "candle_pattern_verification_arm_thresh",
+        "candle_pattern_verification_conf_thresh",
+        "candle_pattern_bars_in_verification",
+        "candle_pattern_n_confirmation_events",
+        "candle_pattern_n_false_events",
+        "candle_pattern_n_verifications_active",
+        "candle_pattern_n_verifications_armed",
+        "fade_risk_ema9",
+        "fade_risk_ema_gap_pct",
+        "fade_risk_trend_state",
+        "fade_risk_clue_score",
+        "fade_risk_leg_atr",
+        "fade_risk_trigger",
+        "fade_risk_fade_dir",
+        "fade_risk_episode_len",
+        "fade_risk_fade_risk",
+        "flow_state_anchored_high",
+        "flow_state_anchored_low",
+        "flow_state_frozen_high",
+        "flow_state_frozen_low",
+        "flow_state_same_slot_vol_ratio",
+        "flow_state_window_vol_ratio",
+        "flow_state_window_rng_ratio",
+        "flow_state_window_oi_ratio",
+        "flow_state_absorption_score",
+        "flow_state_efficiency_ratio",
+        "flow_state_inside_share",
+        "flow_state_box_width_slot_norm",
+        "flow_state_prior_leg_in_atr",
+        "flow_state_volatility_regime",
+        "flow_state_dyn_vol_thr",
+        "flow_state_dyn_rng_thr",
+        "flow_state_dyn_box_thr",
+        "flow_state_dyn_abs_thr",
+        "flow_state_raw_sell_footprints",
+        "flow_state_raw_buy_footprints",
+        "flow_state_raw_accumulation",
+        "flow_state_raw_distribution",
+        "flow_state_phase_state_raw",
+        "flow_state_phase_age",
+        "flow_state_acc_confirmed",
+        "flow_state_dist_confirmed",
+        "flow_state_acc_resolved_up",
+        "flow_state_acc_failed_down",
+        "flow_state_dist_resolved_dn",
+        "flow_state_dist_failed_up",
+        "flow_state_Flow_State",
+        "gap_state_has_gap_up_below",
+        "gap_state_has_gap_down_above",
+        "gap_state_total_unfilled_count",
+        "gap_state_nearest_up_gap_low",
+        "gap_state_nearest_up_gap_high",
+        "gap_state_nearest_up_gap_size",
+        "gap_state_nearest_up_gap_size_atr",
+        "gap_state_nearest_up_gap_distance",
+        "gap_state_nearest_up_gap_distance_atr",
+        "gap_state_nearest_up_gap_ratio",
+        "gap_state_nearest_up_gap_age",
+        "gap_state_nearest_down_gap_high",
+        "gap_state_nearest_down_gap_size",
+        "gap_state_nearest_down_gap_size_atr",
+        "gap_state_nearest_down_gap_distance_atr",
+        "gap_state_nearest_down_gap_ratio",
+        "gap_state_nearest_down_gap_age",
+        "gap_state_total_gap_area",
+        "gap_state_total_up_gap_area_atr",
+        "gap_state_total_down_gap_area_atr",
+        "gap_state_total_gap_area_atr",
+        "gap_state_down_unfilled_count_local_k3",
+        "gap_state_total_unfilled_count_local_k3",
+        "gap_state_total_gap_area_local_atr",
+        "gap_state_gap_fill_ratio",
+        "gap_state_gap_up_stack",
+        "gap_state_gap_up_total_unfilled_pts",
+        "gap_state_gap_up_stack_local_k3",
+        "gap_state_gap_up_total_unfilled_pts_local_atr",
+        "gap_state_gap_down_total_unfilled_pts_local_atr",
+        "intraday_positioning_zone_id",
+        "level_proximity_res_level_name",
+        "level_proximity_res_level_tf",
+        "level_proximity_res_polarity",
+        "level_proximity_res_distance_atr",
+        "level_proximity_res_weighted_score",
+        "level_proximity_res_weight",
+        "level_proximity_bars_in_res_zone",
+        "level_proximity_sup_level_name",
+        "level_proximity_sup_level_tf",
+        "level_proximity_sup_polarity",
+        "level_proximity_sup_weighted_score",
+        "level_proximity_sup_weight",
+        "level_proximity_bars_in_sup_zone",
+        "momentum_state_sma_1m",
+        "momentum_state_sma_1m_slope",
+        "momentum_state_speed",
+        "momentum_state_prev_speed",
+        "momentum_state_abs_speed",
+        "momentum_state_abs_prev_spd",
+        "momentum_state_delta_speed",
+        "momentum_state_same_dir",
+        "momentum_state_is_bullish",
+        "momentum_state_is_bearish",
+        "momentum_state_range_atr",
+        "momentum_state_range_atr_sma_prev",
+        "momentum_state_range_contracting",
+        "momentum_state_er",
+        "momentum_state_fast_er",
+        "momentum_state_er_falling_fast",
+        "momentum_state_er_noisy",
+        "momentum_state_er_supports_accel",
+        "momentum_state_bull_close_qual",
+        "momentum_state_bear_close_qual",
+        "momentum_state_bull_close_weak",
+        "momentum_state_bear_close_weak",
+        "momentum_state_bear_sma_support",
+        "momentum_state_bear_sma_weak",
+        "momentum_state_bull_score",
+        "momentum_state_bear_score",
+        "momentum_state_active_score",
+        "momentum_state_active_c1",
+        "momentum_state_active_c2",
+        "momentum_state_active_c3",
+        "momentum_state_active_c4",
+        "momentum_state_active_c5",
+        "momentum_state_speed_dropping_fast",
+        "momentum_state_accel_score_weak",
+        "momentum_state_close_weak",
+        "momentum_state_sma_weak",
+        "momentum_state_decel_score",
+        "momentum_state_immediate_decel",
+        "momentum_state_raw_state",
+        "momentum_state_pending_count",
+        "momentum_state_bars_in_state",
+        "momentum_state_accel_memory",
+        "momentum_state_weak_accel_bars",
+        "momentum_state_allowed_raw_state",
+        "momentum_state_is_accel",
+        "momentum_state_is_decel",
+        "momentum_state_is_steady",
+        "momentum_state_state_dir",
+        "pullback_severity_ema",
+        "pullback_severity_body_ratio",
+        "pullback_severity_above_ema",
+        "pullback_severity_bull_run_count",
+        "pullback_severity_sustained_run",
+        "pullback_severity_has_clearance",
+        "pullback_severity_clearance_count",
+        "pullback_severity_clearance_ok",
+        "pullback_severity_body_ok",
+        "pullback_severity_is_trend",
+        "pullback_severity_locked",
+        "pullback_severity_pullback_severity_ord",
+        "smc_structure_smc_event",
+        "smc_structure_smc_last_event",
+        "smc_structure_dist_to_cont_atr",
+        "smc_structure_dist_to_rev_atr",
+        "smc_structure_struct_range_atr",
+        "smc_structure_struct_pos",
+        "smc_structure_break_ext_atr",
+        "smc_structure_retrace_frac",
+        "smc_structure_event_recency",
+        "smc_structure_choch_recency",
+        "smc_structure_sweep_recency",
+        "smc_structure_bos_streak_norm",
+        "smc_structure_hh_hl_score",
+        "smc_structure_event_rate",
+        "smc_structure_htf_state",
+        "smc_structure_htf_event",
+        "smc_structure_htf_last_event",
+        "smc_structure_htf_dist_to_cont_atr",
+        "smc_structure_htf_dist_to_rev_atr",
+        "smc_structure_htf_struct_range_atr",
+        "smc_structure_htf_struct_pos",
+        "smc_structure_htf_break_ext_atr",
+        "smc_structure_htf_retrace_frac",
+        "smc_structure_htf_event_recency",
+        "smc_structure_htf_state_age_recency",
+        "smc_structure_htf_choch_recency",
+        "smc_structure_htf_sweep_recency",
+        "smc_structure_htf_bos_streak_norm",
+        "smc_structure_htf_hh_hl_score",
+        "smc_structure_htf_event_rate",
+        "smc_structure_mtf_align",
+        "smc_structure_mtf_align_score",
+        "smc_structure_mtf_fresh_align",
+        "smc_structure_mtf_pos_spread",
+        "smc_structure_mtf_range_ratio",
+        "smc_structure_m5_smc_state",
+        "smc_structure_m5_smc_event",
+        "smc_structure_m5_smc_last_event",
+        "smc_structure_m5_dist_to_cont_atr",
+        "smc_structure_m5_dist_to_rev_atr",
+        "smc_structure_m5_struct_range_atr",
+        "smc_structure_m5_break_ext_atr",
+        "smc_structure_m5_retrace_frac",
+        "smc_structure_m5_event_recency",
+        "smc_structure_m5_choch_recency",
+        "smc_structure_m5_sweep_recency",
+        "smc_structure_m5_bos_streak_norm",
+        "smc_structure_m5_event_rate",
+        "stress_signal_drawdown_big",
+        "stress_signal_drawdown_fast",
+        "stress_signal_bars_underwater",
+        "stress_signal_vol_scale",
+        "stress_signal_state_big",
+        "stress_signal_state_fast",
+        "stress_signal_score",
+        "structural_position_lookback_high_60m",
+        "structural_position_lookback_low_60m",
+        "structural_position_dist_high_60m",
+        "structural_position_dist_low_60m",
+        "structural_position_dist_high_60m_atr",
+        "structural_position_dist_low_60m_atr",
+        "structural_position_structure_location_60m",
+        "structural_position_near_60m_high",
+        "structural_position_near_60m_low",
+        "structural_position_lookback_high_120m",
+        "structural_position_lookback_low_120m",
+        "structural_position_atr_21",
+        "structural_position_dist_high_120m",
+        "structural_position_dist_low_120m",
+        "structural_position_dist_high_120m_atr",
+        "structural_position_dist_low_120m_atr",
+        "structural_position_structure_location_120m",
+        "structural_position_near_120m_high",
+        "structural_position_near_120m_low",
+        "structural_position_lookback_high_1d",
+        "structural_position_lookback_low_1d",
+        "structural_position_atr_75",
+        "structural_position_dist_high_1d",
+        "structural_position_dist_low_1d",
+        "structural_position_dist_high_1d_atr",
+        "structural_position_dist_low_1d_atr",
+        "structural_position_structure_location_1d",
+        "structural_position_near_1d_high",
+        "structural_position_near_1d_low",
+        "trend_direction_ema_fast",
+        "trend_direction_ema_slow",
+        "trend_direction_ema_sep",
+        "trend_direction_er",
+        "trend_direction_er_mean",
+        "trend_direction_er_std",
+        "trend_direction_er_downvol",
+        "trend_direction_er_thr_dyn",
+        "trend_direction_er_low",
+        "trend_direction_weak_run",
+        "trend_direction_label_int",
+        "trend_direction_reason",
+        "trend_maturity_vwap",
+        "trend_maturity_direction_score",
+        "trend_maturity_ema_pressure",
+        "trend_maturity_er",
+        "trend_maturity_state",
+        "trend_maturity_state_name",
+        "trend_maturity_break_event",
+        "trend_maturity_maturity_code",
+        "trend_maturity_exhaustion_event",
+        "trend_maturity_extension_atr",
+        "trend_maturity_peak_ext_atr",
+        "trend_maturity_signed_di_gap",
+        "trend_maturity_mom_fade_frac",
+        "trend_maturity_giveback_atr",
+        "trend_maturity_mature_bars",
+        "trend_maturity_trend_age",
+        "trend_maturity_vwap_dist_atr",
+        "trend_maturity_bars_since_fresh",
+        "trend_maturity_bars_since_mature",
+        "trend_maturity_bars_since_exhausted",
+        "vol_level_rv_60",
+        "vol_level_atr_pct",
+        "vol_level_india_vix_zscore_20",
+        "vol_level_rv_rank_60",
+        "vol_level_atr_rank_60",
+        "vol_level_realized_60",
+        "vol_level_implied_vix",
+        "vol_level_rv_rank_60d",
+        "vol_level_atr_rank_60d",
+        "vol_level_vol_level_pct60d_score",
+        "vol_level_vol_level_pct60d_ord",
+        "vol_level_vol_level_ord",
+        "volume_quality_vol_z",
+        "volume_quality_range_z",
+        "volume_quality_close_pos",
+        "volume_quality_close_clean",
+        "volume_quality_close_rejection",
+        "volume_quality_session_phase",
+        "vwap_microstructure_session",
+        "vwap_microstructure_vwap_band_state",
+        "vwap_microstructure_vwap_excursion_ratio",
+        "vwap_microstructure_reversion_strength",
+        "bar_conviction_bar_conviction",
+        "breakout_state_breakout_state",
+        "candle_pattern_live_label",
+        "flow_state_bucket_sell_footprints",
+        "flow_state_bucket_buy_footprints",
+        "flow_state_acc_share60",
+        "flow_state_is_distribution",
+        "flow_state_Flow_State_Label",
+        "gap_state_gap_state",
+        "intraday_positioning_Intraday_Positioning",
+        "level_proximity_res_state",
+        "level_proximity_sup_state",
+        "level_proximity_range_state",
+        "momentum_state_state",
+        "pullback_severity_pullback_severity",
+        "smc_structure_smc_state",
+        "stress_signal_label_combined",
+        "structural_position_structural_position_60m",
+        "structural_position_structural_position_120m",
+        "structural_position_structural_position_1d",
+        "trend_direction_trend_direction",
+        "trend_maturity_maturity_name",
+        "volume_quality_Volume_Quality",
+        "vwap_microstructure_vwap_microstructure",
+        "dc_pos_275_bucket_features__dc_pos_275_bucket",
+        "candle_pattern_verification_lock_level_is_locked",
+        "pullback_severity_locked_is_locked"
+      ]
+    }
+  ],
+  "labels_name": "L1",
+  "labels_sha256": "2261cc74765f60534b69f1aba86c76d551375bbf68c5b0c99b7d8e3a46383c0c",
+  "class_distribution": {
+    "NO_TRADE": 678530,
+    "EXIT_SUPER": 110369,
+    "EXIT_SUB": 60733,
+    "ENTRY_SUPER": 31665,
+    "EXIT_SMALL": 16620,
+    "ENTRY_SMALL": 10035,
+    "ENTRY_SUB": 7395
+  },
+  "zero_weight_classes": [],
+  "no_peek": {
+    "applied": "by feature team (pre_aligned -- plain reindex, NOT verified here)",
+    "rule": "bar_close",
+    "verified": false,
+    "pre_aligned_features": [
+      "v8_train"
+    ],
+    "tolerance_bars": 3
+  },
+  "built_by": "megaserve",
+  "status": "ready"
+}

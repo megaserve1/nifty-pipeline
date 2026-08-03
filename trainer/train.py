@@ -827,7 +827,11 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     }
     # if BOTH the backtest script and the price dataset are configured, the export also runs the
     # backtest on the TEST table and prints its report into that task's console. blank -> tables only.
-    bt = getattr(C, "BACKTEST_SCRIPT", "")
+    # OOS ONLY BY DEFAULT. see config.BACKTEST_ON_TEST_TABLE -- under bundle_random the test
+    # table is scattered bundles, so a backtest over it walks across thousands of time gaps.
+    # scripts/queue_oos.py still wires the backtest, because the OOS set is contiguous.
+    bt = (getattr(C, "BACKTEST_SCRIPT", "")
+          if getattr(C, "BACKTEST_ON_TEST_TABLE", False) else "")
     # RESOLVE BY NAME, do not read a pinned id. an id copied into config dies when the dataset is
     # re-uploaded -- that happened to the OHLCV on 2026-07-31 and would have broken every backtest.
     try:
@@ -848,6 +852,10 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     elif bt:
         print("  !! BACKTEST_SCRIPT is set but neither PRICE_DATASET_ID nor PRICE_FILE is -- "
               "the table will be written but NO backtest will run.")
+    if not getattr(C, "BACKTEST_ON_TEST_TABLE", False):
+        print(f"  tables only -- no backtest on the test table (split is "
+              f"'{C.SPLIT_STRATEGY}', so it is not continuous in time). "
+              f"backtest the OOS set:  python scripts/queue_oos.py --version {version}")
     run.set_parameters(params)
     Task.enqueue(run, queue_name=getattr(C, "EXPORT_QUEUE", C.SHAP_QUEUE))
     print(f"  queued scored_tables_{model_type} v{version}  (scores THIS model)")

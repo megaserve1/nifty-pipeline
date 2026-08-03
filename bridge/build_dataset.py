@@ -674,7 +674,13 @@ def main():
         label_col=C.LABEL_COL,
         weight_cols=[c for c in (C.WEIGHT_COL, C.WEIGHT_RAW_COL) if c in df.columns],
         per_feature=per_feature,
-        labels_name=recipe.get("labels_name", C.labels_name()),
+        # `or`, NOT dict.get(key, default). python evaluates a default ARGUMENT eagerly, so
+        # `recipe.get("labels_name", C.labels_name())` calls C.labels_name() on EVERY build --
+        # including the ones whose recipe already names a label. that was harmless while one
+        # label file existed and it quietly returned L1. the moment L1/L2/L3 existed with none
+        # marked default, C.labels_name() started raising SystemExit, and the build died at
+        # [5/5] on a value it had already been given and never needed to look up.
+        labels_name=recipe.get("labels_name") or C.labels_name(),
         labels_sha256=hashes.sha256_file(labels_path),   # the file ACTUALLY used -- name + sha agree
         class_distribution={str(k): int(v) for k, v in dist.items()},
         zero_weight_classes=zero_w,

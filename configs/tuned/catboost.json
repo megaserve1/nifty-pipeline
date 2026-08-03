@@ -1,0 +1,18 @@
+{
+  "model_type": "catboost",
+  "from_dataset": "7",
+  "dataset_sha256": "34d1a9da906bd508cf01f5bf710c63cf4838a72a3a290cf29d005c12e28b8f94",
+  "val_trading_cost": 59.3862,
+  "test_trading_cost": 59.7148,
+  "params": {
+    "max_leaves": 256,
+    "max_depth": 15,
+    "learning_rate": 0.05,
+    "n_estimators": 6000,
+    "l2_leaf_reg": 30.0,
+    "min_data_in_leaf": 50,
+    "rsm": 0.5,
+    "subsample": 0.5,
+    "random_strength": 5.0
+  }
+}

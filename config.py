@@ -167,6 +167,23 @@ DEEPCHECKS_SAMPLE  = 50_000
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
 BACKTEST_SCRIPT   = "scripts/backtest_single.py"
+
+# BACKTEST THE OOS SET ONLY -- not the train/test tables.
+#
+# WHY. the backtest walks a table row by row, opens a position on a signal and closes it on a
+# later one. that only means something on a CONTINUOUS stretch of minutes. with
+# SPLIT_STRATEGY = "bundle_random" the test table is 15-minute bundles scattered across the whole
+# history: measured on scored_test_v7, 274,605 rows with 13,088 BREAKS in continuity and a
+# largest gap of 6 days 19 hours. a position opened at the end of one bundle "closes" after a
+# week-long jump, and the equity curve is stitched across all 13,088 of them. it is a number
+# nobody could have traded.
+#
+# the OOS set is one unbroken forward period (2025-01-01 -> 2025-02-24), which is what a backtest
+# is FOR. so: tables always, backtest only where the clock is continuous.
+#
+# set True to go back to backtesting the test table as well -- honest only under
+# SPLIT_STRATEGY = "time", where the test slice IS one contiguous block at the end.
+BACKTEST_ON_TEST_TABLE = False
 PRICE_DATASET_ID  = ""      # empty = resolve CLEARML_PRICE_DATASET ("nifty_ohlcv") by name,
                             # so a re-upload is picked up automatically instead of leaving a dead
                             # id here. set an id only to freeze one exact version.
