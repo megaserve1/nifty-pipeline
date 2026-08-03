@@ -141,6 +141,23 @@ def built_name(source: str, col: str) -> str:
     return f"{source}__{col}"
 
 
+def _default_label() -> str:
+    """the label to use when the picker was left on '(default)'.
+
+    config.labels_name() is right to refuse when several sets exist and none is marked -- same
+    features + a different label is a DIFFERENT dataset, so nothing should choose it for you.
+    on a page that refusal arrives as SystemExit and blanks the screen, so we turn it into a
+    message next to the picker that caused it.
+    """
+    try:
+        return C.labels_name()
+    except SystemExit:
+        st.error("Pick a **label set** above — there are several and none is marked default, "
+                 "so the pipeline will not choose one for you. Same features + a different "
+                 "label = a different dataset.", icon="🏷️")
+        st.stop()
+
+
 def recipe_doc(features_list, columns_full, labels, parent, omit_columns=False):
     """build (but do not write) the recipe from the exact files + full 'source__col' names. when
     omit_columns is True (a clean whole-source clone) we drop 'columns' so build takes it all."""
@@ -150,7 +167,10 @@ def recipe_doc(features_list, columns_full, labels, parent, omit_columns=False):
         "name": f"dataset_{v}", "kind": "variation" if parent else "selection", "parent": parent,
         "created": datetime.datetime.now().isoformat(timespec="seconds"),
         "author": "ui", "selected_by": "ui",
-        "labels_name": labels or C.labels_name(), "date_range": "full",
+        # AN EXPLICIT LABEL, OR STOP. C.labels_name() raises when several label sets exist and
+        # none is marked default -- correct behaviour for a CLI, fatal on a page (it kills the
+        # whole render with a raw SystemExit). so the UI asks instead of guessing.
+        "labels_name": labels or _default_label(), "date_range": "full",
         "features": features_list, "feature_clocks": {},
     }
     if not omit_columns:
@@ -274,6 +294,11 @@ st.markdown('<div class="fs-hero"><h1>Feature selection → build → run</h1>'
 
 reg = registry()
 labels = label_menu()
+try:
+    from trainer import hyperparams as _H
+    H_VERSION = _H.version()
+except Exception:
+    H_VERSION = "baseline"
 
 
 def step(n, title):
@@ -408,8 +433,67 @@ if ticked:
     with st.expander(f"preview the recipe that will be written  →  dataset_{prev_v}.yaml"):
         st.code(yaml.safe_dump(prev_doc, sort_keys=False), language="yaml")
 
-# ---- STEP 4 · actions -------------------------------------------------------
-step(4, "Build / run")
+# ---- STEP 4 · hyperparameters (optional) ------------------------------------
+step(4, "Hyperparameters")
+import _hparams as HP          # noqa: E402
+
+with st.container(border=True):
+    st.caption("optional. upload a file to set the numbers the next training run uses. "
+               "leave it alone and the LAST SAVED set is used — or the baseline in "
+               "configs/hyperparams.yaml if nothing was ever saved.")
+
+    hp_model = st.radio("Model", C.MODEL_TYPES, horizontal=True, key="hp_model")
+
+    cur = HP.saved(hp_model)
+    if cur:
+        st.success(f"**{hp_model}** is currently using a saved set "
+                   f"(source: {cur.get('source', 'unknown')}) — "
+                   f"{len(cur.get('params') or {})} value(s).", icon="💾")
+        with st.expander("what is saved right now"):
+            st.json(cur.get("params") or {})
+        if st.button(f"Clear it — go back to the {H_VERSION} baseline", key="hp_clear"):
+            HP.clear(hp_model)
+            st.rerun()
+    else:
+        st.info(f"**{hp_model}** has nothing saved — it will train on the "
+                f"{H_VERSION} baseline from configs/hyperparams.yaml.", icon="📄")
+
+    up = st.file_uploader("Upload hyperparameters (.json / .yaml / .yml)",
+                          type=["json", "yaml", "yml"], key="hp_file")
+    if up is not None:
+        try:
+            parsed = HP.parse(up.getvalue().decode("utf-8"), up.name, only_model=hp_model)
+        except ValueError as exc:
+            st.error(str(exc))
+            parsed = {}
+        for m, params in parsed.items():
+            r = HP.check(m, params)
+            st.markdown(f"**{m}** — {len(r['known'])} recognised, "
+                        f"{len(r['unknown'])} not recognised")
+            if r["unknown"]:
+                # this is the whole point of the check: defaults() drops these without a word.
+                st.warning(f"IGNORED — not settings this model has: "
+                           f"`{'`, `'.join(r['unknown'])}`. check the spelling against "
+                           f"configs/hyperparams.yaml, or they will look applied and do nothing.",
+                           icon="⚠️")
+            if r["changes"]:
+                st.dataframe(
+                    [{"setting": k, "now": str(a), "will become": str(b)}
+                     for k, (a, b) in r["changes"].items()],
+                    width="stretch", hide_index=True)
+            else:
+                st.caption("no change — these are the values already in effect.")
+            if r["known"] and st.button(f"Save for {m}", key=f"hp_save_{m}", type="primary"):
+                path = HP.save(m, r["known"], f"uploaded {up.name}")
+                st.success(f"saved -> {path.relative_to(ROOT)}. the next run for {m} uses these.")
+                st.rerun()
+
+    st.caption("note: `publish --tune` runs HPO and OVERWRITES this file with its winner. "
+               "use the plain publish (or the button below) to train on what you uploaded.")
+
+
+# ---- STEP 5 · actions -------------------------------------------------------
+step(5, "Build / run")
 with st.container(border=True):
     c1, c2 = st.columns([1, 1])
     with c1:

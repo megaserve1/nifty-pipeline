@@ -156,6 +156,10 @@ def base_trainer_name(model_type: str) -> str:
 BASE_SHAP_NAME     = "shap_explain (base)"
 BASE_EXPORT_NAME   = "export_scored_tables (base)"
 BASE_OOS_NAME      = "score_oos (base)"
+# the short name that rides in the OOS task name and the table filename, e.g.
+# scored_oos_2025_2026_xgboost v7. change it when the OOS window moves, so two runs against
+# DIFFERENT out-of-sample periods can never be mistaken for each other in ClearML.
+OOS_TAG            = "2025_2026"
 BASE_DEEPCHECKS_NAME = "deepchecks_report (base)"
 DEEPCHECKS_QUEUE   = "training"     # runs on the same queue by default
 # deepchecks on 513k rows x 500 cols is very slow. it SAMPLES this many rows per split -- the

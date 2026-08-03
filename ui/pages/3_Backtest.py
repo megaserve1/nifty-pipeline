@@ -6,6 +6,10 @@ PICK THE MODEL, NOT THE FILE. after an overnight run there are two or three mode
 own scored table, backtest, SHAP and deepchecks. choosing a table by name means working out which
 model it came from; choosing the model means everything below it is the right thing by construction.
 
+OOS ONLY. the test-split backtest is deliberately not shown -- under bundle_random that table is
+thousands of scattered 15-minute bundles (13,088 breaks in continuity on v7), so its equity curve
+is stitched across thousands of time gaps and cannot be read as a trading result.
+
 TWO BACKTEST LAYOUTS are understood, because old runs are still worth opening:
   NEW (scripts/backtest_single.py, 3 versions) -- per-version files plus a comparison table
       V1  ENTRY_SUPER -> exit on EXIT_SUB or EXIT_SUPER   is the SUPER entry any good early?
@@ -36,9 +40,16 @@ sys.path.insert(0, str(ROOT))
 import config as C   # noqa: E402
 
 st.title("Backtest results")
-st.caption("what the signals would have done on price. read only — this page starts nothing.")
+st.caption("out-of-sample only — what the signals would have done on days the model has never "
+           "seen. read only; this page starts nothing.")
 
 WANTED = ("yearly_returns", "monthly_returns", "equity_curve", "metrics", "trades")
+
+# how many points to draw on a line chart. the equity curve is per-MINUTE (274,606 rows on the v7
+# test table) and a browser cannot draw that -- the tab freezes. a 320px chart has ~1,300 pixels
+# of width, so 3,000 points is already more resolution than the screen can show.
+PLOT_POINTS = 3000
+TRADES_SHOWN = 2000        # the table is virtualised but the payload still crosses the wire
 
 
 def read_csv(path):
@@ -113,13 +124,13 @@ def show_one(byname: dict, heading: str = ""):
             c2[0].metric("Win rate", "—")
         c2[1].metric("Sharpe", num("sharpe"))
         c2[2].metric("Expectancy / trade", money(d.get("expectancy")))
-        c2[3].metric("vs benchmark", f"{num('vs_benchmark_pp')} pp")
+        # c2[3].metric("vs benchmark", f"{num('vs_benchmark_pp')} pp")
 
         try:
             net = float(d.get("net_pnl", 0))
-            vsb = float(d.get("vs_benchmark_pp", 0))
-            st.caption(("🟢 net positive" if net > 0 else "🔴 net negative") +
-                       (" and beat buy & hold" if vsb > 0 else " and behind buy & hold"))
+            # vsb = float(d.get("vs_benchmark_pp", 0))
+            # st.caption(("🟢 net positive" if net > 0 else "🔴 net negative") +
+            #            (" and beat buy & hold" if vsb > 0 else " and behind buy & hold"))
         except Exception:
             pass
     elif m is not None:
@@ -130,11 +141,26 @@ def show_one(byname: dict, heading: str = ""):
         st.subheader("Equity curve")
         st.caption("the shape matters more than the endpoint — a straight climb is a strategy, "
                    "one vertical jump is one lucky day.")
-        if "timestamp" in eq.columns:
-            eq["timestamp"] = pd.to_datetime(eq["timestamp"], errors="coerce")
-            st.line_chart(eq.set_index("timestamp")["equity"], height=320)
+        # DOWNSAMPLE BEFORE PLOTTING. the curve is one row per MINUTE -- 274,606 of them on the
+        # v7 test table. st.line_chart hands every point to vega-lite in the browser, and the tab
+        # locks up ("page unresponsive"). a chart 320px tall cannot show more points than it has
+        # pixels, so plotting all of them buys nothing and costs the page.
+        # every Nth row PLUS the final one: the endpoint is the number people read off the chart
+        # and striding can miss it.
+        n = len(eq)
+        if n > PLOT_POINTS:
+            step = n // PLOT_POINTS + 1
+            eq_plot = pd.concat([eq.iloc[::step], eq.iloc[[-1]]]).drop_duplicates()
+            st.caption(f"drawn from {len(eq_plot):,} of {n:,} points (every {step}th minute) — "
+                       f"the CSV artifact has all of them.")
         else:
-            st.line_chart(eq["equity"], height=320)
+            eq_plot = eq
+        if "timestamp" in eq_plot.columns:
+            eq_plot = eq_plot.copy()
+            eq_plot["timestamp"] = pd.to_datetime(eq_plot["timestamp"], errors="coerce")
+            st.line_chart(eq_plot.set_index("timestamp")["equity"], height=320)
+        else:
+            st.line_chart(eq_plot["equity"].reset_index(drop=True), height=320)
 
     yr = read_csv(byname.get("yearly_returns"))
     if yr is not None and "year" in yr.columns:
@@ -153,7 +179,10 @@ def show_one(byname: dict, heading: str = ""):
     tr = read_csv(byname.get("trades"))
     if tr is not None and len(tr):
         st.subheader(f"Trades ({len(tr):,})")
-        st.dataframe(tr, width="stretch", height=320, hide_index=True)
+        if len(tr) > TRADES_SHOWN:
+            st.caption(f"showing the first {TRADES_SHOWN:,} — download the artifact for all "
+                       f"{len(tr):,}.")
+        st.dataframe(tr.head(TRADES_SHOWN), width="stretch", height=320, hide_index=True)
 
     if not byname:
         st.info("no readable files for this one.", icon="ℹ️")
@@ -173,13 +202,33 @@ if src.startswith("ClearML"):
         st.stop()
 
     kids = children_of(project, model["id"])
-    # the backtest runs INSIDE the scoring step, so its files hang off that task
-    task = kids.get("scored_tables") or kids.get("scored_oos")
+    # OOS FIRST, ALWAYS. the backtest runs inside a scoring step, and there are two of them:
+    #   score_oos      one continuous forward period -> a real, tradeable equity curve
+    #   scored_tables  the TEST SPLIT, which under bundle_random is thousands of scattered
+    #                  15-min bundles (measured: 13,088 breaks in continuity, largest gap 6 days)
+    # this used to prefer scored_tables, which meant the honest backtest was the one you could
+    # not see. config.BACKTEST_ON_TEST_TABLE is False now, so scored_tables carries no backtest
+    # at all -- preferring it would have shown "no backtest files" and stopped there.
+    # OOS ONLY. the other scoring task (scored_tables) covers the TEST SPLIT, and under
+    # bundle_random that is thousands of scattered 15-minute bundles -- measured on v7: 274,605
+    # rows with 13,088 BREAKS in continuity, largest gap 6 days 19 hours. a backtest walks a
+    # table row by row, so an equity curve stitched across 13,088 time jumps is a number nobody
+    # could have traded. showing it next to the OOS one only invites it to be quoted.
+    # config.BACKTEST_ON_TEST_TABLE also stops that backtest being produced at all.
+    task = kids.get("scored_oos")
     if task is None:
-        st.info("this model has no scored-tables task yet — it is queued, still running, or the "
-                "step failed. check it in ClearML.", icon="⏳")
+        if "scored_tables" in kids:
+            st.info("This model has been scored on the test split, but **not on the OOS set** — "
+                    "and only OOS is shown here.\n\nThe test split is thousands of scattered "
+                    "15-minute bundles, so a backtest over it walks across thousands of time "
+                    "gaps. It is a metric, not a tradeable result.", icon="📊")
+            st.code(f"final_venv/bin/python scripts/queue_oos.py --version "
+                    f"{model['name'].split()[-1]} --oos_tag 2025_2026", language="bash")
+        else:
+            st.info("this model has no OOS scoring task yet — queued, still running, or the step "
+                    "failed. check it in ClearML.", icon="⏳")
         st.stop()
-    st.caption(f"reading **{task['name']}**  ({task['status']})")
+    st.caption(f"reading **{task['name']}**  ({task['status']})  ·  out-of-sample")
 
     files, dead = artifacts_named(task["id"], "backtest_", report=True)
     if dead and not files:

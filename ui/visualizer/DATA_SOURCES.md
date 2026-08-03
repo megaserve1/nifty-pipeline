@@ -85,19 +85,45 @@ Your `schema.detect_labels()` finds `timestamp` / `true_label` / `predicted_labe
 
 ---
 
-## 3. Features — the dataset the model trained on
+## 3. Features — the built dataset
 
-The model names its own dataset, so you never have to guess the version:
+By name (newest version):
+
+```python
+from clearml import Dataset
+import pandas as pd, pathlib
+
+ds = Dataset.get(dataset_project="nifty_main", dataset_name="nifty_signal_dataset")
+folder = pathlib.Path(ds.get_local_copy())
+
+# NOTE: the file inside has NO .parquet extension. the bytes live in DVC's content-addressed
+# store, so the filename is an md5 hash. rglob("*.parquet") finds NOTHING here -- take the file.
+path = next(f for f in folder.rglob("*") if f.is_file())
+df = pd.read_parquet(path)
+```
+
+915,347 rows x 35 columns:
+`unique_index, timestamp, primary_label, weight, weight_raw`, then the feature columns.
+
+Or the exact dataset a given model trained on, so you never guess the version:
 
 ```python
 import joblib
 bundle = joblib.load(model.artifacts["model"].get_local_copy())
 ds = Dataset.get(dataset_id=bundle["dataset_id"])
-feat = pd.read_parquet(next(pathlib.Path(ds.get_local_copy()).rglob("*.parquet")))
 ```
 
-Feature columns are named `source__column` (e.g. `vwap_microstructure_raw__vwap_dist`).
-`timestamp` is a column here, not the index. `primary_label` and `weight` are also in this file.
+**There is no browsable `dataset_v7.parquet` in the bucket.** DVC stores it content-addressed as
+`gs://live-nifty-pipeline/final_pipeline/dvc/files/md5/<2 chars>/<rest>`. Use the SDK above; if you
+must download directly, `gsutil cp` that path and rename it yourself.
+
+Feature columns are named `source_column` — e.g. `bar_conviction_bar_range`,
+`flow_state_Flow_State_Label`. (Some still carry a double underscore, e.g.
+`nifty_context_features__Expiry_Flag`; both forms appear in the same file.)
+
+`timestamp` is a COLUMN here, not the index — unlike the OHLCV file, where it is the index.
+`primary_label`, `weight`, `weight_raw` and `unique_index` are in this file too and are not
+features.
 
 ---
 

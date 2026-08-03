@@ -764,6 +764,7 @@ def main():
         queue_shap_for_me(task.id, a.model_type, a.dataset_version or ds.version)
         queue_export_for_me(task.id, a.model_type, a.dataset_version or ds.version)
         queue_deepchecks_for_me(task.id, a.model_type, a.dataset_version or ds.version)
+        queue_oos_for_me(task.id, a.model_type, a.dataset_version or ds.version)
 
     task.close()
 
@@ -861,6 +862,62 @@ def queue_export_for_me(model_task_id: str, model_type: str, version: str):
     print(f"  queued scored_tables_{model_type} v{version}  (scores THIS model)")
 
 
+
+def queue_oos_for_me(model_task_id: str, model_type: str, version: str):
+    """ask ClearML to score THIS model on the OOS set and backtest it.
+
+    THIS IS THE ONE THAT MATTERS, so it is automatic. the other three children answer "what did
+    the model learn"; this one answers "does it work on days it has never seen", and it is the
+    only backtest the UI shows. a step that has to be remembered is a step that gets skipped, and
+    a model with no OOS number is a model nobody can judge.
+
+    IT IS ALSO THE ONLY CONTINUOUS ONE. scored_tables covers the TEST SPLIT, which under
+    bundle_random is thousands of scattered 15-minute bundles -- a backtest across those walks
+    over thousands of time gaps. the OOS set is one unbroken forward period, so the equity curve
+    it produces is a thing that could actually have been traded.
+
+    the OOS set and the prices are resolved BY NAME, never a pinned id: an id copied into config
+    dies the moment either is re-uploaded, and both are re-uploaded whenever the data extends.
+
+    REPORT ONLY. a failure here never fails the training run.
+    """
+    from clearml import Task
+    base = Task.get_task(project_name=my_project(),
+                         task_name=getattr(C, "BASE_OOS_NAME", "score_oos (base)"))
+    if base is None:
+        print("  (no score_oos base task registered -- skipping. "
+              "run: python trainer/register_base_trainer.py --force)")
+        return
+    try:
+        oos_id = C.resolve_dataset_id(C.CLEARML_OOS_DATASET, getattr(C, "OOS_DATASET_ID", ""))
+    except Exception as exc:
+        print(f"  (no '{C.CLEARML_OOS_DATASET}' dataset found: {exc} -- no OOS scoring queued)")
+        return
+    try:
+        price_id = C.resolve_dataset_id(C.CLEARML_PRICE_DATASET, getattr(C, "PRICE_DATASET_ID", ""))
+    except Exception:
+        price_id = ""
+    tag = getattr(C, "OOS_TAG", "") or "oos"
+    run = Task.clone(source_task=base, name=f"scored_oos_{tag}_{model_type} v{version}")
+    params = {
+        "Args/mode": "oos",
+        "Args/model_task_id": model_task_id,
+        "Args/oos_dataset_id": oos_id,
+        "Args/oos_tag": tag,
+        "Args/dataset_version": version,
+    }
+    # the backtest belongs HERE and only here -- this table is continuous in time.
+    bt = getattr(C, "BACKTEST_SCRIPT", "")
+    if bt and price_id:
+        params["Args/backtest"] = bt
+        params["Args/price_dataset_id"] = price_id
+    elif bt:
+        print(f"  !! no '{C.CLEARML_PRICE_DATASET}' dataset -- OOS table will be scored but NOT "
+              f"backtested.")
+    run.set_parameters(params)
+    Task.enqueue(run, queue_name=getattr(C, "EXPORT_QUEUE", C.SHAP_QUEUE))
+    print(f"  queued scored_oos_{tag}_{model_type} v{version}  "
+          f"(out-of-sample + backtest -- the number that counts)")
 
 def queue_deepchecks_for_me(model_task_id: str, model_type: str, version: str):
     """ask ClearML to run deepchecks_report against THIS model, now that it is saved.
