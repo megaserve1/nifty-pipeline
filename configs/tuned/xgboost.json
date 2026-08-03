@@ -1,5 +1,5 @@
 {
-  "model_type": "catboost",
+  "model_type": "xgboost",
   "source": "uploaded hparams_smoke.yaml",
   "applied_by": "ui",
   "params": {
@@ -7,11 +7,13 @@
     "learning_rate": 0.25,
     "max_leaves": 31,
     "max_depth": 6,
-    "l2_leaf_reg": 3.0,
-    "min_data_in_leaf": 50,
-    "rsm": 0.8,
+    "max_bin": 128,
     "subsample": 0.8,
-    "random_strength": 1.0,
+    "colsample_bynode": 0.8,
+    "min_child_weight": 5.0,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.0,
+    "gamma": 0.0,
     "early_stopping_rounds": 20
   }
 }

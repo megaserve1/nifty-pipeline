@@ -442,7 +442,10 @@ with st.container(border=True):
                "leave it alone and the LAST SAVED set is used — or the baseline in "
                "configs/hyperparams.yaml if nothing was ever saved.")
 
-    hp_model = st.radio("Model", C.MODEL_TYPES, horizontal=True, key="hp_model")
+    # this radio only decides which model a FLAT file belongs to ({"learning_rate": ...} with no
+    # model name in it). a file that names its models is applied to all of them regardless.
+    hp_model = st.radio("Model", C.MODEL_TYPES, horizontal=True, key="hp_model",
+                        help="only used when the uploaded file does not name its models")
 
     cur = HP.saved(hp_model)
     if cur:
@@ -466,27 +469,40 @@ with st.container(border=True):
         except ValueError as exc:
             st.error(str(exc))
             parsed = {}
+
+        # ONE FILE, ONE SAVE. a file can carry every model at once (xgboost: ... catboost: ...),
+        # and asking for a click per model just invites half of them to be forgotten -- so the
+        # models found in the file are shown together and saved together.
+        checked = {}
         for m, params in parsed.items():
             r = HP.check(m, params)
+            checked[m] = r
             st.markdown(f"**{m}** — {len(r['known'])} recognised, "
                         f"{len(r['unknown'])} not recognised")
             if r["unknown"]:
-                # this is the whole point of the check: defaults() drops these without a word.
-                st.warning(f"IGNORED — not settings this model has: "
-                           f"`{'`, `'.join(r['unknown'])}`. check the spelling against "
-                           f"configs/hyperparams.yaml, or they will look applied and do nothing.",
-                           icon="⚠️")
+                # the whole point of the check: defaults() drops these without a word, so an
+                # unnoticed typo trains on the old value while looking applied.
+                st.warning(f"IGNORED — not settings {m} has: `{'`, `'.join(r['unknown'])}`. "
+                           f"check the spelling against configs/hyperparams.yaml.", icon="⚠️")
             if r["changes"]:
-                st.dataframe(
-                    [{"setting": k, "now": str(a), "will become": str(b)}
-                     for k, (a, b) in r["changes"].items()],
-                    width="stretch", hide_index=True)
+                st.dataframe([{"setting": k, "now": str(a), "will become": str(b)}
+                              for k, (a, b) in sorted(r["changes"].items())],
+                             width="stretch", hide_index=True)
             else:
                 st.caption("no change — these are the values already in effect.")
-            if r["known"] and st.button(f"Save for {m}", key=f"hp_save_{m}", type="primary"):
-                path = HP.save(m, r["known"], f"uploaded {up.name}")
-                st.success(f"saved -> {path.relative_to(ROOT)}. the next run for {m} uses these.")
+
+        savable = {m: r for m, r in checked.items() if r["known"]}
+        if savable:
+            names = ", ".join(sorted(savable))
+            if st.button(f"Save for {names}", key="hp_save_all", type="primary"):
+                for m, r in savable.items():
+                    HP.save(m, r["known"], f"uploaded {up.name}")
+                st.success(f"saved for {names}. the next run uses these.")
                 st.rerun()
+            if len(savable) == 1 and len(C.MODEL_TYPES) > 1:
+                missing = [m for m in C.MODEL_TYPES if m not in savable]
+                st.caption(f"this file only covers {names}. {', '.join(missing)} will keep "
+                           f"whatever is already saved for it.")
 
     st.caption("note: `publish --tune` runs HPO and OVERWRITES this file with its winner. "
                "use the plain publish (or the button below) to train on what you uploaded.")
