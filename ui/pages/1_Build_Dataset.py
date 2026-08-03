@@ -207,6 +207,35 @@ def find_identical(doc):
     return None
 
 
+
+def git_head() -> str:
+    """the commit in this working copy, right now."""
+    try:
+        r = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(ROOT),
+                           capture_output=True, text=True)
+        return (r.stdout or "").strip()[:12]
+    except Exception:
+        return ""
+
+
+@st.cache_data(show_spinner=False, ttl=60)
+def worker_commit() -> tuple:
+    """(commit, when) the AGENTS will run -- the one pinned on the base task, not this repo.
+
+    THIS IS THE TRAP THE PAGE EXISTS TO SHOW. an agent does not run your working copy: it clones
+    the git commit recorded on the base task when register_base_trainer.py last ran. change a
+    trainer script, push it, and every worker still runs the OLD code -- silently, with no error,
+    until someone notices the results did not change. it cost a full re-run on 2026-08-03.
+    """
+    try:
+        from clearml import Task
+        t = Task.get_task(project_name=C.CLEARML_PROJECT, task_name="train_xgboost (base)")
+        return (str(getattr(t.data.script, "version_num", ""))[:12],
+                str(getattr(t.data, "last_update", ""))[:16])
+    except Exception:
+        return ("", "")
+
+
 def stream(cmd, box) -> int:
     """run a pipeline command, streaming its output into a code box (throttled). returns exit code."""
     env = dict(os.environ, PYTHONUNBUFFERED="1")
@@ -304,6 +333,33 @@ except Exception:
 def step(n, title):
     st.markdown(f'<div class="fs-step"><span class="num">{n}</span>{title}</div>', unsafe_allow_html=True)
 
+
+
+# ---- are the workers running this code? -------------------------------------
+_head = git_head()
+_wc, _when = worker_commit()
+if _head and _wc and _head != _wc:
+    st.warning(
+        f"**The workers are running older code.** They clone the commit pinned on the base "
+        f"task — `{_wc}` from {_when} — not this repo (`{_head}`). Anything changed in "
+        f"`trainer/` since then will NOT take effect: the run will look fine and quietly do the "
+        f"old thing.", icon="🧩")
+    c_a, c_b = st.columns([1, 2])
+    with c_a:
+        _upd = st.button("Update workers to this code", type="primary", key="reg_base")
+    with c_b:
+        st.caption("re-registers the base tasks against the current commit. push first, or the "
+                   "agents cannot fetch it. takes about a minute.")
+    if _upd:
+        with st.status("re-registering the base tasks …", expanded=True) as _stt:
+            _box = st.empty()
+            _rc = stream([PYBIN, "trainer/register_base_trainer.py", "--force"], _box)
+            _stt.update(label="workers updated" if _rc == 0 else f"failed (exit {_rc}) — see log",
+                        state="complete" if _rc == 0 else "error")
+        worker_commit.clear()
+        st.rerun()
+elif _head and _wc:
+    st.caption(f"workers are on this commit ({_wc}) ✓")
 
 # ---- STEP 1 · mode ----------------------------------------------------------
 step(1, "Mode")

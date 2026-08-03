@@ -70,6 +70,26 @@ try:
 except Exception:
     pass          # a future sklearn may restore it, or move _SCORERS -- do not block on this
 
+# 4. numpy 2 REMOVED the `interpolation=` keyword from quantile/percentile (deprecated in 1.22,
+#    renamed to `method=`). deepchecks 0.19.1 predates that and still passes the old name in two
+#    checks -- outlier_sample_detection.py:142 and string_length_out_of_bounds.py:127 -- so those
+#    two die with "quantile() got an unexpected keyword argument 'interpolation'" while every
+#    other check passes. the values are IDENTICAL either way; only the keyword was renamed.
+import numpy as _np
+for _fn in ("quantile", "percentile"):
+    _orig = getattr(_np, _fn)
+    def _compat(*a, __orig=_orig, **kw):
+        if "interpolation" in kw:
+            kw["method"] = kw.pop("interpolation")
+        return __orig(*a, **kw)
+    try:
+        _compat([1, 2, 3], 0.5, interpolation="linear")     # only patch if it is actually broken
+    except TypeError:
+        pass
+    else:
+        setattr(_np, _fn, _compat)
+
+
 # 3. setuptools AFTER 81 removed pkg_resources, and deepchecks imports parse_version from it.
 #    THIS MUST BE A SHIM, NOT A REQUIREMENTS PIN: a clearml-agent records a task's requirements
 #    from the packages the SCRIPT IMPORTS, so "setuptools<82" in requirements.txt never reaches
@@ -120,9 +140,17 @@ def build_datasets(df: pd.DataFrame, bundle: dict, sample: int):
             idx = idx[np.linspace(0, len(idx) - 1, sample).astype(int)]
         frame = X.loc[idx].copy()
         frame["label"] = y.loc[idx].to_numpy()
+        # DEEPCHECKS DOES NOT LOOK AT THE DATAFRAME INDEX UNLESS TOLD TO.
+        # without this, IdentifierLabelCorrelation refuses with "Dataset does not contain an index
+        # or a datetime" -- which reads like missing data and is really a missing argument. that
+        # check asks "does the row id or the clock predict the label?", and on time-series that is
+        # exactly the leak worth knowing about, so we hand it the timestamp.
+        frame.index = pd.DatetimeIndex(ts.loc[idx].to_numpy(), name=C.LABEL_TS_COL)
         # the model's own categorical list -- passing it changes what several checks do
         cats = [c for c in (bundle.get("categorical") or []) if c in frame.columns]
-        return DcDataset(frame, label="label", features=feats, cat_features=cats), len(idx)
+        return (DcDataset(frame, label="label", features=feats, cat_features=cats,
+                          set_datetime_from_dataframe_index=True),
+                len(idx))
 
     train_ds, n_tr = make(tr)
     test_ds, n_te = make(te)

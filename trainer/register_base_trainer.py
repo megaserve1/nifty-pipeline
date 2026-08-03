@@ -48,7 +48,21 @@ def register(script: pathlib.Path, task_name: str, extra: list, force: bool) -> 
         print(f"  already registered  {task_name}   ({existing.id})")
         return True
     if existing is not None and force:
-        print(f"  re-registering      {task_name}  (the old one stays in ClearML)")
+        # ARCHIVE THE OLD ONE FIRST, and take its name away.
+        # Task.init reuses a task that has the same project+name, and a reused task keeps the
+        # git commit it was first recorded with -- so --force re-ran the script and changed
+        # NOTHING. agents kept cloning a base pinned to an old commit while the repo moved on,
+        # silently, with no error anywhere. renaming it means Task.init finds no match and
+        # records today's commit.
+        before = str(getattr(existing.data.script, "version_num", ""))[:12]
+        try:
+            existing.rename(f"{task_name} [superseded {before}]")
+            existing.set_archived(True)
+            print(f"  re-registering      {task_name}  (old one archived, was on {before})")
+        except Exception as exc:
+            print(f"  !! could not archive the old {task_name}: {exc}\n"
+                  f"     delete it in the ClearML UI, or the new commit will not take effect.")
+            return False
 
     print(f"  registering         {task_name} ...", flush=True)
     r = subprocess.run([sys.executable, str(script)] + extra, text=True,
@@ -62,7 +76,8 @@ def register(script: pathlib.Path, task_name: str, extra: list, force: bool) -> 
     if t is None:
         print(f"     ran, but no task appeared. check ~/clearml.conf")
         return False
-    print(f"     OK  {t.id}")
+    got = str(getattr(t.data.script, "version_num", "")) or "?"
+    print(f"     OK  {t.id}   commit {got[:12]}")
     return True
 
 
