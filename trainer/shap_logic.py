@@ -91,7 +91,9 @@ def rank_mistakes(y_true: np.ndarray, y_pred: np.ndarray, classes: list,
                   severity: dict, default_sev: float = 1.0) -> pd.DataFrame:
     """rank every kind of mistake by  rate x severity.
 
-    rate     = of all the minutes that were REALLY class A, what fraction did the model call B?
+    rate     = of all the minutes that were REALLY class A, what FRACTION did the model call B?
+               reported as a fraction (0.0268), not a percentage, so rate x severity = importance
+               is checkable by eye. n_true is shown beside it so count/n_true can be checked too.
     severity = what that particular confusion COSTS, from configs/severity_7class.json
     """
     rows = []
@@ -108,13 +110,18 @@ def rank_mistakes(y_true: np.ndarray, y_pred: np.ndarray, classes: list,
             rate = cnt / n_true
             sev = float(severity.get(f"{tname}->{pname}", default_sev))
             rows.append({
-                "true": tname, "pred": pname, "count": cnt,
-                "of_true_%": round(100 * rate, 2),
+                "true": tname, "pred": pname,
+                "count": cnt, "n_true": n_true,
+                # THE FRACTION, NOT A PERCENTAGE. this column used to be `of_true_%` = 100 x rate,
+                # which meant the row did not check out by eye: 2.68 x 100 reads as 268, not 2.68,
+                # and you had to know to divide by 100 first. the number shown is now the number
+                # used, so  rate x severity = importance  can be verified straight off the row.
+                "rate": round(rate, 4),
                 "severity": sev,
-                "importance": round(rate * sev, 4),   # how often x how much it hurts
+                "importance": round(rate * sev, 4),   # rate x severity, nothing hidden
             })
     if not rows:
-        return pd.DataFrame(columns=["true", "pred", "count", "of_true_%",
+        return pd.DataFrame(columns=["true", "pred", "count", "n_true", "rate",
                                      "severity", "importance"])
     return (pd.DataFrame(rows)
             .sort_values("importance", ascending=False)
@@ -211,19 +218,44 @@ def explain_one_row(vals: np.ndarray, features: list, row: int, cls: int, top: i
 
 
 def sample_for_shap(y_true: np.ndarray, pair: tuple[int, int], n: int,
-                    seed: int = 42) -> np.ndarray:
+                    seed: int = 42, y_pred: np.ndarray | None = None) -> np.ndarray:
     """pick rows to explain.
 
-    SHAP is slow -- computing it for 500,000 rows x 7 classes would take hours and tell us
-    nothing extra. we only need the rows of the TWO classes involved in the worst mistake.
-    a few hundred of each is plenty to see the pattern.
+    SHAP is slow, so we explain a sample. WHICH rows we sample decides what we can conclude.
+
+    THE OLD WAY (y_pred=None) took n random rows of each of the two classes and hoped some of
+    them happened to be the mistake. measured on v7: the ENTRY_SUPER -> EXIT_SUPER error rate is
+    0.067, so 300 sampled rows contained about 20 real mistakes and 40 sampled rows contained
+    THREE. the one table that explains the mistake was being computed from three examples, while
+    297 rows were spent on the part that only needed a ranking.
+
+    THE WAY IT WORKS NOW (y_pred given) takes three deliberate groups of n:
+
+        WRONG    true A, predicted B   <- the mistake itself. this is what the diagnosis needs.
+        RIGHT_A  true A, predicted A   <- the same class, got right
+        RIGHT_B  true B, predicted B   <- the other class, got right
+
+    the two RIGHT groups are the contrast: "which features fire when it gets this right, and what
+    is different when it gets it wrong". without them, everything looks like it causes the error.
+
+    so n=40 now yields FORTY mistake rows instead of three, from 120 rows instead of 600.
     """
     rng = np.random.default_rng(seed)
-    picks = []
-    for cls in pair:
-        idx = np.where(y_true == cls)[0]
-        if len(idx):
-            picks.append(rng.choice(idx, size=min(n, len(idx)), replace=False))
+    A, B = pair
+    if y_pred is None:                                   # old behaviour, kept for callers/tests
+        picks = []
+        for cls in pair:
+            idx = np.where(y_true == cls)[0]
+            if len(idx):
+                picks.append(rng.choice(idx, size=min(n, len(idx)), replace=False))
+        return np.concatenate(picks) if picks else np.array([], dtype=int)
+
+    groups = [
+        np.where((y_true == A) & (y_pred == B))[0],      # the mistake
+        np.where((y_true == A) & (y_pred == A))[0],      # A, correct
+        np.where((y_true == B) & (y_pred == B))[0],      # B, correct
+    ]
+    picks = [rng.choice(g, size=min(n, len(g)), replace=False) for g in groups if len(g)]
     return np.concatenate(picks) if picks else np.array([], dtype=int)
 
 

@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt            # noqa: E402
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 import config as C          # noqa: E402
 from trainer.shap_logic import (  # noqa: E402
-    compute_shap, rank_mistakes, worst_case_mistakes, feature_shares,
+    compute_shap, rank_mistakes, feature_shares,
     stable_feature_shares, explain_one_row, sample_for_shap, SHAP_SPACE,
 )
 from trainer.objective import three_way_split   # noqa: E402  (the SAME split as the trainer, or
@@ -62,8 +62,9 @@ def main():
     ap.add_argument("--model_task_id", default="", help="the training task whose model we explain")
     ap.add_argument("--model_type", default="", help="xgboost | catboost")
     ap.add_argument("--dataset_version", default="")
-    ap.add_argument("--n_samples", type=int, default=300,
-                    help="rows to explain per class of the worst pair. SHAP is slow.")
+    ap.add_argument("--n_samples", type=int, default=40,
+                    help="rows per GROUP: the mistake, A-correct, B-correct. 40 gives 40 real "
+                         "mistake rows -- the old 300-per-class gave about 20.")
     ap.add_argument("--n_charts", type=int, default=6, help="waterfall pictures to save")
     from clearml import Dataset, Task   # BEFORE parse_args -- clearml patches argparse at import;
     # parse first and every Args/ override from the clone is silently lost. see train.py.
@@ -115,7 +116,23 @@ def main():
     # model TRAINED on and every SHAP number is confidently, silently wrong. the trainer now
     # records its own test cut inside the bundle; that recorded cut is the truth.
     split = bundle.get("split") or {}
-    if split.get("test_start"):
+    if split.get("strategy") in ("bundle_random",):
+        # BUNDLE_RANDOM IS NOT A DATE CUT. its test rows are 15-minute bundles scattered across
+        # the WHOLE history, so `test_start` is merely the earliest timestamp that landed in test
+        # -- for v7 that is 2015-01-09 09:45, the second candle in the file. the old
+        # `ts >= test_start` rule therefore selected 915,347 rows instead of 274,605 and every
+        # SHAP number was computed on train+val+test together, i.e. mostly on rows the model had
+        # memorised. rebuild the split the way the trainer did: same function, same recorded
+        # seed. (export_scored_tables and deepchecks already do this; only this file did not.)
+        _, _, te, _ = three_way_split(
+            ts, float(split.get("val_fraction", C.VAL_FRACTION)),
+            float(split.get("test_fraction", C.TEST_FRACTION)),
+            int(split.get("embargo_sessions", C.EMBARGO_SESSIONS)),
+            strategy=split["strategy"], bundle_minutes=split.get("bundle_minutes"),
+            seed=split.get("seed"))
+        print(f"      test split REBUILT from the bundle recipe: {split['strategy']}, "
+              f"{split.get('bundle_minutes')}min bundles, seed {split.get('seed')}")
+    elif split.get("test_start"):
         te = ts >= pd.Timestamp(split["test_start"])
         print(f"      test split FROM THE BUNDLE: >= {split['test_start']}")
     else:
@@ -161,14 +178,12 @@ def main():
 
     print("\n--- WHERE THE MONEY GOES (rate x severity) ---")
     print(rank.head(10).to_string(index=False))
-    logger.report_table("Mistakes ranked", "by importance (rate x severity)", table_plot=rank)
+    logger.report_table("Mistakes ranked", "importance = rate x severity", table_plot=rank)
 
-    # the second view: what could KILL us, however rare
-    worst = worst_case_mistakes(rank, min_severity=50)
-    if not worst.empty:
-        print("\n--- WHAT COULD KILL US (high severity, however rare) ---")
-        print(worst.to_string(index=False))
-        logger.report_table("Danger list", "high severity, any rate", table_plot=worst)
+    # NO SEPARATE "danger list" AND NO account_ender FLAG. both were re-stating the severity
+    # column, which is already on every row: a reader who wants the account-enders sorts by
+    # severity. rate x severity can still bury a rare catastrophe low in the ranking -- the
+    # severity column is how you find it, and it needs no help from us.
 
     # ---- 4. SHAP on the worst pair ------------------------------------------
     A, B = rank.iloc[0]["true"], rank.iloc[0]["pred"]
@@ -176,7 +191,9 @@ def main():
     print(f"\n[4/6] the worst mistake: TRUE '{A}'  ->  predicted '{B}'  "
           f"(importance {rank.iloc[0]['importance']})")
 
-    picks = sample_for_shap(y_true, (Ai, Bi), a.n_samples)
+    # SAMPLE THE MISTAKE ITSELF, not the class and hope. n rows of (true A, predicted B),
+    # n of A-got-right, n of B-got-right. see sample_for_shap for why.
+    picks = sample_for_shap(y_true, (Ai, Bi), a.n_samples, y_pred=y_pred)
     print(f"      computing SHAP on {len(picks):,} sampled rows "
           f"(not all {len(X):,} -- SHAP is slow and a sample shows the same pattern)")
     Xs = X.iloc[picks]
@@ -190,11 +207,56 @@ def main():
     # not one ranking, but SEVERAL -- so we can say which parts of it are trustworthy and
     # which are just the luck of the sample. a ranking always LOOKS confident; this one has to
     # earn it. (measured: the top feature is rock-solid; ranks 4-5 wobble ~5%.)
-    shares = stable_feature_shares(model, Xs, feats, mtype, cls=Bi, n_boot=5,
-                                   cat_features=bundle.get("categorical", []))
-    print(shares.head(12).to_string(index=False))
-    print("     verdict: 'solid' = in the top 5 of EVERY run. 'noise' = it got lucky once.")
-    logger.report_table(f"Feature shares -- pushing towards '{B}'", mtype, table_plot=shares)
+    # BOTH SIDES OF THE RACE, not one.
+    # a 7-class prediction is an argmax: the model answered B instead of A because B's score
+    # ENDED UP HIGHER. two separate things can cause that -- something lifted B, or something
+    # failed to lift A -- and a table for B alone only ever shows the first. so we report the
+    # movers of B and the movers of A side by side. (the number is a mean ABSOLUTE shap value,
+    # so it measures INFLUENCE on that class's score, in either direction, not "pushes towards".)
+    # TWO COLUMNS ONLY. the old table also carried top5_hits / verdict / runs. verdict was a hard
+    # cutoff (5 of 5 = "solid", 3 of 5 = "probable") on five runs -- one run's difference flipped
+    # the label, and it judged RANK POSITION rather than value. wobble says the same thing in a
+    # number you can read: 13.38 +/- 0.19 means every run agreed, 13.38 +/- 6.0 means they did not.
+    def trim(d):
+        return d[["feature", "share_%", "wobble_+/-"]]
+
+    shares = trim(stable_feature_shares(model, Xs, feats, mtype, cls=Bi, n_boot=5,
+                                        cat_features=bundle.get("categorical", [])))
+    print(f"\n      levers on '{B}' within the {A}/{B} rows only:")
+    print(shares.head(10).to_string(index=False))
+    logger.report_table(f"Levers on '{B}' -- {A}/{B} rows ONLY, not global",
+                        mtype, table_plot=shares)
+
+    # ---- WHY B BEAT A, decomposed exactly -----------------------------------
+    # the two tables above use mean ABSOLUTE shap, so they mostly agree: a strong lever is a
+    # strong lever on every class, and subtracting two absolute numbers means nothing.
+    #
+    # this one is SIGNED, and it is the actual arithmetic of the mistake. the model predicts
+    # argmax over the 7 class scores, so B won because
+    #       score(B) > score(A)
+    # and shap is additive, so each feature's contribution to that gap is exactly
+    #       shap[row, f, B] - shap[row, f, A]
+    # positive = this feature pushed the model towards the WRONG answer and away from the right
+    # one. negative = it argued for the right answer and was overruled. summed over features it
+    # reconstructs the whole margin -- nothing is hand-waved.
+    #
+    # computed ONLY on the rows that were actually wrong (true A, predicted B). including the
+    # correct rows would average the mistake away, which is the opposite of the question.
+    wrong_mask = np.array([(int(y_true[s]) == Ai and int(y_pred[s]) == Bi) for s in picks])
+    if wrong_mask.any():
+        m = vals[wrong_mask][:, :, Bi] - vals[wrong_mask][:, :, Ai]     # signed, per row
+        tip = (pd.DataFrame({"feature": feats, "pushed_towards_wrong": m.mean(axis=0).round(4)})
+               .sort_values("pushed_towards_wrong", ascending=False).reset_index(drop=True))
+        print(f"\n     WHY '{A}' became '{B}', on the {int(wrong_mask.sum())} rows that were "
+              f"actually wrong (signed -- + means it argued for the wrong answer):")
+        print(tip.head(8).to_string(index=False))
+        print(f"     ... and the features arguing FOR the right answer, overruled:")
+        print(tip.tail(4).to_string(index=False))
+        logger.report_table(f"WHY '{A}' became '{B}'  (signed, wrong rows only)",
+                            mtype, table_plot=tip)
+        task.upload_artifact("why_wrong", tip)
+    else:
+        print(f"     (no sampled row was actually {A}->{B}, so the signed breakdown is skipped)")
     for _, r in shares.head(15).iterrows():
         logger.report_single_value(f"shap_share/{r['feature']}", float(r["share_%"]))
 

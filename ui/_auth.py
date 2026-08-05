@@ -28,9 +28,27 @@ import streamlit as st
 ENV_VAR = "NIFTY_UI_PASSWORD"
 
 
+def _secret() -> str:
+    """the password, from the environment OR from streamlit's secrets store.
+
+    LOCALLY it comes from the shell (export NIFTY_UI_PASSWORD=...). there is no shell on a hosted
+    runner, so a deployment there reads st.secrets instead -- set it in the host's Secrets box as
+        NIFTY_UI_PASSWORD = "..."
+    st.secrets raises rather than returning None when no secrets file exists, which is the normal
+    case on this machine, so it is guarded.
+    """
+    v = os.environ.get(ENV_VAR, "")
+    if v:
+        return v
+    try:
+        return str(st.secrets[ENV_VAR])
+    except Exception:
+        return ""
+
+
 def require_auth():
     """stop the page unless the visitor has entered the password. returns nothing on success."""
-    secret = os.environ.get(ENV_VAR, "")
+    secret = _secret()
 
     if not secret:
         # fail CLOSED. an unset variable is a mistake, not permission to skip the gate.

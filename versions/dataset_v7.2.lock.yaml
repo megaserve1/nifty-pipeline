@@ -4,7 +4,7 @@ version: v7.2
 clearml_dataset_id: 8a1fefd4fb3f40bea1980585f15b6797
 clearml_version: '7.2'
 gcs_url: gs://live-nifty-pipeline/final_pipeline/dvc/files/md5/b6/5988d72b619641c5c07f9b67c4a936
-git_sha: 6c08df09600d73c16f87ca737aa3c39423eb877d
+git_sha: a9f224b900da09ab046f146e6566f507f90daf03
 parquet_sha256: 420fffe6830c6061760daf2eaee6574f89acc8f9395c682d48140e197d8b2646
 recipe_sha256: 0b0f47b42121157610f417f3fd3c0f2e33b4b1c651e62897a4c24fbb2c769961
 labels_sha256: c601cf5fe1440abd866a9ae76d02df651fc4031669191443ba1d395985042e1e
@@ -152,4 +152,4 @@ per_feature:
   - nifty_context_features__Expiry_Flag
   - candle_pattern_vote_sum
   - dc_pos_275_bucket_features__dc_pos_275_bucket
-published_at: '2026-08-03T12:10:05+00:00'
+published_at: '2026-08-04T04:48:18+00:00'

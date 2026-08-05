@@ -168,6 +168,54 @@ def test_unlisted_pairs_fall_back_to_the_default_severity():
     assert rank.iloc[0]["severity"] == 1.0
 
 
+def test_the_sampler_targets_the_mistake_itself():
+    """THE POINT OF THE WHOLE SAMPLE. the old sampler took n random rows of each class and hoped
+    some were wrong -- measured on v7 the error rate is 0.067, so 40 rows a class contained THREE
+    real mistakes and the table explaining the mistake was built from three examples. asking for
+    the (true A, predicted B) rows directly gives n of them, every time."""
+    A, B = 4, 2                                        # ENTRY_SUPER -> EXIT_SUPER
+    y_true = np.array([A] * 500 + [B] * 500)
+    y_pred = y_true.copy()
+    y_pred[:30] = B                                    # 30 real mistakes out of 500 -> rate 0.06
+
+    old = sample_for_shap(y_true, (A, B), n=40, seed=1)
+    n_wrong_old = int(((y_true[old] == A) & (y_pred[old] == B)).sum())
+
+    new = sample_for_shap(y_true, (A, B), n=10, seed=1, y_pred=y_pred)
+    n_wrong_new = int(((y_true[new] == A) & (y_pred[new] == B)).sum())
+
+    assert n_wrong_new == 10, "asking for the mistake must return exactly that many"
+    assert n_wrong_new > n_wrong_old, "and more of them than blind sampling, from fewer rows"
+    # three groups of 10: the mistake, A-correct, B-correct -- the two correct ones are the
+    # CONTRAST. without them every feature looks guilty, because they all fire on wrong rows too.
+    assert len(new) == 30
+    assert int(((y_true[new] == A) & (y_pred[new] == A)).sum()) == 10
+    assert int(((y_true[new] == B) & (y_pred[new] == B)).sum()) == 10
+
+
+def test_the_sampler_still_works_the_old_way_when_no_predictions_are_given():
+    """local_check.py and older callers pass no y_pred -- that path must not change."""
+    y = np.array([0] * 50 + [4] * 50)
+    picked = sample_for_shap(y, pair=(0, 4), n=10, seed=1)
+    assert len(picked) == 20
+    assert set(y[picked]) == {0, 4}
+
+
+def test_the_ranking_row_can_be_checked_by_eye():
+    """rate is a FRACTION, not a percentage, and n_true is on the row. so a reader can verify
+    count/n_true = rate and rate*severity = importance without knowing to divide by 100 first --
+    which is exactly what the old `of_true_%` column made impossible."""
+    y_true = np.array([4] * 1000)
+    y_pred = y_true.copy()
+    y_pred[:30] = 2
+    rank = rank_mistakes(y_true, y_pred, CLASSES, {"ENTRY_SUPER->EXIT_SUPER": 100.0})
+    row = rank.iloc[0]
+    assert row["n_true"] == 1000
+    assert row["count"] == 30
+    assert row["rate"] == pytest.approx(0.03)
+    assert row["rate"] * row["severity"] == pytest.approx(row["importance"], abs=1e-4)
+
+
 # ------------------------------------------------------------------ the shares
 def test_feature_shares_sum_to_one_hundred(models, data):
     X, _, _ = data

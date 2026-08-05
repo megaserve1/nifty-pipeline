@@ -27,7 +27,7 @@
 # below so nothing depends on that fallback.
 
 xgboost:
-  n_estimators: 200
+  n_estimators: 20
   learning_rate: 0.25
   max_leaves: 31
   max_depth: 6
@@ -41,7 +41,7 @@ xgboost:
   early_stopping_rounds: 20
 
 catboost:
-  n_estimators: 200
+  n_estimators: 20
   learning_rate: 0.25
   max_leaves: 31          # explicit: 0 would silently fall back to 31 anyway
   max_depth: 6            # explicit: 0 would silently become 6
