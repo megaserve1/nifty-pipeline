@@ -136,6 +136,35 @@ def parse_max_features(v):
         raise SystemExit(f"max_features must be sqrt / log2 / a fraction, got {v!r}")
 
 
+class _Tracked(dict):
+    """a params dict that remembers which keys were actually READ.
+
+    WHY THIS EXISTS. build_model names every setting by hand -- params["n_estimators"] and so on
+    -- because each library wants different names and several knobs need real per-model logic
+    (max_depth 0 means "uncapped" under lossguide and "please cap me at 6" under depthwise). that
+    is fine, but it has one silent failure: add a knob to configs/hyperparams.yaml, forget the
+    matching line here, and the setting is accepted everywhere, recorded in ClearML, searched by
+    HPO -- and never reaches the model. it happened to THREE of them (colsample_bynode,
+    max_delta_step, colsample_bylevel, added 2026-07-31, unwired until 2026-08-05), and 50 HPO
+    trials were spent tuning two knobs that did nothing.
+
+    so the dict counts reads, and build_model refuses to return a model while any knob is unread.
+    a yaml key that nobody consumes is now a crash at the first run, not a lie in the config.
+    """
+
+    def __init__(self, d):
+        super().__init__(d)
+        self.read = set()
+
+    def __getitem__(self, k):
+        self.read.add(k)
+        return super().__getitem__(k)
+
+    def get(self, k, default=None):
+        self.read.add(k)
+        return super().get(k, default)
+
+
 def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has_val: bool = False):
     """make one model. each library gets the settings that suit it.
 
@@ -143,6 +172,76 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
     at fit time, so it is only ARMED when there is a val split -- otherwise the library raises
     'need at least one validation set'. with early stopping on, n_estimators is a CEILING.
     """
+    params = _Tracked(params)
+    model = _build_model_inner(model_type, n_classes, params, cat_idx, has_val)
+
+    # PASS THROUGH ANYTHING THE EXPLICIT BLOCK DID NOT TOUCH.
+    # the block above has to name some settings by hand -- the libraries disagree (seed is
+    # random_state in xgboost and random_seed in catboost, n_estimators is iterations in
+    # catboost) and a few need real logic (max_depth 0 means "uncapped" under lossguide and
+    # "cap me at 6" under depthwise). but that is the ONLY reason to name one, and every knob
+    # that needs no translation should simply work.
+    #
+    # it used to be that a knob with no hand-written line was silently dropped: colsample_bynode,
+    # max_delta_step and colsample_bylevel sat in the yaml from 2026-07-31, were recorded on every
+    # ClearML task, were searched by 50 HPO trials -- and never reached the library. so now we ASK
+    # THE LIBRARY what it accepts and hand it everything it recognises. add a knob to the yaml and
+    # it works, with no code change, as long as the library has a setting by that name.
+    unread = sorted(set(params) - params.read)
+    if unread:
+        accepted = _library_params(model_type)
+        passthrough = {k: params[k] for k in unread
+                       if k in accepted and params[k] not in (None, "")}
+        unknown = [k for k in unread if k not in accepted]
+        if unknown:
+            # A LIE IN THE CONFIG IS FATAL. A STRAY KEY FROM A CALLER IS NOT.
+            # if configs/hyperparams.yaml declares the knob for THIS model and the library has no
+            # such setting, the file is claiming something that can never happen -- stop. but a
+            # caller (a test, local_check, a shared dict) passing an extra key is not a config
+            # lie: say so and carry on, which is what the old code did silently.
+            claimed = _yaml_knobs(model_type)
+            fatal = [k for k in unknown if k in claimed]
+            if fatal:
+                raise SystemExit(
+                    f"configs/hyperparams.yaml declares {model_type} setting(s) that {model_type} "
+                    f"has no such name for: {', '.join(fatal)}\n"
+                    f"  they would do NOTHING. check the spelling, or delete them from the yaml.")
+            print(f"      ignoring {len(unknown)} setting(s) {model_type} does not accept: "
+                  f"{', '.join(unknown)}")
+        if passthrough:
+            model.set_params(**passthrough)
+            print(f"      {len(passthrough)} setting(s) passed straight through to {model_type}: "
+                  f"{', '.join(sorted(passthrough))}")
+    return model
+
+
+def _yaml_knobs(model_type: str) -> set:
+    """what configs/hyperparams.yaml claims for this model. a knob declared there and unusable is
+    a broken config; the same knob arriving from a caller is just an extra argument."""
+    try:
+        from trainer import hyperparams as _H
+        import yaml as _yaml
+        return set((_yaml.safe_load(_H.HP_FILE.read_text()) or {})
+                   .get(model_type, {}).get("default") or {})
+    except Exception:
+        return set()
+
+
+def _library_params(model_type: str) -> set:
+    """the setting names this library will actually accept -- asked of the library, not a list
+    kept here. a list kept here is the thing that went stale in the first place."""
+    import inspect
+    if model_type == "xgboost":
+        import xgboost as xgb
+        return set(xgb.XGBClassifier().get_params())
+    if model_type == "catboost":
+        from catboost import CatBoostClassifier
+        return set(inspect.signature(CatBoostClassifier.__init__).parameters) - {"self"}
+    from sklearn.ensemble import RandomForestClassifier
+    return set(RandomForestClassifier().get_params())
+
+
+def _build_model_inner(model_type: str, n_classes: int, params, cat_idx=None, has_val: bool = False):
     if model_type == "random_forest":
         from sklearn.ensemble import RandomForestClassifier
         return RandomForestClassifier(
@@ -187,6 +286,7 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
             max_depth = 0 if grow_policy == "lossguide" else 6
         else:
             max_depth = int(md)
+        _esr = params.get("early_stopping_rounds")
         return xgb.XGBClassifier(
             n_estimators=params["n_estimators"],
             max_depth=max_depth,
@@ -200,6 +300,15 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
             learning_rate=params["learning_rate"],
             subsample=params.get("subsample", 1.0),
             colsample_bytree=params.get("colsample_bytree", 1.0),
+            # RE-DEALT AT EVERY SPLIT, not once per tree. this and max_delta_step below were in
+            # configs/hyperparams.yaml from 2026-07-31 and were NEVER PASSED to xgboost -- the
+            # yaml called colsample_bynode "the key regulariser for uncapped lossguide trees"
+            # while the model never saw it, and the HPO search tuned it across 50 trials with no
+            # effect on any of them. the _Tracked guard below now makes that impossible.
+            colsample_bynode=params.get("colsample_bynode", 1.0),
+            # caps how far any single leaf may move in one round. the guard against a tiny leaf
+            # of heavily-weighted rare-class rows taking one violent, overconfident step.
+            max_delta_step=params.get("max_delta_step", 0.0),
             # min_child_weight is a floor on the SUM OF WEIGHTS in a leaf, not a row count. that
             # matters enormously here: our weights run 0.00-0.91 and NO_TRADE is 0.00, so a leaf
             # holding 500 NO_TRADE rows has a child weight of ZERO. keep this floor low or
@@ -218,8 +327,11 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
             eval_metric="mlogloss",
             # stop early once val mlogloss stops improving. only ARMED when a val split exists
             # (the fit passes eval_set); else None = train all n_estimators.
-            early_stopping_rounds=(int(params["early_stopping_rounds"])
-                                   if has_val and params.get("early_stopping_rounds") else None),
+            # READ IT UNCONDITIONALLY, then decide. written as `if has_val and params.get(...)`
+            # python short-circuits and never touches the key when has_val is False -- so the
+            # _Tracked dict saw it as unread and the passthrough below would have set it anyway,
+            # undoing the very guard this line exists to be.
+            early_stopping_rounds=(int(_esr) if has_val and _esr else None),
             verbosity=0,
         )
 
@@ -232,6 +344,8 @@ def build_model(model_type: str, n_classes: int, params: dict, cat_idx=None, has
             l2_leaf_reg=params.get("l2_leaf_reg", 3.0),   # L2 on leaf values -- the main brake
             min_data_in_leaf=int(params.get("min_data_in_leaf", 1)),
             rsm=params.get("rsm", 1.0),                   # column sampling (= colsample_bytree)
+            # per-LEVEL column sampling. also in the yaml since 2026-07-31 and never passed.
+            colsample_bylevel=params.get("colsample_bylevel", 1.0),
             random_strength=params.get("random_strength", 1.0),  # noise added when scoring splits
             loss_function="MultiClass",
             random_seed=params["seed"],

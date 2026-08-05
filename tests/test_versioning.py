@@ -31,12 +31,23 @@ def mv(monkeypatch, tmp_path):
         "beta":  {"file": "b.parquet", "clock": "5min"},
         "gamma": {"file": "c.parquet", "clock": "1min"},
     }))
+    # ISOLATE THE LABEL MENU TOO. freeze() records a labels_name, and with no --labels it asks
+    # config.labels_name(). that reads data/labels/registry.yaml -- the REAL one -- so these unit
+    # tests silently depended on production data: they passed while one label set existed and all
+    # ten broke the day L1/L2/L3 arrived with none marked default (which is config refusing to
+    # guess, and correct). a unit test must not read the real menu.
+    labels = tmp_path / "labels"
+    labels.mkdir()
+    (labels / "registry.yaml").write_text(yaml.safe_dump(
+        {"LT": {"file": "LT.csv", "note": "the test label set", "default": True}}))
+    monkeypatch.setattr(C, "LABELS_DIR", labels)
     monkeypatch.setattr(C, "REGISTRY", reg)
     monkeypatch.setattr(C, "VERSIONS_DIR", tmp_path)
     monkeypatch.setattr(C, "CONFIGS_DIR", tmp_path)
 
     m = importlib.import_module("make_version")
     importlib.reload(m)
+    monkeypatch.setattr(m.C, "LABELS_DIR", labels)
     monkeypatch.setattr(m.C, "REGISTRY", reg)
     monkeypatch.setattr(m.C, "VERSIONS_DIR", tmp_path)
     monkeypatch.setattr(m.C, "CONFIGS_DIR", tmp_path)

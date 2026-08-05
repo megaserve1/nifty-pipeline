@@ -1,50 +1,13 @@
-"""
-trainer/objective.py -- the ONE definition of the thing HPO is allowed to optimise.
+"""trainer/objective.py -- the one definition of what HPO optimises.
 
-read this before hpo.py. it is short, and it is the whole ball game.
+ClearML does not call a score function of yours. it reads ONE scalar off the finished task, found
+by two strings (title, series). get the strings wrong and get_objective returns None, silently --
+every trial scores the same nothing and the "best" params are just the first ones sampled. green
+all the way, no traceback. so the two strings live here once and train.py and hpo.py both import
+them; they cannot drift apart.
 
-
-WHY THIS FILE EXISTS AT ALL
---------------------------------------------------------------------------------------
-ClearML's HyperParameterOptimizer does NOT call a score function of yours. it clones the
-trainer, lets it run to completion, and then goes and READS ONE SCALAR off the finished task.
-it finds that scalar by two strings -- a TITLE and a SERIES:
-
-    clearml/automation/optimization.py, Objective.get_objective:
-        task = Task._query_tasks(task_ids=[task_id],
-                                 only_fields=["last_metrics.<md5(title)>.<md5(series)>"])
-        values = metrics[md5(title)][md5(series)]
-        return values["value"]
-        ...
-        except Exception:
-            return None            <-- THIS IS THE WHOLE PROBLEM
-
-if the trainer reports "Summary"/"val_cost" and the optimiser asks for "Summary"/"val/trading_cost",
-every lookup misses and get_objective returns None. None is NOT an error. the optimiser keeps
-going, every trial scores the same nothing, and four hours later it hands you a "best" set of
-parameters which are really just the first ones it happened to sample. green all the way. no
-traceback. no warning in the run.
-
-(SearchStrategy._validate_base_task does check for the metric -- but it only calls
-logger.warning(). a warning in an agent's log is a warning nobody reads.)
-
-this is the same SHAPE of bug as finalize()-without-publish(). so the two strings are defined
-HERE, once, and train.py and hpo.py both import them. they cannot drift apart because there is
-only one copy of them.
-
-
-HOW THE SCALAR ACTUALLY GETS THERE
---------------------------------------------------------------------------------------
-verified in clearml 2.1.10, clearml/logger.py line 190:
-
-    def report_single_value(self, name, value):
-        return self.report_scalar(title="Summary", series=name,
-                                  value=value, iteration=-(2**31))
-
-so report_single_value("val/trading_cost", 41.2) IS a scalar, under title "Summary", series
-"val/trading_cost". it lands in last_metrics, which is exactly where the optimiser looks.
-that is why OBJECTIVE_TITLE below is the literal string "Summary" -- it is not a name we chose,
-it is the title ClearML hard-codes.
+report_single_value() is a scalar under the title "Summary" (clearml/logger.py:190), which is why
+OBJECTIVE_TITLE is that literal -- ClearML hard-codes it, we did not choose it.
 """
 from __future__ import annotations
 
@@ -83,24 +46,12 @@ OBJECTIVE_SIGN = "min"               # trading_cost is a COST. lower is better.
 # ---------------------------------------------------------------- the split
 def bundle_random_split(ts: pd.Series, val_fraction: float, test_fraction: float,
                         bundle_minutes: int = 15, seed: int = 42):
-    """cut by whole BUNDLES, assigned at RANDOM. the alternative strategy, on trial.
+    """cut by whole 15-min candles, assigned at RANDOM. no minute is split across slices.
 
-    THE IDEA. minutes inside one 15-minute candle are near-copies of each other, so splitting them
-    across train and test leaks. group each candle's minutes into a BUNDLE and send the whole
-    bundle to one side -- if 2c goes to test, 2a..2o all go to test. no minute is split.
-
-    THERE IS NO EMBARGO HERE, AND THAT IS NOT AN OVERSIGHT -- IT IS THE WHOLE RISK.
-    a time split has ONE boundary, so one gap protects it. random assignment interleaves train and
-    test all through the series, so every test bundle has training bundles minutes away on both
-    sides. the features look back 20 SESSIONS (~7,500 minutes = ~500 bundles), so an honest purge
-    would have to drop ~500 bundles around EVERY test bundle -- which would delete the dataset.
-    so this strategy cannot be made safe by a gap. either the leak is small enough not to matter,
-    or the strategy is wrong; that is a question for measurement, not argument, which is what
-    scripts/forward_holdout_test.py exists to settle. the manifest and the model bundle record
-    which strategy was used so no result can be mistaken for the other kind.
-
-    the seed is recorded and re-used by every consumer (shap, scored tables, deepchecks) -- a
-    different seed would reproduce a DIFFERENT split and mislabel which rows were test.
+    NO EMBARGO, and none is possible: random assignment puts training bundles minutes away from
+    every test bundle on both sides, while the features look back ~500 bundles. purging that would
+    delete the dataset. that is the open risk -- scripts/forward_holdout_test.py measures it.
+    the seed is recorded; every consumer re-uses it or it would mislabel which rows were test.
     """
     import numpy as np
 
@@ -144,9 +95,8 @@ def bundle_random_split(ts: pd.Series, val_fraction: float, test_fraction: float
         "train_end": str(ts[train].max()),
         "val_start": str(ts[val].min()) if int(val.sum()) else None,
         "val_end": str(ts[val].max()) if int(val.sum()) else None,
-        # NOT a time cut -- test rows are scattered. kept for the same key shape as the time split;
-        # consumers that treat it as "everything after this is test" would be WRONG here, which is
-        # why they must read `strategy` first.
+        # NOT a time cut -- test rows are scattered. read `strategy` first: treating this as
+        # "everything after is test" selects the whole dataset (it did, in shap_explain, until 08-05).
         "test_start": str(ts[test].min()),
         "val_enabled": bool(int(val.sum())),
     }
@@ -156,52 +106,10 @@ def bundle_random_split(ts: pd.Series, val_fraction: float, test_fraction: float
 def three_way_split(ts: pd.Series, val_fraction: float, test_fraction: float,
                     embargo_sessions: int, strategy: str = None,
                     bundle_minutes: int = None, seed: int = None):
-    """cut the data into  TRAIN | embargo | VALIDATION | embargo | TEST.
+    """cut the data into TRAIN | embargo | VAL | embargo | TEST.
 
-    WHY A THIRD SLICE. THIS IS THE POINT OF THE WHOLE EXERCISE.
-        train.py today cuts train | embargo | test, and reports its score on TEST. that is
-        honest for ONE model with fixed settings.
-
-        the moment we run 50 trials and KEEP THE ONE WITH THE BEST TEST SCORE, the test set has
-        entered the training loop. we did not fit the model on it, but we fitted the SETTINGS on
-        it -- and settings are parameters too. the winning number is then the best of 50 draws
-        from a noisy distribution, so it is biased high by construction, and there is nothing
-        left to measure the real thing with.
-
-        worked example, and it is not a small effect. suppose every one of 50 candidate models
-        is genuinely identical, and the only thing separating their test trading_cost is noise
-        with a spread of 1.5. pick the lowest of 50 draws and you will land roughly 2 standard
-        deviations below the true mean -- about 3 points of trading_cost that DO NOT EXIST. you
-        would report 38 to the manager, deploy it, and live-trade a 41.
-
-        so: the optimiser tunes on VALIDATION. TEST is opened once, at the end, on the winner.
-        that number is the one you are allowed to say out loud.
-
-    WHY TWO EMBARGOES, NOT ONE
-        the same argument that puts a gap between train and test puts one between train and
-        validation. a validation row a minute after the train cut shares nearly all of its
-        20-day rolling window with the training rows -- it is a near-duplicate. tune on those
-        and the optimiser will simply pick whichever settings memorise the training period best.
-        the embargo before VAL is what stops that.
-
-        the embargo before TEST stays too, for the original reason.
-
-    WHY THE EMBARGO IS COUNTED IN SESSIONS, NOT CALENDAR DAYS
-        this used to take embargo_days and add pd.Timedelta(days=21). 21 CALENDAR days, to cover
-        a feature lookback of "20 days". but "20 days" means 20 TRADING SESSIONS, and the market
-        is shut at weekends and on holidays -- 21 calendar days spans about 14 sessions, never
-        20. so the gap was ~30% too short. we now count sessions, off the data's own calendar.
-        see trainer/purged_cv.embargo_end.
-
-    the layout, by time:
-
-        |<---------- train ---------->|xxx|<--- val --->|xxx|<---- test ---->|
-        ^                             ^   ^             ^   ^                ^
-        oldest                    val_cut |         test_cut                 newest
-                                    +25 sessions      +25 sessions
-                                    (both xxx blocks are thrown away)
-
-    returns (train_mask, val_mask, test_mask, info) -- three BOOLEAN masks that never overlap.
+    the third slice exists because HPO fits the SETTINGS on whatever it scores. tune on VAL, open
+    TEST once at the end on the winner -- otherwise the reported number is the best of 50 draws.
     """
     from trainer.purged_cv import embargo_end
     import config as _C

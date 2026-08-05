@@ -83,19 +83,13 @@ def labels_name() -> str:
         f"  say which one:   python core/make_version.py --from-sheet --labels L1\n"
         f"  or mark one in {LABELS_DIR/'registry.yaml'} with  default: true")
 
-# ---- how the data is cut into train / val / test -------------------------------
-# "time"           TRAIN | embargo | VAL | embargo | TEST, oldest to newest. the honest default:
-#                  one boundary, one gap, and the gap is >= the longest feature lookback.
-# "bundle_random"  whole 15-minute candles assigned at RANDOM. no minute is split across slices,
-#                  but there is NO embargo and none is possible (see bundle_random_split) --
-#                  train and test end up interleaved, minutes apart, while the features look back
-#                  20 sessions. ON TRIAL. run scripts/forward_holdout_test.py before trusting a
-#                  number that came out of it; the quick experiment showed it inflating ranking
-#                  metrics ~2x, which is either a leak or a real gain and only the forward slice
-#                  can tell you which.
-# CHOSEN 2026-07-31 after scripts/forward_holdout_test.py: on the forward hold-out, bundle_random
-# scored macro_f1 0.139 / cost 88.2 vs time's 0.135 / 90.1, and showed NO inflation (its dev score
-# 0.115 was LOWER than its forward 0.139 -- a leaking split shows the opposite).
+# ---- train / val / test ------------------------------------------------------
+# "time"          TRAIN | gap | VAL | gap | TEST, oldest to newest. one boundary, one gap.
+# "bundle_random" whole 15-min candles assigned at RANDOM. no minute is split across slices, but
+#                 there is NO embargo and none is possible -- train and test end up interleaved
+#                 minutes apart while the features look back 20 sessions. that is the open risk.
+# chosen 2026-07-31 on the forward hold-out: macro_f1 0.139 vs time's 0.135, and NO inflation
+# (dev 0.115 < forward 0.139; a leaking split shows the opposite). scripts/forward_holdout_test.py
 SPLIT_STRATEGY = "bundle_random"
 BUNDLE_MINUTES = 15        # one bundle = one candle. only used by bundle_random.
 SPLIT_SEED     = 42        # recorded in the model bundle: a different seed = a DIFFERENT split.
@@ -172,21 +166,11 @@ DEEPCHECKS_SAMPLE  = 50_000
 # the script must be COMMITTED in the repo -- an agent runs the repo snapshot, not your laptop.
 BACKTEST_SCRIPT   = "scripts/backtest_single.py"
 
-# BACKTEST THE OOS SET ONLY -- not the train/test tables.
-#
-# WHY. the backtest walks a table row by row, opens a position on a signal and closes it on a
-# later one. that only means something on a CONTINUOUS stretch of minutes. with
-# SPLIT_STRATEGY = "bundle_random" the test table is 15-minute bundles scattered across the whole
-# history: measured on scored_test_v7, 274,605 rows with 13,088 BREAKS in continuity and a
-# largest gap of 6 days 19 hours. a position opened at the end of one bundle "closes" after a
-# week-long jump, and the equity curve is stitched across all 13,088 of them. it is a number
-# nobody could have traded.
-#
-# the OOS set is one unbroken forward period (2025-01-01 -> 2025-02-24), which is what a backtest
-# is FOR. so: tables always, backtest only where the clock is continuous.
-#
-# set True to go back to backtesting the test table as well -- honest only under
-# SPLIT_STRATEGY = "time", where the test slice IS one contiguous block at the end.
+# BACKTEST THE OOS SET ONLY -- never the train/test tables.
+# a backtest walks a table row by row and only means something on CONTINUOUS minutes. under
+# bundle_random the test table is scattered 15-min bundles: measured on v7, 274,605 rows with
+# 13,088 BREAKS and a largest gap of 6 days. an equity curve stitched across those is untradeable.
+# True is honest only under SPLIT_STRATEGY = "time", where test IS one block at the end.
 BACKTEST_ON_TEST_TABLE = False
 PRICE_DATASET_ID  = ""      # empty = resolve CLEARML_PRICE_DATASET ("nifty_ohlcv") by name,
                             # so a re-upload is picked up automatically instead of leaving a dead
@@ -282,24 +266,9 @@ TEST_FRACTION = 0.30     # the most RECENT 30% of time is the test set. NEVER a 
 # Fine to leave at 0 while you are just watching the pipeline run.
 VAL_FRACTION  = 0.15
 
-# The gap thrown away between two slices (the "xxx" above).
-#
-# WHY IT EXISTS. A row just before a cut and a row just after it share almost all of their
-# rolling-window history -- they are near-duplicates. Without a gap, the later slice is partly
-# made of the earlier one and its score is flattered.
-#
-# WHY IT IS COUNTED IN SESSIONS, NOT CALENDAR DAYS. This was wrong until 2026-07-14. The old
-# setting was EMBARGO_DAYS = 21, applied as CALENDAR days, to cover a feature lookback of
-# "20 days". But "20 days" means 20 TRADING SESSIONS -- ret_20d is 20 bars of a DAILY series,
-# and a daily series has one bar per session. The market is shut at weekends and on holidays,
-# so 21 calendar days spans only ~14 sessions. Measured on the real label file: mean 14.1,
-# min 9, max 16 -- NEVER 20, at any cut point in five years. You need 25-39 calendar days
-# (mean 29.8) to span 20 sessions. So the embargo was ~30% short, and the first ~6 sessions of
-# every test set still carried features built from training-period prices.
-#
-# tests/test_purged_cv.py::test_calendar_days_are_NOT_trading_sessions proves this on the real
-# data. We now count the thing the feature counts: sessions, read off the timestamps
-# themselves (no holiday table -- see trainer/purged_cv.sessions_of).
+# The gap thrown away between two slices. a row just before a cut and one just after share almost
+# all of their rolling-window history -- near-duplicates. without a gap the later slice is partly
+# a copy of the earlier one and the score is flattered. must be >= the longest feature lookback.
 EMBARGO_SESSIONS = 25    # >= the longest feature lookback (20 sessions) + 5 sessions of margin
 
 # The label's own horizon: how far FORWARD a label at time t has to look before it knows its
@@ -387,16 +356,8 @@ def column_part(name: str) -> str:
 
 # the labels + weights (bridge-only; core never opens this file)
 #
-# THIS USED TO BE  Path.home() / "Downloads" / "labels_....csv"  AND THAT WAS A BUG.
-#
-# It is hard-wired to ONE laptop. Clone the repo onto the VM, or onto a colleague's machine, and
-# there is no ~/Downloads/labels...csv -- the pipeline dies on the first line of load_labels().
-# Worse, the file lived OUTSIDE the repo, so it was not versioned and not DVC-tracked: the
-# manifest swears to a labels_sha256 for a file sitting in a Downloads folder that anybody could
-# overwrite or delete. That is a lineage hole with the ground truth in it.
-#
-# The labels now belong IN the project, at data/labels/, and DVC tracks them like everything
-# else. One `dvc pull` on any machine and they are there.
+# never a path under Downloads: an agent on another machine has no such folder, and the run dies
+# there instead of here.
 LABELS_DIR  = DATA_DIR / "labels"
 
 # 2026-07-14: the NO_TRADE weight is no longer ZERO.
@@ -458,17 +419,8 @@ def _find_labels() -> Path:
           f"  then on any other machine:  git clone ... && dvc pull\n")
 
 
-# THE LABELS PATH IS RESOLVED LAZILY. NOT AT IMPORT. THIS WAS A CRASH.
-#
-# It used to say `LABELS_CSV = _find_labels()` right here, at module level -- which ran the
-# search (and its SystemExit) the moment ANYTHING imported config. Every trainer, every core
-# script, every test imports config. So a ClearML agent on a fresh VM clone -- which needs the
-# labels for NOTHING (it fetches the built parquet from the bucket) -- died at `import config`
-# before it could do a single thing. Proven by repro: `python -c "import config"` on a
-# labels-less machine exits 1. It also contradicted this file's own promise that core never
-# opens the labels.
-#
-# Only bridge/build_dataset.py may call this, and only when it actually builds.
+# RESOLVED LAZILY, never at import. as a module-level constant its SystemExit fired the moment
+# anything imported config -- including --help and every test collection.
 def labels_csv() -> Path:
     """the labels file on THIS machine -- resolved when asked for, never at import."""
     return _find_labels()
@@ -514,38 +466,15 @@ LABEL_TS_FORMAT = "%d-%m-%Y %H:%M"      # e.g. 01-01-2020 09:15
 # datetime). timestamp is the merge key; this is stamped on the result. see [[unique-index-in-dataset]].
 INDEX_COL       = "unique_index"
 
-# ---- CLASS WEIGHTS: a fixed weight per class, instead of the labels' per-row `weight` ---------
-#
-# Set to a dict -> every row is weighted by its CLASS (these numbers).
-# Set to None    -> fall back to the labels file's per-row `weight` column.
-#
-# >>> KEYED BY CLASS NAME ON PURPOSE. THIS IS NOT A STYLE CHOICE. <<<
-# The feature team's version used integer keys 0..6 in THEIR ordering (0 = No Trade). But sklearn's
-# LabelEncoder sorts the class names ALPHABETICALLY, so in this pipeline:
-#       0=ENTRY_SMALL 1=ENTRY_SUB 2=ENTRY_SUPER 3=EXIT_SMALL 4=EXIT_SUB 5=EXIT_SUPER 6=NO_TRADE
-# Feeding their integer dict in directly would have given NO_TRADE the TOP weight (1.00) and the
-# entries the BOTTOM (0.05) -- the exact opposite of the intent -- and nothing would have errored.
-# A name -> weight map cannot be silently reordered, so that class of bug is impossible here.
-# THESE ARE BALANCED (INVERSE-FREQUENCY) WEIGHTS -- sklearn's class_weight="balanced" formula:
-#
-#         weight_i = N / (K * n_i)        N = 1,021,847 rows, K = 7 classes, n_i = rows in class i
-#
-# the property that makes them worth using: weight_i * n_i is CONSTANT, so every class commands the
-# SAME ~14.3% share of the loss. that lifts the ENTRY classes -- the ones the models were completely
-# blind to -- from a few percent of the loss to 42.9% between them.
-#
-# >>> DO NOT ROUND NO_TRADE TO AN INTEGER. <<<  it would become 0, and 761,735 rows (74.5% of the
-# dataset) would contribute NOTHING to the loss. the model could then never learn "don't trade" and
-# would try to trade every minute. that exact failure is why this line is a decimal.
-#
-# RECOMPUTED 2026-07-31 for the new L1 (1,021,847 rows, 2015-01-09 -> 2026-02-24). the previous
-# numbers were computed on the 513,611-row file and were stale the moment it was replaced.
-# to recompute after any label change:
-#         weight_i = len(labels) / (7 * rows_in_class_i)
-#
-# THE SWITCH: set this to {} and the trainer falls back to the labels file's own per-row 'weight'
-# column (signal strength: SUPER > SUB > SMALL) instead of these per-class weights. the new L1
-# already gives NO_TRADE 0.0638 there rather than 0, so that fallback is now a real option.
+# ---- CLASS WEIGHTS -- per class, and they OVERRIDE the labels' per-row `weight` --------------
+# set {} to fall back to that column instead (conviction: SUPER > SUB > SMALL).
+# balanced/inverse-frequency:  weight_i = len(labels) / (7 * rows_in_class_i)
+# every class then commands the same ~14.3% of the loss, lifting the ENTRY classes from a few
+# percent to 42.9% between them. recompute after ANY label change -- these are L1's counts.
+# KEYED BY NAME, never index: LabelEncoder sorts alphabetically, so an integer dict would hand
+#   NO_TRADE the top weight and the entries the bottom, silently.
+# NO_TRADE STAYS DECIMAL: round it to 0 and 74.5% of rows stop contributing to the loss, and the
+#   model can never learn "don't trade".
 CLASS_WEIGHTS = {
     "ENTRY_SUB":    19,     # rarest        (  7,845 rows,  0.8%)  exact 18.6078
     "ENTRY_SMALL":  14,     #               ( 10,665 rows,  1.0%)  exact 13.6876

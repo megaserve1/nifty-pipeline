@@ -88,14 +88,23 @@ xgboost and catboost handle missing values themselves -- at each split they try 
 ## 2. Handling class imbalance (weighting)
 
 ### Per-row sample_weight (instance weighting / observation weighting)
-Every training row carries a number in the labels file's `weight` column. When we fit, we hand that column straight to the model as `sample_weight`. A row with weight 2 pulls on the model twice as hard as a row with weight 1, exactly as if we had copied it twice -- but we never copy anything. All three models take it the same way: `model.fit(Xtr, ytr, sample_weight=wtr)`. The forest is told `class_weight=None` on purpose so the per-row weight is the only weighting in play.
+Every training row is fitted with a `sample_weight`, and **`config.CLASS_WEIGHTS` decides where that number comes from**:
+
+- **set** (it is today) -> a fixed weight per CLASS, from the inverse-frequency formula `N / (K * n_i)`. Rarest class biggest: `ENTRY_SUB 19 ... NO_TRADE 0.192`. The labels file's `weight` column is **not used**.
+- **`{}`** -> fall back to the labels file's own per-row `weight` column (signal conviction: SUPER 0.91 > SUB 0.46 > SMALL 0.18).
+
+The two orderings are nearly opposite -- `EXIT_SUPER` has the highest conviction and the lowest class weight, because it is common. `trainer/train.py:566` is the switch, and the run log says which fired.
+
+Whichever source wins, the mechanism is the same: a row with weight 2 pulls on the model twice as hard as a row with weight 1, exactly as if we had copied it twice -- but we never copy anything. Every model takes it the same way: `model.fit(Xtr, ytr, sample_weight=wtr)`. (RandomForest is additionally told `class_weight=None`, so the per-row weight is the only weighting in play there -- it is off in `MODEL_TYPES` today regardless.)
+
+> **This section was wrong until 2026-08-05.** It described only the fallback case. `CLASS_WEIGHTS` was added to `config.py` afterwards and this file was not updated, so it stated the opposite of what every run since has actually done. If you read it before that date, re-read the two bullets above.
 
 **Why this, not the alternative:** The obvious alternative is resampling the rows to balance the classes. Weighting gets the same effect as duplicating rows without actually duplicating them -- no copies, no extra memory, and it never lets the same minute land in both train and test. It is one number per row, so it can carry finer information than a class-level knob could.
 
 **Q (manager):** How does the imbalance handling reach the model -- is it a config flag or the data?  
 **A:** It rides in the data. The labels CSV has a `weight` column; the trainer loads it, slices it to the train rows, and passes it as `sample_weight` to fit. sklearn, XGBoost and CatBoost all accept that argument, so the exact same weight vector drives all three models.
 
-`trainer/train.py:344 (load weight col), :430 (wtr = w[tr]), :450 (fit sample_weight=wtr), :127 (RF class_weight=None -> we use per-row instead)`
+`config.py:549 (CLASS_WEIGHTS), trainer/train.py:566 (the switch), :567 (per-class) or :575 (per-row fallback), :723/725/727 (fit sample_weight=wtr)`
 
 ### Signal-strength / conviction weighting (NOT inverse-frequency weighting)
 The weights rank how strong a signal is, not how rare a class is. SUPER = 0.91 (biggest conviction), SUB = 0.46 (medium), SMALL = 0.18 (smallest). So a big high-conviction trade counts for a lot and a weak trade counts for little. This is the OPPOSITE of the usual trick where you weight rare classes UP. Here the rarest class (ENTRY_SUB, 1.2%) gets a middling 0.46, not the biggest weight. The weight file ranks conviction; it does not fix class imbalance.

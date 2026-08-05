@@ -1,148 +1,37 @@
-# ============================================================================
-#  configs/hyperparams.yaml -- THE one source of every model setting.
-#  train.py reads `default:`.  hpo.py reads `search:`.  no number lives in python.
-# ============================================================================
+# configs/hyperparams.yaml -- every model setting. no number lives in python.
+#   train.py reads `default:`   hpo.py reads `search:`
 #
-# h2 = the manager's set, 2026-07-20 (file "hyperparameter 20072026"). depth-based, regularised.
+# THREE TRAPS, ALL MEASURED, ALL STILL LIVE:
 #
-# h3 = DELIBERATE MAX-OVERFIT, LOSS-BASED (leaf-wise), 2026-07-21. xgboost + catboost only.
-#      the goal is to overfit as HARD as possible -- a capacity/sanity probe: if the model cannot
-#      drive TRAIN error near zero, the features carry no signal or the pipeline is broken. every
-#      knob below is turned toward memorising the training set. it is NOT a model to deploy.
-#      random_forest is left at its h2 values (it is not part of this run).
+# 1. FLOATS NEED THE .0 . merge() casts every override to the TYPE of the default here. an int
+#    default makes int("0.3") fail and the trial dies -- that killed the gamma=0.3 trials on
+#    2026-07-22.
 #
-#      TWO of these changes REVERSE earlier decisions -- both are required to overfit, both are
-#      marked "OVERFIT REVERSAL" so you can put them back:
-#        1. early stopping OFF  (you insisted on it on 07-19; but it is an ANTI-overfit brake)
-#        2. no row/feature/scoring randomness (regularisers that fight overfit)
+# 2. CATBOOST HAS NO "UNLIMITED". 0 does not mean uncapped there, it means smaller:
+#       max_depth: 0   -> build_model does `depth = params["max_depth"] or 6`  -> DEPTH 6
+#       max_leaves: 0  -> the key is not forwarded at all -> catboost's own default, 31 LEAVES
+#    hard ceilings: depth 16, max_leaves 65536 under Lossguide. xgboost is the opposite -- there
+#    0 genuinely IS unlimited for both.
 #
-# h4 = LOSS-BASED xgboost set, 2026-07-23 (user-supplied). lossguide growth with UNLIMITED
-#      depth (max_depth 0) and UNLIMITED leaves (max_leaves 0), but -- unlike h3's overfit
-#      probe -- with real regularisation: slow learning rate, row/column subsampling,
-#      min_child_weight 15, gamma 0.3. random_forest and catboost keep their old values --
-#      both are commented out of the trainer anyway (XGB-ONLY retrain).
+# 3. YAML DOES NOT READ `None` AS NULL. `[10, 20, None]` gives the four-character STRING 'None',
+#    which then dies in int(). use 0; build_model turns it into sklearn's None.
 #
-# h5 = LOSS-BASED **catboost** set, 2026-07-23. the h4 treatment, finally applied to the block
-#      that actually trains in this copy (CB-ONLY). h3's catboost block was a MAX-OVERFIT PROBE
-#      and was never meant to ship: 512 leaves, depth 12, lr 0.1, l2 1.0, min_data_in_leaf 1,
-#      no subsampling, no split noise, no early stopping. h5 keeps the LOSS-BASED growth
-#      (Lossguide) and reverses every one of those overfit knobs:
-#        * capacity cut      512 -> 64 leaves, depth 12 -> 8
-#        * learning rate     0.1 -> 0.02  (slow, matching xgboost h4)
-#        * L2                1.0 -> 10.0
-#        * min_data_in_leaf  1   -> 50    (no single-row leaves)
-#        * rsm               1.0 -> 0.6   (column sampling back on)
-#        * subsample         1.0 -> 0.6   (row sampling back on, MVS)
-#        * random_strength   0.0 -> 1.0   (split-scoring noise back on)
-#        * early stopping    OFF -> 200   (the BOTH-overfit-reversals of h3, both undone)
-#      the dataset is only 18 features / 88k train rows, so this is a small-capacity, heavily
-#      braked set on purpose. n_estimators stays 6000 because it is now a CEILING, not a count:
-#      early stopping decides the real length (h3's 6000 with no brake is what produced 43%
-#      empty-stump tail trees on the xgboost side).
-#      xgboost and random_forest are UNCHANGED (both commented out of this copy's trainer).
+# CATBOOST GROWTH SATURATES AT ~360 LEAVES (measured, 25 trees per setting, depth read from
+# catboost's own JSON export). below that, max_leaves rules and IS the capacity knob. above it,
+# the depth wall takes over and max_leaves changes nothing -- 512, 1024 and 65536 all train the
+# identical 360-leaf tree at up to 2x the wall-clock. so 256 is the top real rung, and depth is
+# pinned at 16 to stay out of the way. lowering depth hands control back to the depth wall, which
+# is depth-based growth wearing a Lossguide label.
 #
-#      ONLY THESE KEYS REACH CATBOOST. build_model() in trainer/train.py reads a fixed key set:
-#      n_estimators, max_depth, learning_rate, l2_leaf_reg, min_data_in_leaf, rsm,
-#      random_strength, seed, grow_policy, max_leaves, bootstrap_type, subsample (or
-#      bagging_temperature under Bayesian), early_stopping_rounds. adding any OTHER key here is
-#      a silent no-op -- the yaml would claim a setting the model never sees.
+# ONLY KEYS build_model() PASSES TO THE LIBRARY DO ANYTHING. a knob added here and not wired
+# there used to be silently dropped -- colsample_bynode, max_delta_step and colsample_bylevel sat
+# unwired from 2026-07-31 to 2026-08-05, searched by 50 HPO trials, never reaching the model.
+# build_model now passes through anything the library accepts by name, and refuses to run if this
+# file declares a knob the library has no name for.
 #
-# h6 = catboost REVERTED to the manager's delivered set, 2026-07-23 (user decision, file
-#      "hyperparameter 20072026 (1).yaml"). h5 above lasted one afternoon and never trained.
-#      the delivered numbers ARE h2's catboost numbers -- so this is a revert, not a new set,
-#      and the label is h6 only because the FILE as a whole is now a mix (xgboost still h4).
-#      the values-sha printed by every run is the real identity; the label is just a handle.
-#
-#      WHAT REVERTING COSTS, so it is on the record and not a surprise later:
-#        * DEPTH-BASED again. no grow_policy in the delivered block -> SymmetricTree (oblivious
-#          trees), so max_depth 11 = 2^11 = 2,048 leaves per tree, every tree the same shape.
-#          h3 and h5 were both Lossguide; this is the opposite end.
-#        * NO EARLY STOPPING. the delivered block has no early_stopping_rounds, so all 6,000
-#          iterations get built, always. n_estimators is a COUNT again, not a ceiling.
-#        * min_data_in_leaf 15 may be INERT here. catboost documents that knob as Lossguide/
-#          Depthwise only. VERIFIED 2026-07-23 that it does not raise under SymmetricTree --
-#          catboost accepts it silently -- but "accepted" is not "applied". if you want it to
-#          bite, the growth policy has to change.
-#
-# h7 = h6's DELIVERED VALUES, switched to LOSS-BASED growth with depth and leaves opened up as
-#      far as catboost allows, 2026-07-23 (user request: "loss based, max depth and leaves to
-#      0 or none"). the ten delivered numbers are untouched; only the three structural keys move.
-#
-#      WHY NOT LITERALLY 0 / null -- THIS IS THE WHOLE POINT, AND IT IS A TRAP.
-#      in xgboost (h4 above) 0 genuinely MEANS unlimited for both knobs. in catboost it does not,
-#      and this pipeline turns 0 into something SMALLER than h6, not bigger. VERIFIED 2026-07-23
-#      by building through build_model() and reading back what catboost received:
-#
-#          yaml max_depth: 0   ->  build_model does `depth=params["max_depth"] or 6`  ->  DEPTH 6
-#          yaml max_leaves: 0  ->  build_model only forwards a TRUTHY max_leaves, so the key is
-#                                  never passed  ->  catboost's own default  ->  31 LEAVES
-#          measured result: ~19 leaves/tree. h6 (depth 11) gives ~25. so "0/0" = a SMALLER model.
-#
-#      catboost has no unlimited. its hard ceilings, both confirmed by error message:
-#          depth      max 16   (any policy)
-#          max_leaves max 65536 under Lossguide -- 65537 raises
-#            "Maximum leaves count for Lossguide grow policy is 65536"
-#      so h7 uses 16 / 65536: catboost's "as unlimited as it gets", which is what was asked for.
-#
-#      THE DATA IS THE REAL CEILING ANYWAY. 88,112 train rows / min_data_in_leaf 15 = ~5,874
-#      leaves maximum before that brake stops growth -- an order of magnitude under 65,536.
-#      MEASURED on the real slice: trees actually reach ~334 leaves. 65,536 is a formality.
-#
-#      TWO CONSEQUENCES, BOTH MEASURED, NEITHER GUESSED:
-#        * min_data_in_leaf 15 IS NOW LIVE. it was the possibly-inert knob under h6's
-#          SymmetricTree; Lossguide is one of the two policies catboost honours it for. h6's
-#          caveat above is resolved BY this change.
-#        * COST: 1.36 s/tree vs h6's 0.10 -- ~14x. with early_stopping_rounds still 0 (as
-#          delivered), all 6,000 iterations get built no matter what: ~136 min (~2.3 h) per run,
-#          against ~10 min for h6. `--early_stopping_rounds 200` on the CLI is the cheap way out
-#          and is exactly why that key was kept in the block.
-#
-#      h7 WAS WRONG ABOUT ITSELF, AND MEASURING IT IS WHAT CAUGHT THAT -- SEE h8.
-#      "max_leaves 65536" sounded like uncapped loss-based growth. it was not. it was
-#      DEPTH-16-capped growth wearing a Lossguide label: 65,536 was never reached, never
-#      approached, and never did anything.
-#
-# h8 = GENUINELY LOSS-BASED, 2026-07-23 (user: "i want it loss based so change max depth and
-#      max leaves accordingly"). same growth policy as h7 -- the change is which knob RULES.
-#
-#      WHAT THE MEASUREMENT SHOWED (real 88,112-row slice, 25 trees per setting, depth read out
-#      of catboost's own JSON export -- not inferred):
-#
-#        with max_leaves 65536, varying the depth cap:
-#            cap  6 -> every tree exactly  6 deep,  18 leaves, 0.16 s/tree
-#            cap  8 -> every tree exactly  8 deep,  47 leaves, 0.25 s/tree
-#            cap 10 -> every tree exactly 10 deep,  81 leaves, 0.37 s/tree
-#            cap 12 -> every tree exactly 12 deep, 138 leaves, 0.59 s/tree
-#            cap 16 -> every tree exactly 16 deep, 360 leaves, 1.92 s/tree
-#          25 of 25 trees sat exactly ON the cap at EVERY setting. the depth wall was the only
-#          thing stopping growth. max_leaves 65536 and min_data_in_leaf 15 (which permits ~5,874
-#          leaves on 88k rows) were BOTH inert -- decoration on a depth-limited model.
-#
-#        with the depth cap pinned at 16, varying max_leaves:
-#             64 ->  62 leaves/tree, 0.43 s/tree   <- leaves rule
-#            128 -> 126 leaves/tree, 0.61 s/tree   <- leaves rule
-#            256 -> 243 leaves/tree, 1.00 s/tree   <- leaves rule
-#            512 -> 359 leaves/tree, 1.98 s/tree   <- SATURATED. 512 never reached.
-#           1024 -> 360 leaves/tree, 2.14 s/tree   <- identical model, 2x the time
-#          65536 -> 360 leaves/tree, 2.15 s/tree   <- identical model, 2x the time (h7)
-#
-#      SO: growth saturates at ~360 leaves. ABOVE that, max_leaves is a number that changes
-#      nothing and the depth wall is in charge -- which is depth-based growth by another name.
-#      BELOW it, trees stop within a few percent of the leaf cap and max_leaves genuinely IS
-#      the capacity knob. that is what loss-based growth is supposed to mean.
-#
-#      h8 THEREFORE:
-#        max_depth  16   UNCHANGED from h7 and deliberately at catboost's HARD MAXIMUM. this is
-#                        not a capacity choice -- it is depth being pushed as far OUT OF THE WAY
-#                        as this library permits, so that leaves decide the tree's shape. it
-#                        cannot be removed (catboost always has a depth; there is no unlimited)
-#                        and it cannot go higher than 16.
-#        max_leaves 256  the largest measured rung where leaves still RULE. 512+ buys nothing but
-#                        wall-clock. this is now THE knob to turn: 64 / 128 / 256 are all real,
-#                        anything >= ~360 is not.
-#
-#      COST at 256, all 6,000 iterations (early stopping still off, as delivered): 1.00 s/tree
-#      -> ~1.7 h. h7's 65536 was ~3.6 h for the SAME 360-leaf trees. h6 was ~10 min.
+# history of h2..h8 is in git; `hyperparams_version` below is only a handle -- the values-sha
+# printed by every run is the real identity.
+
 hyperparams_version: h8
 
 random_forest:
@@ -150,173 +39,69 @@ random_forest:
     n_estimators: 3000
     max_depth: 20
     min_samples_leaf: 10
-    max_features: "0.8"
+    max_features: '0.8'
     max_samples: 0.8
     seed: 42
   search:
-    # Scale: [Conservative, Balanced/Actual, Extreme]
-    #
-    # CHANGED FROM THE DELIVERED FILE: the last rung was `None`, it is now `0`.
-    #   the delivered note said "max_depth uses `None` instead of `0` to properly trigger
-    #   scikit-learn's unlimited depth". that is right about sklearn and wrong about this file,
-    #   for two reasons:
-    #
-    #   1. YAML does not read `None` as null. `yaml.safe_load("[10, 20, 30, None]")` gives
-    #      [10, 20, 30, 'None'] -- the four-character STRING. (yaml's null is `null` or `~`.)
-    #   2. every hyperparameter reaches the trainer as a string, and merge() casts it using the
-    #      type of the default. max_depth's default is an int, so 'None' goes to int('None') and
-    #      the trial exits. verified:
-    #          H.merge("random_forest", {"max_depth": "None"})
-    #          -> SystemExit: --max_depth='None' is not a valid int
-    #      one rung in four = a quarter of every RF trial dead, and optuna would read those
-    #      crashes as "that region is bad" rather than "that rung is broken".
-    #
-    #   0 already IS this pipeline's unlimited: build_model does `max_depth=params["max_depth"]
-    #   or None`, so 0 -> None -> sklearn grows the tree out. same intent, and it survives the
-    #   round trip through ClearML.
-    max_depth: [10, 20, 30, 0]              # 0 = unlimited (NOT None -- see above)
+    max_depth: [10, 20, 30, 0]                # 0 = unlimited (NOT None -- see trap 3)
     min_samples_leaf: [50, 25, 10, 2]
-    max_features: ["0.2", "0.5", "0.8", "1.0"]
+    max_features: ['0.2', '0.5', '0.8', '1.0']
     max_samples: [0.5, 0.7, 0.8, 1.0]
-    n_estimators: [500, 1500, 3000, 5000]   # Budget knob: higher only costs time, doesn't overfit
+    n_estimators: [500, 1500, 3000, 5000]     # higher only costs time, does not overfit
 
 xgboost:
   default:
-    # ===== h4 LOSS-BASED. the values below are the set handed over 2026-07-23. =====
-    grow_policy: "lossguide"     # LOSS-BASED (leaf-wise): split whichever leaf cuts loss most.
-    max_leaves: 0                # 0 = UNLIMITED leaves. under lossguide THIS is the capacity
-                                 #   knob -- kept as a key so `--max_leaves N` can cap it from
-                                 #   the CLI if a run crawls or eats too much memory.
+    grow_policy: lossguide                    # LOSS-BASED: split whichever leaf cuts loss most
+    max_leaves: 0                             # 0 = unlimited. under lossguide THIS is the capacity knob
     n_estimators: 6000
-    max_depth: 0                 # 0 = UNLIMITED depth ("let max_leaves rule" under lossguide --
-                                 #   build_model passes the 0 through ONLY in lossguide mode).
-    max_bin: 256                 # histogram resolution (added 2026-07-23): how finely feature
-                                 #   values are bucketed when scoring splits. xgboost's default.
-                                 #   128 = coarser/faster/more regularised; 512 = finer/slower/
-                                 #   more overfit room. searched below.
+    max_depth: 0                              # 0 = unlimited; passed through only in lossguide mode
+    max_bin: 256                              # histogram resolution. 128 coarser/faster, 512 more overfit room
     learning_rate: 0.02
     subsample: 0.6
-    colsample_bytree: 1.0        # OFF (2026-07-23): redundant with bynode -- what the model
-                                 #   feels is the PRODUCT of the two, so one knob carries the
-                                 #   whole job. key kept so --colsample_bytree still works.
-    colsample_bynode: 0.5        # feature subset RE-DEALT at every SPLIT. the key regulariser
-                                 #   for uncapped lossguide trees: no tree can ride one favourite
-                                 #   feature all the way down. 0.5 alone ~= the old 0.6 x 0.7
-                                 #   combined (42%) per split. 1.0 = off.
-    max_delta_step: 1.0          # cap on any single leaf's update per round (added 2026-07-23).
-                                 #   stops a tiny leaf of heavily-weighted rare-class rows taking
-                                 #   one violent, overconfident step. 0.0 = off; 1 = classic fix
-                                 #   for weighted/imbalanced multiclass.
-    # THESE MUST BE FLOATS (note the .0). merge() casts every HPO override to the TYPE of the
-    # default here; the search spaces contain fractions (gamma 0.3/0.5, reg_lambda 0.1), so an
-    # INTEGER default makes int("0.3") fail and the trial dies ("not a whole number"). that is
-    # exactly what killed the gamma=0.3 trials on 2026-07-22. keep the .0.
-    min_child_weight: 15.0
-    reg_lambda: 5.0                          # L2 Regularization
-    reg_alpha: 0.2                           # L1 Regularization
+    colsample_bytree: 1.0                     # off -- redundant with bynode (the model feels the product)
+    colsample_bynode: 0.5                     # feature subset RE-DEALT at every split. the key regulariser
+    max_delta_step: 1.0                       # caps one leaf's update per round. guards weighted rare classes
+    min_child_weight: 15.0                    # a floor on the SUM OF WEIGHTS, not a row count -- NO_TRADE weighs 0.192, so keep it low or xgboost will not split near the rare classes
+    reg_lambda: 5.0
+    reg_alpha: 0.2
     gamma: 0.3
     seed: 42
-    early_stopping_rounds: 0     # 0 = OFF (matches the handed-over set, which has no early
-                                 #   stopping). kept as a key ONLY so `--early_stopping_rounds N`
-                                 #   on the CLI still works -- merge() ignores overrides for keys
-                                 #   missing from this block. delete the line to hard-remove it.
+    early_stopping_rounds: 0                  # 0 = off. only ARMED when a val split exists
   search:
-    # Scale: [Conservative, Balanced/Actual, Extreme]
-    # NO max_depth / max_leaves rungs ON PURPOSE (2026-07-23): this set is LOSS-BASED with
-    # depth and leaves deliberately uncapped -- every trial inherits max_depth 0 / max_leaves 0
-    # from `default:`. capacity is controlled by the regularisers below, not by structural caps.
     learning_rate: [0.01, 0.02, 0.05, 0.002]
     n_estimators: [2000, 4000, 6000]
     subsample: [0.6, 0.8, 1.0]
-    # colsample_bytree NOT searched (2026-07-23): redundant with bynode -- the model feels the
-    # PRODUCT of the two, so searching both wastes trials on indistinguishable combinations.
-    # bynode carries the whole feature-sampling job, with rungs widened to cover the low end.
-    colsample_bynode: [0.3, 0.5, 0.7, 1.0]  # per-SPLIT feature sampling (1.0 = off)
-    max_delta_step: [0.0, 1.0, 5.0]         # per-leaf update cap (0.0 = off)
-    max_bin: [128, 256, 512]                # histogram resolution (coarse -> fine)
+    colsample_bynode: [0.3, 0.5, 0.7, 1.0]
+    max_delta_step: [0.0, 1.0, 5.0]
+    max_bin: [128, 256, 512]
     min_child_weight: [20.0, 15.0, 5.0]
-    reg_lambda: [20.0, 5.0, 1.0, 0.1]       # L2 Regularization
-    reg_alpha: [5.0, 1.0, 0.2, 0.0]         # L1 Regularization
+    reg_lambda: [20.0, 5.0, 1.0, 0.1]
+    reg_alpha: [5.0, 1.0, 0.2, 0.0]
     gamma: [1.0, 0.5, 0.3]
 
 catboost:
   default:
-    # ===== h8 = THE DELIVERED SET (h6) + GENUINELY LOSS-BASED GROWTH.
-    # ===== the ten delivered values from "hyperparameter 20072026 (1).yaml" are UNCHANGED.
-    # ===== only grow_policy, max_depth and max_leaves differ from what was delivered, and each
-    # ===== of those three is marked "h8" below. the header note has the measurements behind
-    # ===== them -- read it before changing either number, both are counter-intuitive.
-    n_estimators: 6000           # a COUNT, not a ceiling: nothing stops the fit early (below).
-    max_depth: 16                # h8 (delivered/h6: 11). catboost's HARD MAXIMUM, and NOT a
-                                 #   capacity choice: it is depth shoved as far OUT OF THE WAY as
-                                 #   the library allows, so that max_leaves decides tree shape.
-                                 #   there is no unlimited here -- 0 would silently become 6
-                                 #   (build_model does `depth=params["max_depth"] or 6`), and 17
-                                 #   is rejected. LEAVE THIS AT 16 while the set is loss-based:
-                                 #   lowering it hands control back to the depth wall, which is
-                                 #   depth-based growth wearing a Lossguide label (that was h7).
+    n_estimators: 6000
+    max_depth: 16                             # catboost's hard max. pinned so max_leaves decides the shape
     learning_rate: 0.02
-    l2_leaf_reg: 5.0             # L2 on leaf values. FLOAT on purpose -- merge() casts overrides
-                                 #   to this type and the search rungs are decimals.
-    min_data_in_leaf: 15         # HONOURED but NOT BINDING. catboost applies this knob under
-                                 #   Lossguide/Depthwise only, so unlike h6's SymmetricTree it is
-                                 #   at least live here. it is still not what stops growth: at 15
-                                 #   rows minimum, 88,112 rows permit ~5,874 leaves, and measured
-                                 #   trees stop at 243 (max_leaves) or ~360 (depth wall). raising
-                                 #   it toward ~350 is what would make it bite.
-    rsm: 0.8 #0.6                     # column sampling (= xgboost's colsample_bytree)
+    l2_leaf_reg: 5.0
+    min_data_in_leaf: 15                      # honoured under Lossguide only. not what stops growth here
+    rsm: 0.8
     colsample_bylevel: 0.7
-    subsample: 0.7               # row sampling -- forwarded ONLY because bootstrap_type is not
-                                 #   Bayesian (Bayesian uses bagging_temperature and would
-                                 #   silently IGNORE this).
-    bootstrap_type: "MVS"        # Minimum Variance Sampling
-    #has_time: True
-    random_strength: 3.0         # noise added when scoring splits    
+    subsample: 0.7                            # forwarded only because bootstrap_type is not Bayesian
+    bootstrap_type: MVS
+    random_strength: 3.0
     seed: 42
-    # ---- THE THREE KEYS BELOW ARE NOT IN THE DELIVERED FILE. ------------------------------
-    # merge() ignores an override whose key is absent from this block, so a knob that is not
-    # written here cannot be reached from the CLI at all -- `--early_stopping_rounds 200` would
-    # be a SILENT no-op. that is why they are spelled out.
-    grow_policy: "Lossguide"     # h8 (delivered/h6: absent -> SymmetricTree). LOSS-BASED:
-                                 #   split whichever LEAF cuts loss most, so trees grow where the
-                                 #   error is instead of one oblivious split per level.
-    max_leaves: 256              # h8 -- THE CAPACITY KNOB. this is the number to turn.
-                                 #   MEASURED: trees land at 243 leaves, i.e. the cap is what
-                                 #   stops growth, which is the whole point of loss-based growth.
-                                 #   real rungs: 64 (62 leaves, 0.43 s/tree) | 128 (126, 0.61) |
-                                 #   256 (243, 1.00). growth SATURATES near 360, so 512 / 1024 /
-                                 #   65536 all give the SAME ~360-leaf tree at 2x the wall-clock
-                                 #   -- above ~360 this knob does nothing and depth is back in
-                                 #   charge. (h7 was 65536 and was exactly that mistake.)
-                                 #   catboost's hard max is 65536; 65537 raises. 0 does NOT mean
-                                 #   unlimited -- build_model only forwards a TRUTHY value, so 0
-                                 #   drops the key and catboost falls back to 31 leaves.
-    early_stopping_rounds: 0     # 0 = OFF, matching the delivered file (which has no such key).
-                                 #   so all 6,000 iterations are built no matter what val does --
-                                 #   at h8's MEASURED 1.00 s/tree that is ~1.7 HOURS per run.
-                                 #   `--early_stopping_rounds 200` is the cheap way out, and is
-                                 #   the reason this key is spelled out at all.
+    grow_policy: Lossguide
+    max_leaves: 256                           # THE capacity knob. real rungs 64/128/256; >=360 does nothing
+    early_stopping_rounds: 0                  # 0 = off, so all n_estimators are built
   search:
-    # Scale: [Conservative, Balanced/Actual, Extreme]
-    # RUNGS ARE VERBATIM FROM THE DELIVERED FILE. the delivered NOTE, however, was written for
-    # oblivious trees ("max_depth > 12 on oblivious trees is massive") and h7 is LOSSGUIDE, so
-    # it no longer describes this set -- under Lossguide max_depth caps branch LENGTH and
-    # max_leaves is the capacity knob. the rungs are still sane, they just mean something else.
-    # max_leaves rung ADDED for h8: it is the capacity knob now, so tuning everything EXCEPT it
-    # would be strange. rungs stop at 256 on purpose -- measured, growth saturates near 360, so a
-    # 512 or 65536 rung would train the identical ~360-leaf tree at twice the wall-clock and the
-    # search would read the tie as noise.
     max_leaves: [128, 256, 512]
-    # max_depth rungs are the DELIVERED ones and are left alone, but note they fight the h8
-    # default: a trial that picks 4 or 8 is no longer loss-based -- at that cap the depth wall
-    # stops every tree (measured, 25/25) and max_leaves goes inert. keep depth pinned at 16 and
-    # let max_leaves carry the search if you want the tuning to stay honest to the growth policy.
     max_depth: [6, 11, 15]
     learning_rate: [0.02, 0.001, 0.05]
-    #learning_rate: 0.02
     n_estimators: [2000, 4000, 6000]
     l2_leaf_reg: [30.0, 10.0, 5.0, 15.0]
     min_data_in_leaf: [50, 25, 15, 100]
-    rsm: [0.5, 0.6, 0.8, 1.0]               # Column sampling
-    subsample: [0.5, 0.6, 0.8, 1.0]         # Row sampling
-    random_strength: [5.0, 1.0, 0.5, 0.0]   # Scoring noise: high = conservative, 0 = extreme
+    rsm: [0.5, 0.6, 0.8, 1.0]
+    subsample: [0.5, 0.6, 0.8, 1.0]
+    random_strength: [5.0, 1.0, 0.5, 0.0]
