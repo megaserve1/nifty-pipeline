@@ -173,9 +173,28 @@ def score_dataset(df: pd.DataFrame, bundle: dict, oos: bool = False, meta: dict 
     # is OPTIONAL: without it true_label and correct come back null and the backtest works off
     # predicted_label + the probabilities. (this used to be a bare KeyError, raised AFTER the whole
     # dataset had already been scored.)
-    has_label = C.LABEL_COL in df.columns
+    #
+    # WHICH truth column. an OOS file prepared by scripts/attach_oos_labels.py carries ONE PER
+    # LABEL SET -- primary_label_L1 / _L2 / _L3 -- because truth depends on which set the model
+    # trained under. L3 is SIX classes, L1 and L2 are seven. so we pick by the bundle's own
+    # labels_name. a training-era dataset has the plain column and falls straight through.
+    want = str(bundle.get("labels_name") or "")
+    tagged = sorted(c for c in df.columns if c.startswith(C.LABEL_COL + "_"))
+    if want and f"{C.LABEL_COL}_{want}" in df.columns:
+        label_col = f"{C.LABEL_COL}_{want}"
+        print(f"      truth column: {label_col}  (this model trained on {want})")
+    elif want and tagged:
+        # DO NOT fall back to another set. a 6-class truth scored against a 7-class model just
+        # looks like a model that makes a lot of mistakes -- nothing downstream can tell the
+        # difference between wrong labels and a bad model. refuse instead.
+        raise SystemExit(f"this model trained on {want}, but the file only carries {tagged}. "
+                         f"rebuild it:  scripts/attach_oos_labels.py --sets {want}")
+    else:
+        label_col = C.LABEL_COL if C.LABEL_COL in df.columns else None
+
+    has_label = label_col is not None
     if has_label:
-        true = df[C.LABEL_COL].astype(str).str.strip().to_numpy()   # labels carry trailing spaces
+        true = df[label_col].astype(str).str.strip().to_numpy()   # labels carry trailing spaces
         true_col = pd.array(true, dtype="string")
         correct_col = pd.array(np.where(pred == true, "YES", "no"), dtype="string")
     else:
@@ -308,9 +327,23 @@ def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int
     # parquet -> CSV, because their loader cannot read parquet signals.
     out_dir = pathlib.Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
     signal_csv = out_dir / (pathlib.Path(table_path).stem + "_signal.csv")
-    sig = pd.read_parquet(table_path, columns=["timestamp", "predicted_label"])
+    # HAND OVER THE TRUTH TOO, when we have it. the 2026-08 backtest measures churn, missed
+    # opportunity, wrong direction and delay -- all of which need the true label. it finds it via
+    # its own TRUTH_COLS list, which includes "true_label", and reports n/a for every one of them
+    # if the column is absent. it also filters on "split" itself. both are optional: an OOS table
+    # carries true_label all-null today, and the engine treats that as no truth.
+    import pyarrow.parquet as _pq
+    have = {f.name for f in _pq.ParquetFile(str(table_path)).schema_arrow}   # footer only, no rows
+    extra = [c for c in ("true_label", "split") if c in have]
+    sig = pd.read_parquet(table_path, columns=["timestamp", "predicted_label"] + extra)
+    # an all-null true_label is worse than none: the engine would see the column, switch the cost
+    # decomposition on, and report zeros as if they were measurements. drop it unless it has values.
+    if "true_label" in sig.columns and not sig["true_label"].notna().any():
+        sig = sig.drop(columns=["true_label"])
+        print("      true_label is entirely null -> dropped. churn / missed / delay will read n/a.")
     sig.to_csv(signal_csv, index=False)
-    print(f"      signal csv for the backtest: {signal_csv.name}  ({len(sig):,} rows)")
+    print(f"      signal csv for the backtest: {signal_csv.name}  ({len(sig):,} rows, "
+          f"columns {list(sig.columns)})")
 
     # COVERAGE CHECK. their engine inner-merges signal x price and says NOTHING when only part of
     # the window matches -- measured on the real files: the price parquet ends 2025-07-31 while
@@ -353,12 +386,14 @@ def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int
         if out.strip():
             # park it as a report too, so it survives console truncation on a long run
             task.get_logger().report_text(out, print_console=False)
-        # their CSVs land in a timestamped folder -- upload them or they die with the worker.
-        # RGLOB, not glob: the 3-version suite writes comparison.csv + full_report.txt at the top
-        # and then one SUBFOLDER per version (V1_.../metrics.csv, trades.csv, ...). a flat glob
-        # would upload two files and silently drop fifteen.
+        # their output lands in a timestamped folder -- upload it or it dies with the worker.
+        # RGLOB, not glob: the 3-version suite writes at the top AND one SUBFOLDER per version
+        # (V1_.../metrics.csv, trades.csv, ...). a flat glob would drop most of it.
+        # .XLSX IS NOT OPTIONAL: the 2026-08 engine writes ONE workbook and a full_report.txt, so
+        # a csv+txt glob would upload the txt and silently lose every number.
         for d in sorted(bt_out.glob("backtest_*")):
-            for f in sorted(d.rglob("*.csv")) + sorted(d.rglob("*.txt")):
+            for f in (sorted(d.rglob("*.csv")) + sorted(d.rglob("*.txt"))
+                      + sorted(d.rglob("*.xlsx"))):
                 # name the artifact by its path inside the run folder, so V1/metrics and
                 # V2/metrics do not overwrite each other under one name.
                 rel = f.relative_to(d).with_suffix("")
