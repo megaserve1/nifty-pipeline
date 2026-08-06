@@ -447,3 +447,47 @@ def test_catboost_never_gets_both_rsm_and_colsample_bylevel():
     p = dict(H.defaults("catboost")); p.pop("rsm", None); p["colsample_bylevel"] = 0.6
     assert float(build_model("catboost", 7, p, has_val=True)._init_params["rsm"]) == 0.6, (
         "a value given as colsample_bylevel must still reach catboost, as rsm")
+
+
+def test_the_training_curve_is_reported_by_us_not_by_clearml():
+    """auto_connect_frameworks=False stops the duplicate model upload -- and the SAME switch
+    killed the loss graph. that is why a 2-hour catboost run showed '0 iterations' and clearml
+    logged 'Could not detect iteration reporting'. report_training_curve() reads evals_result
+    ourselves so both fixes can coexist.
+    """
+    import sys, pathlib, numpy as np
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+    from trainer.train import build_model, report_training_curve
+    from trainer import hyperparams as H
+
+    X = np.random.RandomState(0).rand(400, 5)
+    y = np.random.RandomState(1).randint(0, 7, 400)
+    Xv, yv = X[:120], y[:120]
+
+    class Rec:
+        def __init__(self): self.pts = []
+        def report_scalar(self, title, series, value, iteration):
+            self.pts.append((title, series, iteration, value))
+
+    for mt in ("xgboost", "catboost"):
+        p = dict(H.defaults(mt)); p["n_estimators"] = 12; p["early_stopping_rounds"] = 0
+        m = build_model(mt, 7, p, has_val=True)
+        if mt == "xgboost":
+            m.fit(X, y, eval_set=[(Xv, yv)], verbose=False)
+        else:
+            m.fit(X, y, eval_set=(Xv, yv), verbose=False)
+
+        rec = Rec()
+        report_training_curve(m, mt, rec)
+        assert rec.pts, f"{mt}: no training curve reported -- the graph is gone again"
+        assert {t for t, _, _, _ in rec.pts} == {"Training"}, (
+            f"{mt}: the curve must land under the 'Training' title, so it is its own section")
+        assert any(s.startswith("val/") for _, s, _, _ in rec.pts), (
+            f"{mt}: no validation series -- the val curve is the one early stopping watches")
+        # iterations must be a real sequence, not all zero (a flat x-axis draws nothing)
+        iters = sorted({i for _, _, i, _ in rec.pts})
+        assert len(iters) > 1 and iters[0] == 0, f"{mt}: bad iteration axis {iters[:5]}"
+
+    # and a model with no curve must not explode
+    assert report_training_curve(object(), "random_forest", Rec()) == 0
+    assert report_training_curve(object(), "xgboost", None) == 0

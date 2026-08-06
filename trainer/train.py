@@ -415,6 +415,57 @@ def full_proba(model, proba, n_classes: int):
     return out
 
 
+def report_training_curve(model, model_type: str, logger) -> int:
+    """the loss-per-round graph, reported BY US instead of by clearml's auto-hook.
+
+    WHY BY HAND. Task.init(auto_connect_frameworks=False) stops clearml uploading the model twice
+    -- but the SAME switch is what fed the loss curve, so turning off the duplicate upload also
+    turned off the graph. that is why a 2-hour catboost run showed "0 iterations" and clearml
+    said "Could not detect iteration reporting, falling back to iterations as seconds-from-start".
+    reading evals_result ourselves keeps the upload fix AND gets the curve back, under a title we
+    choose rather than whatever the hook picks.
+
+    read AFTER fit, so it costs one dict lookup and no training time. it is the full curve, not
+    live -- live progress is C.TRAIN_VERBOSE printing into the console tab.
+    """
+    if logger is None:
+        return 0
+    try:
+        if model_type == "xgboost":
+            ev = model.evals_result() or {}
+        elif model_type == "catboost":
+            ev = model.get_evals_result() or {}
+        else:
+            return 0                                  # the forest has no per-round curve
+    except Exception as exc:
+        print(f"      (no training curve: {exc})")
+        return 0
+
+    n = 0
+    for split_name, metrics in ev.items():
+        # xgboost calls it validation_0, catboost calls it validation/learn. say val/train.
+        nice = {"validation_0": "val", "validation": "val", "learn": "train"}.get(
+            split_name, split_name)
+        for metric, values in (metrics or {}).items():
+            vals = list(values)
+            if not vals:
+                continue
+            # 6000 points per series is a lot of round trips for a graph nobody reads at that
+            # resolution. keep every point up to 1500, then stride -- the SHAPE is what matters,
+            # and the last point is always kept so the final loss is exact.
+            step = max(1, len(vals) // 1500)
+            for i in range(0, len(vals), step):
+                logger.report_scalar(title="Training", series=f"{nice}/{metric}",
+                                     value=float(vals[i]), iteration=i)
+            if (len(vals) - 1) % step:
+                logger.report_scalar(title="Training", series=f"{nice}/{metric}",
+                                     value=float(vals[-1]), iteration=len(vals) - 1)
+            n += len(vals)
+            print(f"      training curve: {nice}/{metric}  {len(vals):,} rounds, "
+                  f"first {vals[0]:.4f} -> best {min(vals):.4f} -> last {vals[-1]:.4f}")
+    return n
+
+
 def report_metrics(y_true, y_pred, proba, classes, logger, split: str):
     """report the numbers that are HONEST for this problem.
 
@@ -783,11 +834,14 @@ def main():
         # computed on raw 74%-NO_TRADE rows -- a different objective from the weighted
         # one being minimised, so it would stop on the wrong signal.
         model.fit(Xtr, ytr, sample_weight=wtr, eval_set=[(Xva, yva)],
-                  sample_weight_eval_set=[wva], verbose=False)
+                  sample_weight_eval_set=[wva], verbose=C.TRAIN_VERBOSE or False)
     elif len(Xva) and a.model_type == "catboost":
-        model.fit(Xtr, ytr, sample_weight=wtr, eval_set=(Xva, yva))
+        model.fit(Xtr, ytr, sample_weight=wtr, eval_set=(Xva, yva),
+                  verbose=C.TRAIN_VERBOSE or False)
     else:
         model.fit(Xtr, ytr, sample_weight=wtr)      # the per-row weight, in every library
+
+    report_training_curve(model, a.model_type, logger)
 
     # --- TRAINING (in-sample). PRINTED, not logged. this is the OVERFIT CHECK: train scoring far
     # above val/test means the model memorised rather than learned. skipped on HPO trials -- dozens

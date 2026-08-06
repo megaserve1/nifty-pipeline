@@ -1,22 +1,33 @@
-"""ui/pages/3_Backtest.py -- pick a PROJECT and a MODEL, see what its signals would have earned.
+"""ui/pages/3_Backtest.py -- show the BACKTEST workbook a run produced, in one place.
 
-READ ONLY. this page starts nothing and changes nothing.
+READ ONLY. this page starts nothing and changes nothing. it only opens an .xlsx and draws it.
 
-PICK THE MODEL, NOT THE FILE. after an overnight run there are two or three models, each with its
-own scored table, backtest, SHAP and deepchecks. choosing a table by name means working out which
-model it came from; choosing the model means everything below it is the right thing by construction.
+WHAT IT READS (changed 2026-08-05)
+    the backtest engine now writes ONE multi-sheet Excel workbook instead of a scatter of CSVs.
+    the sheets, and where each lands on this page:
+        00_README         the workbook's own guide            -> Data & config tab
+        01_Summary        executive V1/V2/V3 comparison        -> Overview tab (the stats table)
+        02_Config         every setting the run used           -> Data & config tab
+        03_Data_Quality   coverage / OHLC / churn checks       -> Data & config tab
+        04_Metrics        all 103 metrics x V1/V2/V3           -> Full metrics tab
+        05_Tradebook      one row per closed trade             -> Trades tab
+        06_Yearly         year by year, per version            -> Year / Month tab
+        07_Monthly        month by month, per version          -> Year / Month tab
+        08_Daily_Equity   end-of-session equity per version    -> Equity & risk tab
+        09_Missed_Trades  ideal trades the model skipped        -> Churn & missed tab
 
-OOS ONLY. the test-split backtest is deliberately not shown -- under bundle_random that table is
-thousands of scattered 15-minute bundles (13,088 breaks in continuity on v7), so its equity curve
-is stitched across thousands of time gaps and cannot be read as a trading result.
+WHERE THE WORKBOOK COMES FROM  -- two sources, SAME file either way:
+    * A folder on this machine  (what you use now: the engine writes the .xlsx there)
+    * ClearML (a trained model) -- the GCP-backed path, UNCHANGED: same project / model pickers,
+      it just fetches the .xlsx artifact instead of the old CSVs.
 
-TWO BACKTEST LAYOUTS are understood, because old runs are still worth opening:
-  NEW (scripts/backtest_single.py, 3 versions) -- per-version files plus a comparison table
-      V1  ENTRY_SUPER -> exit on EXIT_SUB or EXIT_SUPER   is the SUPER entry any good early?
-      V2  ENTRY_SUB   -> exit on EXIT_SUB or EXIT_SUPER   does the SUB entry work on its own?
-      V3  ENTRY_SUPER -> exit on EXIT_SUPER only          is the SUPER class self-consistent?
-  OLD (one strategy, flat files) -- metrics / equity_curve / trades / monthly_returns / report
+CORE vs OPTIONAL  (the workbook's own distinction, kept here):
+    CORE metrics divide by NO capital -- rupees, points, counts, ratios. judge the signal on these.
+    OPTIONAL metrics (return %, CAGR, Sharpe, Sortino, drawdown %, Calmar) divide by an ASSUMED
+    capital, so the workbook reports them on TWO bases -- A: 1-lot notional, B: peak notional.
+    pick the basis with the toggle; it only affects the OPTIONAL numbers.
 """
+import math
 import pathlib
 import sys
 
@@ -25,174 +36,248 @@ import streamlit as st
 
 st.set_page_config(page_title="Backtest", page_icon="📉", layout="wide")
 
-
-# the password gate. FIRST thing after set_page_config -- streamlit serves this file at its
-# own URL, so a gate on Home.py alone would not protect it.
+# the password gate. FIRST thing after set_page_config -- streamlit serves this file at its own
+# URL, so a gate on Home.py alone would not protect it.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 from _auth import require_auth   # noqa: E402
 require_auth()
 
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+# GCP / ClearML integration -- UNCHANGED. these are the same helpers every page uses.
 from _shared import model_picker, children_of, artifacts_named, project_picker   # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(ROOT))
-import config as C   # noqa: E402
+import config as C   # noqa: E402,F401
+
+# the folder your local runs write into. new runs drop a new backtest_*/ subfolder here, and this
+# page takes the NEWEST .xlsx under it -- so you never have to update the path.
+DEFAULT_LOCAL = r"C:\Users\Admin\Downloads\backtest_results"
+TRADES_SHOWN = 2000        # the tables are virtualised, but the payload still crosses the wire
+
+VERSION_LABELS = {"V1": "V1 · SUPER entry", "V2": "V2 · SUB entry", "V3": "V3 · SUPER class"}
+BASIS_BLOCK = {"A · 1-lot notional": "OPTIONAL A 1-lot", "B · peak notional": "OPTIONAL B peak"}
 
 st.title("Backtest results")
-st.caption("out-of-sample only — what the signals would have done on days the model has never "
-           "seen. read only; this page starts nothing.")
+st.caption("one workbook per run — the V1/V2/V3 signal-quality suite, priced on NIFTY futures with "
+           "next-bar-open fills. read only; this page starts nothing.")
 
-WANTED = ("yearly_returns", "monthly_returns", "equity_curve", "metrics", "trades")
+# TILE READABILITY. st.metric shows the value in a big ~2.25rem font on one no-wrap line, so a
+# rupee figure in a narrow column was being clipped to "₹-12…". smaller value font + allow wrap
+# (never ellipsis) + let the label wrap too. scoped to metric tiles only.
+st.markdown("""
+<style>
+  [data-testid="stMetricValue"]{ font-size:1.5rem; line-height:1.25;
+        white-space:normal; overflow-wrap:anywhere; overflow:visible; }
+  [data-testid="stMetricValue"] > div{ white-space:normal; overflow:visible; text-overflow:clip; }
+  [data-testid="stMetricLabel"], [data-testid="stMetricLabel"] p{ white-space:normal; }
+</style>""", unsafe_allow_html=True)
 
-# how many points to draw on a line chart. the equity curve is per-MINUTE (274,606 rows on the v7
-# test table) and a browser cannot draw that -- the tab freezes. a 320px chart has ~1,300 pixels
-# of width, so 3,000 points is already more resolution than the screen can show.
-PLOT_POINTS = 3000
-TRADES_SHOWN = 2000        # the table is virtualised but the payload still crosses the wire
 
-
-def read_csv(path):
-    if not path:
-        return None
+# ============================== loading ====================================
+def _engine():
     try:
-        return pd.read_csv(path)
-    except Exception:
+        import python_calamine  # noqa: F401   fast Rust reader; silent fallback to openpyxl
+        return {"engine": "calamine"}
+    except ImportError:
+        return {}
+
+
+@st.cache_data(show_spinner="reading the workbook …", ttl=300)
+def load_workbook(path: str, sig) -> dict:
+    """every sheet -> {name: DataFrame}. cached on (path, sig) so an edited/replaced file reloads.
+
+    sig is (mtime_ns, size); it is part of the cache key on purpose -- overwrite the .xlsx and the
+    old sheets must not be served from cache.
+    """
+    return pd.read_excel(path, sheet_name=None, **_engine())
+
+
+def newest_xlsx(folder: str):
+    """the newest real .xlsx under `folder` (recursively), plus the full list. Excel's ~$ lock
+    files are skipped -- they are 165-byte temp files, not workbooks."""
+    p = pathlib.Path(folder).expanduser()
+    if not p.exists():
+        return None, []
+    files = [f for f in p.rglob("*.xlsx") if not f.name.startswith("~$")]
+    files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+    return (files[0] if files else None), files
+
+
+def clearml_xlsx(task_id: str):
+    """download the run's .xlsx artifact off ClearML (GCP-backed) and return its local path.
+
+    the model/project pickers above are unchanged; only the artifact we pull is different -- the
+    engine now uploads one workbook, not a pile of CSVs. we look at the artifact NAMES first and
+    fetch only the workbook, so we never drag down the big scored-table parquet to find it.
+    """
+    from clearml import Task
+    t = Task.get_task(task_id=task_id)
+    arts = t.artifacts or {}
+    names = list(arts)
+    # prefer an obvious workbook: name mentions xlsx/backtest/workbook. fall back to trying each.
+    ranked = sorted(names, key=lambda n: ("xlsx" not in n.lower(),
+                                          "backtest" not in n.lower(), n))
+    for n in ranked:
+        try:
+            p = arts[n].get_local_copy()
+        except Exception:
+            p = None
+        if p and str(p).lower().endswith((".xlsx", ".xlsm")):
+            return p, names
+    return None, names
+
+
+def sheet(wb: dict, needle: str):
+    """a sheet by fuzzy name, so the numeric prefixes (04_Metrics) are not load-bearing."""
+    for k in wb:
+        if needle.lower() in str(k).lower():
+            return wb[k]
+    return None
+
+
+# ============================== formatting =================================
+def _num(x):
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
         return None
+    return x if math.isfinite(x) else None
 
 
 def money(x):
-    try:
-        return f"₹{float(x):,.0f}"
-    except (TypeError, ValueError):
+    """COMPACT Indian format, so a tile never overflows: ₹-1.22 Cr, ₹9.58 L, ₹14.6 K, ₹-1,679.
+    the full rupee figure is still shown exactly — on hover (tile tooltip) and in the tables."""
+    v = _num(x)
+    if v is None:
         return "—"
+    a = abs(v)
+    if a >= 1e7:
+        return f"₹{v / 1e7:,.2f} Cr"
+    if a >= 1e5:
+        return f"₹{v / 1e5:,.2f} L"
+    if a >= 1e4:
+        return f"₹{v / 1e3:,.1f} K"
+    return f"₹{v:,.0f}"
 
 
-def collect(pairs) -> dict:
-    """(key, path) pairs -> {'metrics': path, 'equity_curve': path, ...}
-
-    matched on the END of the key, so it works for both layouts: the new suite names a file
-    V1_SUPER_entry_quality_metrics, the old one just calls it metrics.
-    """
-    out = {}
-    for k, p in pairs:
-        for want in WANTED:
-            if k.endswith(want):
-                out.setdefault(want, p)
-                break
-    return out
+def money_exact(x):
+    """the full rupee figure, for tooltips and anywhere there is room for it."""
+    v = _num(x)
+    return "—" if v is None else f"₹{v:,.0f}"
 
 
-def folder_files(folder: str) -> dict:
-    """the files a LOCAL --backtest run wrote. it nests them in a timestamped folder, and the
-    3-version suite adds one subfolder per version, so this walks the tree."""
-    p = pathlib.Path(folder).expanduser()
-    if not p.exists():
-        return {}
-    runs = sorted(p.glob("backtest_*"), key=lambda d: d.name)
-    base = runs[-1] if runs else p
-    out = {}
-    for f in list(base.rglob("*.csv")) + list(base.rglob("*.txt")):
-        out[str(f.relative_to(base).with_suffix("")).replace("/", "_")] = str(f)
-    return out
+def pct(x, dp=2):
+    v = _num(x)
+    return "—" if v is None else f"{v:,.{dp}f}%"
 
 
-def show_one(byname: dict, heading: str = ""):
-    """render one strategy: the tiles, the curve, the years, the months, the trades."""
-    m = read_csv(byname.get("metrics"))
-    if m is not None and {"metric", "value"} <= set(m.columns):
-        d = dict(zip(m["metric"], m["value"]))
-
-        def num(k, fmt="{:,.2f}"):
-            try:
-                return fmt.format(float(d[k]))
-            except (KeyError, TypeError, ValueError):
-                return "—"
-
-        c = st.columns(6)
-        c[0].metric("Net PnL", money(d.get("net_pnl")))
-        c[1].metric("Total return", f"{num('total_return_pct')} %")
-        c[2].metric("CAGR", f"{num('cagr_pct')} %")
-        c[3].metric("Max drawdown", f"{num('max_drawdown_pct')} %")
-        c[4].metric("Trades", num("n_trades", "{:,.0f}"))
-        c[5].metric("Profit factor", num("profit_factor"))
-
-        c2 = st.columns(4)
-        try:
-            c2[0].metric("Win rate", f"{float(d['win_rate']) * 100:.1f} %")
-        except Exception:
-            c2[0].metric("Win rate", "—")
-        c2[1].metric("Sharpe", num("sharpe"))
-        c2[2].metric("Expectancy / trade", money(d.get("expectancy")))
-        # c2[3].metric("vs benchmark", f"{num('vs_benchmark_pp')} pp")
-
-        try:
-            net = float(d.get("net_pnl", 0))
-            # vsb = float(d.get("vs_benchmark_pp", 0))
-            # st.caption(("🟢 net positive" if net > 0 else "🔴 net negative") +
-            #            (" and beat buy & hold" if vsb > 0 else " and behind buy & hold"))
-        except Exception:
-            pass
-    elif m is not None:
-        st.dataframe(m, width="stretch", hide_index=True)
-
-    eq = read_csv(byname.get("equity_curve"))
-    if eq is not None and "equity" in eq.columns:
-        st.subheader("Equity curve")
-        st.caption("the shape matters more than the endpoint — a straight climb is a strategy, "
-                   "one vertical jump is one lucky day.")
-        # DOWNSAMPLE BEFORE PLOTTING. the curve is one row per MINUTE -- 274,606 of them on the
-        # v7 test table. st.line_chart hands every point to vega-lite in the browser, and the tab
-        # locks up ("page unresponsive"). a chart 320px tall cannot show more points than it has
-        # pixels, so plotting all of them buys nothing and costs the page.
-        # every Nth row PLUS the final one: the endpoint is the number people read off the chart
-        # and striding can miss it.
-        n = len(eq)
-        if n > PLOT_POINTS:
-            step = n // PLOT_POINTS + 1
-            eq_plot = pd.concat([eq.iloc[::step], eq.iloc[[-1]]]).drop_duplicates()
-            st.caption(f"drawn from {len(eq_plot):,} of {n:,} points (every {step}th minute) — "
-                       f"the CSV artifact has all of them.")
-        else:
-            eq_plot = eq
-        if "timestamp" in eq_plot.columns:
-            eq_plot = eq_plot.copy()
-            eq_plot["timestamp"] = pd.to_datetime(eq_plot["timestamp"], errors="coerce")
-            st.line_chart(eq_plot.set_index("timestamp")["equity"], height=320)
-        else:
-            st.line_chart(eq_plot["equity"].reset_index(drop=True), height=320)
-
-    yr = read_csv(byname.get("yearly_returns"))
-    if yr is not None and "year" in yr.columns:
-        st.subheader("Year by year")
-        show = [c for c in ("year", "trades", "win_rate_pct", "net_pnl", "return_pct",
-                            "bench_pct", "alpha_pp", "max_dd_pct") if c in yr.columns]
-        st.dataframe(yr[show], width="stretch", hide_index=True)
-        if "return_pct" in yr.columns:
-            st.bar_chart(yr.set_index("year")["return_pct"], height=240)
-
-    mo = read_csv(byname.get("monthly_returns"))
-    if mo is not None and len(mo.columns) >= 2:
-        st.subheader("Monthly net PnL")
-        st.bar_chart(mo.set_index(mo.columns[0])[mo.columns[1]], height=240)
-
-    tr = read_csv(byname.get("trades"))
-    if tr is not None and len(tr):
-        st.subheader(f"Trades ({len(tr):,})")
-        if len(tr) > TRADES_SHOWN:
-            st.caption(f"showing the first {TRADES_SHOWN:,} — download the artifact for all "
-                       f"{len(tr):,}.")
-        st.dataframe(tr.head(TRADES_SHOWN), width="stretch", height=320, hide_index=True)
-
-    if not byname:
-        st.info("no readable files for this one.", icon="ℹ️")
+def ratio(x, dp=2):
+    v = _num(x)
+    return "—" if v is None else f"{v:,.{dp}f}"
 
 
-# ---------------------------------------------------------------- where from
-src = st.radio("Source", ["ClearML (a trained model)", "A folder on this machine"], horizontal=True)
+def cnt(x):
+    v = _num(x)
+    return "—" if v is None else f"{v:,.0f}"
 
-files = {}
-if src.startswith("ClearML"):
+
+def frac_pct(x, dp=1):
+    """a 0..1 fraction shown as a percent (win_rate is stored as 0.177)."""
+    v = _num(x)
+    return "—" if v is None else f"{v * 100:,.{dp}f}%"
+
+
+def smart_fmt(name: str, x):
+    """best-effort unit from the metric NAME, for the big reference tables."""
+    v = _num(x)
+    if v is None:
+        return "—"
+    n = str(name).lower()
+    if n in ("win_rate", "win_rate_gross"):
+        return f"{v * 100:,.1f}%"
+    if n.endswith("pct") or "pct" in n:
+        return f"{v:,.2f}%"
+    if n.endswith("points") or n in ("avg_points_per_lot", "breakeven_points_per_lot",
+                                     "gross_pnl_points", "avg_delay_points"):
+        return f"{v:,.2f}"
+    if n in ("profit_factor", "profit_factor_gross", "edge_ratio", "calmar", "sharpe", "sortino",
+             "sharpe_gross", "avg_delay_atr", "avg_delay_bars", "avg_holding_bars",
+             "avg_lots_in_market", "years", "sessions_per_year", "annualisation_factor",
+             "sharpe_gross"):
+        return f"{v:,.2f}"
+    if n.startswith("n_") or n in ("total_lots", "peak_lots", "n_drawdowns", "shadow_trades",
+                                   "n_trading_days"):
+        return f"{v:,.0f}"
+    if n == "avg_holding_minutes":
+        return f"{v:,.1f}"
+    return f"₹{v:,.0f}"       # default: rupees
+
+
+def fmt_table(df: pd.DataFrame, ver_cols=("V1", "V2", "V3")) -> pd.DataFrame:
+    """format the V1/V2/V3 columns of a metric sheet for display."""
+    d = df.copy()
+    key = "metric" if "metric" in d.columns else d.columns[0]
+    for vc in ver_cols:
+        if vc in d.columns:
+            d[vc] = [smart_fmt(m, v) for m, v in zip(d[key], d[vc])]
+    return d
+
+
+# ============================== metric lookup ==============================
+def metric_index(metrics_df: pd.DataFrame) -> dict:
+    """(block, metric) -> row. 04_Metrics carries CORE, OPTIONAL A 1-lot, OPTIONAL B peak."""
+    idx = {}
+    if metrics_df is None:
+        return idx
+    for _, r in metrics_df.iterrows():
+        idx[(str(r.get("block")), str(r.get("metric")))] = r
+    return idx
+
+
+def mget(idx: dict, name: str, ver: str, block: str = "CORE"):
+    r = idx.get((block, name))
+    if r is None:
+        return float("nan")
+    try:
+        return float(r[ver])
+    except (KeyError, TypeError, ValueError):
+        return float("nan")
+
+
+def tiles(specs, ncol=4):
+    """draw a grid of st.metric tiles. specs = [(label, value_str[, exact_tooltip]), ...].
+
+    FOUR per row, not six -- six squeezed a rupee figure into ~120px and streamlit clipped it to
+    "₹-12…". the optional third item is the exact value, shown as the tile's hover tooltip."""
+    for i in range(0, len(specs), ncol):
+        row = specs[i:i + ncol]
+        cols = st.columns(len(row))
+        for c, spec in zip(cols, row):
+            label, value = spec[0], spec[1]
+            helptext = spec[2] if len(spec) > 2 else None
+            c.metric(label, value, help=helptext)
+
+
+# ============================== source =====================================
+src = st.radio("Where is the workbook?",
+               ["A folder on this machine", "ClearML (a trained model)"], horizontal=True)
+
+xlsx_path, report_txt = None, None
+
+if src.startswith("A folder"):
+    folder = st.text_input("Folder", value=DEFAULT_LOCAL,
+                           help="the folder your local backtest run wrote the .xlsx into. the "
+                                "newest workbook under it is used.")
+    xlsx_path, found = newest_xlsx(folder)
+    if not xlsx_path:
+        st.info(f"no .xlsx found under {folder}", icon="📂")
+        st.stop()
+    # the text report, if the run wrote one next to the workbook
+    rt = pathlib.Path(xlsx_path).with_name("full_report.txt")
+    report_txt = str(rt) if rt.exists() else None
+    st.caption(f"reading **{pathlib.Path(xlsx_path).name}**"
+               + (f"  ·  {len(found)} workbook(s) in this folder" if len(found) > 1 else ""))
+else:
     col_p, col_m = st.columns([1, 2])
     with col_p:
         project = project_picker(key="bt_project")
@@ -200,92 +285,264 @@ if src.startswith("ClearML"):
         model = model_picker(key="bt_model", project=project)
     if model is None:
         st.stop()
-
     kids = children_of(project, model["id"])
-    # OOS FIRST, ALWAYS. the backtest runs inside a scoring step, and there are two of them:
-    #   score_oos      one continuous forward period -> a real, tradeable equity curve
-    #   scored_tables  the TEST SPLIT, which under bundle_random is thousands of scattered
-    #                  15-min bundles (measured: 13,088 breaks in continuity, largest gap 6 days)
-    # this used to prefer scored_tables, which meant the honest backtest was the one you could
-    # not see. config.BACKTEST_ON_TEST_TABLE is False now, so scored_tables carries no backtest
-    # at all -- preferring it would have shown "no backtest files" and stopped there.
-    # OOS ONLY. the other scoring task (scored_tables) covers the TEST SPLIT, and under
-    # bundle_random that is thousands of scattered 15-minute bundles -- measured on v7: 274,605
-    # rows with 13,088 BREAKS in continuity, largest gap 6 days 19 hours. a backtest walks a
-    # table row by row, so an equity curve stitched across 13,088 time jumps is a number nobody
-    # could have traded. showing it next to the OOS one only invites it to be quoted.
-    # config.BACKTEST_ON_TEST_TABLE also stops that backtest being produced at all.
     task = kids.get("scored_oos")
     if task is None:
-        if "scored_tables" in kids:
-            st.info("This model has been scored on the test split, but **not on the OOS set** — "
-                    "and only OOS is shown here.\n\nThe test split is thousands of scattered "
-                    "15-minute bundles, so a backtest over it walks across thousands of time "
-                    "gaps. It is a metric, not a tradeable result.", icon="📊")
-            st.code(f"final_venv/bin/python scripts/queue_oos.py --version "
-                    f"{model['name'].split()[-1]} --oos_tag 2025_2026", language="bash")
-        else:
-            st.info("this model has no OOS scoring task yet — queued, still running, or the step "
-                    "failed. check it in ClearML.", icon="⏳")
+        st.info("this model has no OOS scoring task yet — queued, still running, or the step "
+                "failed. check it in ClearML.", icon="⏳")
         st.stop()
     st.caption(f"reading **{task['name']}**  ({task['status']})  ·  out-of-sample")
-
-    files, dead = artifacts_named(task["id"], "backtest_", report=True)
-    if dead and not files:
-        # clearml keeps the artifact record forever; the bucket does not.
-        st.error(f"this run advertises {len(dead)} backtest files but **the bytes are gone from "
-                 f"the bucket** — they were deleted, so there is nothing left to draw. re-run the "
-                 f"scoring step for this model to regenerate them.", icon="🗑️")
-        with st.expander("which files ClearML still lists"):
-            st.code("\n".join(sorted(dead)), language="text")
-        st.stop()
-    if dead:
-        st.warning(f"{len(dead)} of this run's files were deleted from the bucket: "
-                   f"{', '.join(sorted(dead))}", icon="⚠️")
-    if not files:
-        st.warning("that task produced the table but no backtest files. usually the price file was "
-                   "unreachable on the worker, or BACKTEST_SCRIPT was not set. its ClearML console "
-                   "says which.", icon="⚠️")
-        st.stop()
-else:
-    folder = st.text_input("Folder", value="/tmp/bt_check",
-                           help="the --out folder of a local run")
-    files = folder_files(folder)
-    if not files:
-        st.info(f"nothing found under {folder}", icon="📂")
+    xlsx_path, names = clearml_xlsx(task["id"])
+    if not xlsx_path:
+        st.warning("that task has no backtest workbook (.xlsx) artifact yet. its ClearML console "
+                   "says whether the backtest ran.", icon="⚠️")
+        with st.expander("artifacts this task does have"):
+            st.code("\n".join(names) or "(none)", language="text")
         st.stop()
 
-# ---------------------------------------------------------------- comparison
-cmp_df = read_csv(files.get("comparison"))
-if cmp_df is not None and len(cmp_df.columns) > 1:
+# one read, cached on the file's own mtime+size
+_st = pathlib.Path(xlsx_path).stat()
+wb = load_workbook(str(xlsx_path), (_st.st_mtime_ns, _st.st_size))
+
+metrics_df = sheet(wb, "Metrics")
+summary_df = sheet(wb, "Summary")
+config_df = sheet(wb, "Config")
+idx = metric_index(metrics_df)
+
+# ---- the two global controls: which version, which capital basis ----
+cfg = dict(zip(config_df["setting"], config_df["value"])) if config_df is not None else {}
+rule = {v: cfg.get(f"{v} rule", "") for v in ("V1", "V2", "V3")}
+
+c1, c2 = st.columns([2, 1])
+with c1:
+    ver = st.radio("Version", ["V1", "V2", "V3"], horizontal=True,
+                   format_func=lambda v: VERSION_LABELS.get(v, v))
+with c2:
+    basis_label = st.radio("Capital basis (optional metrics only)", list(BASIS_BLOCK), horizontal=True)
+basis = BASIS_BLOCK[basis_label]
+if rule.get(ver):
+    st.caption(f"**{ver} rule:** {rule[ver]}")
+
+TAB_OVERVIEW, TAB_METRICS, TAB_EQUITY, TAB_YM, TAB_TRADES, TAB_CHURN, TAB_DATA = st.tabs(
+    ["Overview", "Full metrics", "Equity & risk", "Year / Month", "Trades",
+     "Churn & missed", "Data & config"])
+
+
+# ------------------------------------------------------------------ Overview
+with TAB_OVERVIEW:
+    st.subheader(f"Headline — {VERSION_LABELS.get(ver, ver)}")
+    st.caption("CORE numbers — capital-independent. this is where the signal is judged.")
+    def m_(name, ver_=ver, block="CORE"):
+        v = mget(idx, name, ver_, block)
+        return money(v), money_exact(v)      # (compact, exact-for-tooltip)
+
+    tiles([
+        ("Net PnL",            *m_("net_pnl")),
+        ("Gross PnL",          *m_("gross_pnl")),
+        ("Total charges",      *m_("total_charge")),
+        ("Trades",             cnt(mget(idx, "n_trades", ver))),
+        ("Win rate (net)",     frac_pct(mget(idx, "win_rate", ver))),
+        ("Profit factor",      ratio(mget(idx, "profit_factor", ver))),
+        ("Expectancy / trade", *m_("expectancy")),
+        ("Avg points / lot",   ratio(mget(idx, "avg_points_per_lot", ver))),
+        ("Edge ratio",         ratio(mget(idx, "edge_ratio", ver))),
+        ("Max drawdown",       *m_("max_drawdown")),
+        ("Churn rate",         pct(mget(idx, "churn_rate_pct", ver))),
+        ("Avg hold (min)",     ratio(mget(idx, "avg_holding_minutes", ver), 0)),
+    ])
+
+    st.divider()
+    st.subheader(f"Capital-dependent (optional) — basis {basis_label}")
+    cap = mget(idx, "capital", ver, basis)
+    st.caption(f"these divide by an ASSUMED capital of **{money(cap)}**. a straight NaN means the "
+               f"net equity ended at or below zero, so the growth/ratio has no meaning on this basis.")
+    tiles([
+        ("Total return",  pct(mget(idx, "total_return_pct", ver, basis))),
+        ("Gross return",  pct(mget(idx, "gross_return_pct", ver, basis))),
+        ("CAGR (net)",    pct(mget(idx, "cagr_pct", ver, basis))),
+        ("ARR",           pct(mget(idx, "arr_pct", ver, basis))),
+        ("Max DD %",      pct(mget(idx, "max_drawdown_pct", ver, basis))),
+        ("Sharpe",        ratio(mget(idx, "sharpe", ver, basis))),
+        ("Sortino",       ratio(mget(idx, "sortino", ver, basis))),
+        ("Calmar",        ratio(mget(idx, "calmar", ver, basis))),
+    ], ncol=4)
+
+    st.divider()
     st.subheader("The three versions, side by side")
     st.caption("same window, same 1-lot size, same costs — so the differences are the signal, "
                "not the sizing.")
-    st.dataframe(cmp_df.set_index(cmp_df.columns[0]), width="stretch")
+    if summary_df is not None:
+        show = [c for c in ("block", "metric", "what it is", "V1", "V2", "V3") if c in summary_df.columns]
+        st.dataframe(fmt_table(summary_df)[show], width="stretch", hide_index=True, height=460)
+    else:
+        st.info("no Summary sheet in this workbook.", icon="ℹ️")
 
-# ---------------------------------------------------------------- the results
-# a key like V1_SUPER_entry_quality_metrics means the new 3-version suite. anything else is an old
-# single-strategy run, and those files sit flat with no version prefix at all.
-versions = sorted({k.split("_")[0] for k in files
-                   if len(k) > 1 and k[0] == "V" and k[1].isdigit()})
 
-if versions:
-    pick = st.radio("Version", versions, horizontal=True,
-                    format_func=lambda v: {"V1": "V1 · SUPER entry", "V2": "V2 · SUB entry",
-                                           "V3": "V3 · SUPER class"}.get(v, v))
-    show_one(collect((k, p) for k, p in files.items() if k.startswith(pick + "_")))
-else:
-    st.caption("this is an older single-strategy run — one result, no V1/V2/V3 split.")
-    show_one(collect(files.items()))
+# ------------------------------------------------------------- Full metrics
+with TAB_METRICS:
+    st.caption("every metric, for every version. CORE first — then the two capital bases the "
+               "OPTIONAL metrics are shown on.")
+    if metrics_df is not None:
+        cols = [c for c in ("metric", "what it is", "V1", "V2", "V3") if c in metrics_df.columns]
+        for blk, note in [("CORE", "capital-independent — the honest ones"),
+                          ("OPTIONAL A 1-lot", "return / risk on 1-lot notional capital"),
+                          ("OPTIONAL B peak", "return / risk on peak-notional capital")]:
+            part = metrics_df[metrics_df["block"] == blk]
+            if not len(part):
+                continue
+            st.markdown(f"**{blk}** — {note}")
+            st.dataframe(fmt_table(part)[cols], width="stretch", hide_index=True,
+                         height=min(560, 40 + 35 * len(part)))
+    else:
+        st.info("no Metrics sheet in this workbook.", icon="ℹ️")
 
-# ---------------------------------------------------------------- raw report
-report = files.get("full_report") or files.get("report")
-if report:
-    with st.expander("the full text report"):
-        try:
-            st.code(pathlib.Path(report).read_text(), language="text")
-        except Exception as exc:
-            st.warning(f"could not read it: {exc}")
 
-with st.expander("every file in this run"):
-    st.code("\n".join(f"{k:<40} {p}" for k, p in sorted(files.items())), language="text")
+# ------------------------------------------------------------- Equity & risk
+with TAB_EQUITY:
+    eq = sheet(wb, "Daily_Equity")
+    if eq is not None and f"{ver}_net" in eq.columns:
+        eq = eq.copy()
+        eq["date"] = pd.to_datetime(eq["date"], errors="coerce")
+        eq = eq.dropna(subset=["date"]).set_index("date")
+
+        st.subheader("Equity curve (net, after charges)")
+        st.caption("the shape matters more than the endpoint — a straight climb is a strategy, "
+                   "one vertical jump is one lucky day.")
+        overlay = st.checkbox("overlay all three versions", value=False)
+        net_cols = [c for c in ("V1_net", "V2_net", "V3_net") if c in eq.columns]
+        st.line_chart(eq[net_cols] if overlay else eq[[f"{ver}_net"]], height=320)
+
+        # underwater curve, computed from the selected version's net equity
+        s = eq[f"{ver}_net"]
+        underwater = s - s.cummax()
+        st.subheader("Underwater (drawdown, ₹)")
+        st.caption("distance below the running peak. it sits at zero only when the curve is making "
+                   "new highs.")
+        st.area_chart(underwater.rename("drawdown"), height=200)
+
+        if "close" in eq.columns:
+            st.subheader("NIFTY futures close (context)")
+            st.line_chart(eq[["close"]], height=180)
+    else:
+        st.info("no Daily_Equity sheet in this workbook.", icon="ℹ️")
+
+    st.divider()
+    st.subheader(f"Risk — basis {basis_label}")
+    tiles([
+        ("Max drawdown ₹",   money(mget(idx, "max_drawdown", ver))),
+        ("Max DD %",         pct(mget(idx, "max_drawdown_pct", ver, basis))),
+        ("Avg drawdown ₹",   money(mget(idx, "avg_drawdown", ver))),
+        ("DD episodes",      cnt(mget(idx, "n_drawdowns", ver))),
+        ("Time underwater",  pct(mget(idx, "pct_time_in_dd", ver))),
+        ("Calmar",           ratio(mget(idx, "calmar", ver, basis))),
+    ])
+
+
+# ------------------------------------------------------------- Year / Month
+with TAB_YM:
+    yr = sheet(wb, "Yearly")
+    if yr is not None and "version" in yr.columns:
+        y = yr[yr["version"] == ver].drop(columns=["version"])
+        st.subheader("Year by year")
+        st.dataframe(y, width="stretch", hide_index=True)
+        if {"year", "net_pnl"} <= set(y.columns):
+            st.caption("net PnL by year (after charges)")
+            st.bar_chart(y.set_index("year")["net_pnl"], height=240)
+    else:
+        st.info("no Yearly sheet in this workbook.", icon="ℹ️")
+
+    mo = sheet(wb, "Monthly")
+    if mo is not None and "version" in mo.columns:
+        m = mo[mo["version"] == ver]
+        if {"month", "net_pnl"} <= set(m.columns):
+            st.subheader("Monthly net PnL")
+            mm = m.copy()
+            mm["month"] = mm["month"].astype(str)
+            st.bar_chart(mm.set_index("month")["net_pnl"], height=240)
+
+
+# ------------------------------------------------------------------ Trades
+with TAB_TRADES:
+    st.caption("trade quality for the selected version.")
+    tiles([
+        ("Win rate (gross)", frac_pct(mget(idx, "win_rate_gross", ver))),
+        ("Win rate (net)",   frac_pct(mget(idx, "win_rate", ver))),
+        ("Avg win",          money(mget(idx, "avg_win", ver))),
+        ("Avg loss",         money(mget(idx, "avg_loss", ver))),
+        ("Avg MFE (pts)",    ratio(mget(idx, "avg_mfe_points", ver))),
+        ("Avg MAE (pts)",    ratio(mget(idx, "avg_mae_points", ver))),
+        ("MFE capture",      pct(mget(idx, "mfe_capture_pct", ver))),
+        ("Ever in profit >cost", pct(mget(idx, "pct_trades_mfe_over_breakeven", ver))),
+    ], ncol=4)
+
+    tb = sheet(wb, "Tradebook")
+    if tb is not None and "version" in tb.columns:
+        t = tb[tb["version"] == ver]
+        st.subheader(f"Tradebook ({len(t):,})")
+        cols = [c for c in ("signal_time", "entry_signal", "entry_true_label", "is_false_trade",
+                            "exit_true_label", "entry_time", "entry_price", "exit_time",
+                            "exit_price", "exit_reason", "holding_minutes", "pnl_points",
+                            "mae_points", "mfe_points", "pnl_money", "cum_net_pnl")
+                if c in t.columns]
+        if len(t) > TRADES_SHOWN:
+            st.caption(f"showing the first {TRADES_SHOWN:,} — open the workbook for all {len(t):,}.")
+        st.dataframe(t[cols].head(TRADES_SHOWN), width="stretch", height=380, hide_index=True)
+    else:
+        st.info("no Tradebook sheet in this workbook.", icon="ℹ️")
+
+
+# ------------------------------------------------------------- Churn & missed
+with TAB_CHURN:
+    st.caption("what the over-trading and the mistakes cost — all CORE, all in rupees unless noted.")
+    tiles([
+        ("False trades",       cnt(mget(idx, "n_false_trades", ver))),
+        ("Churn rate",         pct(mget(idx, "churn_rate_pct", ver))),
+        ("Churn cost",         money(mget(idx, "churn_cost", ver))),
+        ("Missed opportunity", money(mget(idx, "missed_opportunity_cost", ver))),
+        ("Wrong direction",    money(mget(idx, "wrong_direction_cost", ver))),
+        ("Delay cost",         money(mget(idx, "delay_cost", ver))),
+        ("Total error cost",   money(mget(idx, "total_error_cost", ver))),
+        ("Shadow trades",      cnt(mget(idx, "shadow_trades", ver))),
+    ], ncol=4)
+
+    ms = sheet(wb, "Missed")
+    if ms is not None and "version" in ms.columns:
+        m = ms[ms["version"] == ver]
+        st.subheader(f"Missed trades ({len(m):,})")
+        st.caption("ideal entries the model did not take — profit left on the table.")
+        st.dataframe(m.drop(columns=["version"]).head(TRADES_SHOWN),
+                     width="stretch", height=320, hide_index=True)
+    else:
+        st.info("no Missed_Trades sheet in this workbook.", icon="ℹ️")
+
+
+# ------------------------------------------------------------- Data & config
+with TAB_DATA:
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if config_df is not None:
+            st.subheader("Config")
+            st.caption("every setting this run used.")
+            st.dataframe(config_df, width="stretch", hide_index=True, height=460)
+    with col_b:
+        dq = sheet(wb, "Data_Quality")
+        if dq is not None:
+            st.subheader("Data quality")
+            st.caption("coverage, OHLC sanity, prediction-level churn.")
+            st.dataframe(dq, width="stretch", hide_index=True, height=460)
+
+    readme = sheet(wb, "README")
+    if readme is not None:
+        with st.expander("how to read this workbook (from the file itself)"):
+            st.dataframe(readme, width="stretch", hide_index=True)
+
+    if report_txt:
+        with st.expander("the full text report"):
+            try:
+                st.code(pathlib.Path(report_txt).read_text(encoding="utf-8"), language="text")
+            except Exception as exc:
+                st.warning(f"could not read it: {exc}")
+
+    with st.expander("workbook file"):
+        st.code(str(xlsx_path), language="text")
+        st.code("sheets: " + ", ".join(wb), language="text")

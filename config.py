@@ -139,6 +139,12 @@ def resolve_dataset_id(dataset_name: str, pinned: str = "") -> str:
 OOS_DATASET_ID    = ""      # empty = resolve CLEARML_OOS_DATASET by name (the newest).
                             # set an id here only to FREEZE one exact version for reproducing.
 TRAIN_QUEUE       = "training"          # a clearml-agent must listen here, or nothing runs
+# PRINT THE LOSS EVERY N ROUNDS while training. 0 = silent.
+# this is the LIVE progress line. a catboost run on 2026-08-06 sat at "0 iterations" for two hours
+# with no way to tell it from a hang -- verbose=0 meant the console said nothing and
+# auto_connect_frameworks=False meant clearml had nothing to read either. 100 is roughly one line
+# a minute on the real dataset; the full curve is graphed after fit by report_training_curve().
+TRAIN_VERBOSE     = 100
 SHAP_QUEUE        = "training"          # SHAP runs on the same queue by default
 EXPORT_QUEUE      = "training"          # scored-tables export runs on the same queue by default
 OOS_QUEUE         = "training"          # OOS scoring runs on the same queue by default
