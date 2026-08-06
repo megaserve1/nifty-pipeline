@@ -1,0 +1,17 @@
+{
+  "model_type": "catboost",
+  "source": "configs/hparams_catboost_braked.yaml",
+  "applied_by": "ui",
+  "params": {
+    "grow_policy": "Lossguide",
+    "max_leaves": 256,
+    "max_depth": 8,
+    "learning_rate": 0.02,
+    "l2_leaf_reg": 10.0,
+    "min_data_in_leaf": 50,
+    "rsm": 0.6,
+    "subsample": 0.6,
+    "random_strength": 1.0,
+    "early_stopping_rounds": 200
+  }
+}

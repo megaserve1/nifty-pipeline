@@ -391,6 +391,7 @@ def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int
         # (V1_.../metrics.csv, trades.csv, ...). a flat glob would drop most of it.
         # .XLSX IS NOT OPTIONAL: the 2026-08 engine writes ONE workbook and a full_report.txt, so
         # a csv+txt glob would upload the txt and silently lose every number.
+        n_up = 0
         for d in sorted(bt_out.glob("backtest_*")):
             for f in (sorted(d.rglob("*.csv")) + sorted(d.rglob("*.txt"))
                       + sorted(d.rglob("*.xlsx"))):
@@ -399,6 +400,16 @@ def run_backtest(script: str, table_path, price: str, out_dir, task=None) -> int
                 rel = f.relative_to(d).with_suffix("")
                 task.upload_artifact(f"backtest_{str(rel).replace('/', '_')}", str(f))
                 print(f"      uploaded {rel}")
+                n_up += 1
+        # SAY SO WHEN NOTHING CAME BACK. on 2026-08-06 the backtest computed every number, printed
+        # the whole report, then died writing the workbook (no openpyxl on the agent) -- exit 1,
+        # zero files, and the task still finished COMPLETED with one lonely parquet on it. the tag
+        # is what makes that visible in the task LIST, without failing a run whose table is fine.
+        if n_up == 0:
+            task.add_tags(["backtest_failed"])
+            print(f"      !! the backtest produced NO files (exit {r.returncode}). tagged "
+                  f"'backtest_failed'. the numbers are in the console above, but nothing was "
+                  f"saved -- read the traceback at the end of its output.")
     if r.returncode != 0:
         print(f"      !! backtest exited {r.returncode} -- output above.")
     return r.returncode
