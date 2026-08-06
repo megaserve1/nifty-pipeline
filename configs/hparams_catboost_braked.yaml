@@ -1,36 +1,63 @@
-# upload on the Build Dataset page, step 4 -> Save for catboost. catboost only.
-# everything that granted capacity is turned down, and early stopping is finally on.
+# upload on the Build Dataset page, step 4. save for BOTH models -- a publish trains
+# MODEL_TYPES = ["xgboost", "catboost"], so braking only one means comparing a braked model
+# against an unbraked one.
 #
-#                        yaml    this file
-#   max_depth              16  ->    8      the real brake
-#   l2_leaf_reg           5.0  -> 10.0      heavier damping on every leaf value
-#   min_data_in_leaf       15  ->   50      no tiny leaves
-#   rsm                   0.8  ->  0.6      column sampling back on
-#   subsample             0.7  ->  0.6      row sampling back on
-#   random_strength       3.0  ->  1.0      less split-scoring noise
-#   early_stopping_rounds   0  ->  200      the important one
+# the theme for both: everything that granted capacity is turned down, and early stopping is on.
 #
-# early stopping was 0, and 0 means OFF -- every run built all 6000 iterations whatever the
-# validation score did. measured on train_xgboost v7: best at round 240, saved at round 5997,
-# 4.3% worse than its own best. with 200 here, n_estimators becomes a ceiling instead of a count.
-#
-# max_leaves 256 will NOT bind. measured on real v7 data, 25 trees each:
-#     depth 8,  max_leaves 256    0.27 s/tree
-#     depth 8,  max_leaves 65536  0.26 s/tree   identical -> 256 never binds
-#     depth 16, max_leaves 256    0.49 s/tree   different -> depth was the limit
-# at depth 8 catboost builds ~47-leaf trees whatever max_leaves says. that is a strong brake and
-# probably what you want -- just know max_depth is doing the work, not max_leaves.
-#
-# not listed = keeps its yaml value: n_estimators 6000 (now a ceiling), bootstrap_type MVS, seed 42.
+# EARLY STOPPING WAS 0 ON BOTH, AND 0 MEANS OFF. every run built all 6000 iterations whatever
+# validation did. measured on train_xgboost v7: best at round 240, saved at round 5997, 4.3% worse
+# than its own best. with 200, n_estimators becomes a ceiling instead of a count.
 
 catboost:
   grow_policy: "Lossguide"
-  max_leaves: 256
-  max_depth: 8
+  max_leaves: 256           # will NOT bind at depth 8 -- see the note below
+  max_depth: 8              # this is the real brake
   learning_rate: 0.02
   l2_leaf_reg: 10.0
-  min_data_in_leaf: 50
+  min_data_in_leaf: 50      # counts ROWS
   rsm: 0.6
   subsample: 0.6
   random_strength: 1.0
   early_stopping_rounds: 200
+
+# MAX_LEAVES 256 DOES NOT BIND ON CATBOOST. measured on real v7 data, 25 trees each:
+#     depth 8,  max_leaves 256    0.27 s/tree
+#     depth 8,  max_leaves 65536  0.26 s/tree   identical -> 256 never binds
+#     depth 16, max_leaves 256    0.49 s/tree   different -> depth was the limit
+# at depth 8 catboost builds ~47-leaf trees whatever max_leaves says. max_depth does the work.
+
+xgboost:
+  grow_policy: "lossguide"
+  max_leaves: 256           # HERE it DOES bind -- lossguide grows by leaf, not by level
+  max_depth: 8              # was 0, and 0 means UNLIMITED
+  learning_rate: 0.02
+  reg_lambda: 10.0          # the l2_leaf_reg equivalent
+  reg_alpha: 0.2
+  min_child_weight: 48.0    # NOT the same knob as min_data_in_leaf -- see below
+  colsample_bytree: 0.6     # the rsm equivalent. was 1.0, i.e. no sampling at all
+  colsample_bynode: 0.5
+  subsample: 0.6
+  gamma: 0.3
+  max_delta_step: 1.0
+  early_stopping_rounds: 200
+
+# WHY XGBOOST WAS WIDE OPEN. max_depth 0 and max_leaves 0 both mean unlimited under lossguide.
+# measured, 5 trees x 7 classes on 4000 rows:
+#     max_depth 0, max_leaves 0     -> 352 leaves/tree
+#     max_depth 8, max_leaves 256   ->  81 leaves/tree
+# catboost at depth 8 makes ~47. so the two models were not remotely comparable.
+#
+# MIN_CHILD_WEIGHT IS NOT MIN_DATA_IN_LEAF. catboost's min_data_in_leaf counts ROWS. xgboost's
+# min_child_weight counts COVER = the sum of sample_weight in the leaf. we train with per-class
+# weights, so the two mean different things on the same data:
+#     mean sample_weight across the L1 class shares = 0.960
+#     -> min_child_weight 48 requires ~50 rows ON AVERAGE, matching min_data_in_leaf 50
+# but only on average. with CLASS_WEIGHTS = {ENTRY_SUB 19 ... NO_TRADE 0.192} it lands unevenly:
+#     3 ENTRY_SUB rows   -> cover 57  -> PASSES  (a 3-row leaf survives)
+#     250 NO_TRADE rows  -> cover 48  -> PASSES  (needs 250 rows to survive)
+# so the brake is loose exactly where the data is thinnest and tight where it is thickest -- the
+# reverse of what you want. there is NO value that makes it equal min_data_in_leaf. 48 is the
+# honest average-case match, not an equivalent. was 15.0.
+#
+# NOT LISTED = keeps its yaml value: n_estimators 6000 (a ceiling now), max_bin 256,
+# colsample_bylevel/bootstrap_type/seed 42.

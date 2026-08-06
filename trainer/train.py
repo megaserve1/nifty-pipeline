@@ -342,15 +342,20 @@ def _build_model_inner(model_type: str, n_classes: int, params, cat_idx=None, ha
 
     if model_type == "catboost":
         from catboost import CatBoostClassifier
+        # RSM AND COLSAMPLE_BYLEVEL ARE THE SAME KNOB, not two. catboost's _process_synonyms_group
+        # RAISES if both are present -- "only one of the parameters rsm, colsample_bylevel should
+        # be initialized" -- so passing both killed every catboost run the moment colsample_bylevel
+        # was wired up (2026-08-05; it crashed on the first run after, 2026-08-06). read BOTH here
+        # so the passthrough below cannot re-add the one we drop, and send exactly ONE.
+        _rsm = params.get("rsm", None)
+        _csbl = params.get("colsample_bylevel", None)
         kw = dict(
             iterations=params["n_estimators"],
             depth=params["max_depth"] or 6,   # catboost HARD CAPS depth at 16 (oblivious trees)
             learning_rate=params["learning_rate"],
             l2_leaf_reg=params.get("l2_leaf_reg", 3.0),   # L2 on leaf values -- the main brake
             min_data_in_leaf=int(params.get("min_data_in_leaf", 1)),
-            rsm=params.get("rsm", 1.0),                   # column sampling (= colsample_bytree)
-            # per-LEVEL column sampling. also in the yaml since 2026-07-31 and never passed.
-            colsample_bylevel=params.get("colsample_bylevel", 1.0),
+            rsm=float(_rsm if _rsm is not None else (_csbl if _csbl is not None else 1.0)),
             random_strength=params.get("random_strength", 1.0),  # noise added when scoring splits
             loss_function="MultiClass",
             random_seed=params["seed"],

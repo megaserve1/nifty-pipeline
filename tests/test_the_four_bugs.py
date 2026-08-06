@@ -413,3 +413,37 @@ def test_config_no_longer_carries_the_calendar_day_embargo():
         "in SESSIONS. leaving it importable invites someone to use it again.")
     assert C.EMBARGO_SESSIONS >= 20, "the embargo must cover the 20-session feature lookback"
     assert C.SESSION_ANCHOR_MINUTES == 9 * 60 + 15, "NSE opens at 09:15"
+
+
+def test_catboost_never_gets_both_rsm_and_colsample_bylevel():
+    """they are the SAME knob. catboost RAISES if both are present, so passing both kills the
+    run at model.fit -- after the data is loaded, the split is cut and the tables are built.
+
+    2026-08-06: colsample_bylevel was wired into build_model with a hardcoded default of 1.0, so
+    it was passed on EVERY catboost run whether or not the yaml mentioned it. removing it from
+    the yaml did nothing. the crash was
+        _catboost.CatBoostError: only one of the parameters rsm, colsample_bylevel
+        should be initialized.
+    """
+    import sys, pathlib
+    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+    from trainer.train import build_model
+    from trainer import hyperparams as H
+
+    for extra in ({"rsm": 0.6},
+                  {"colsample_bylevel": 0.6},
+                  {"rsm": 0.6, "colsample_bylevel": 0.9}):     # the case that crashed
+        p = dict(H.defaults("catboost"))
+        p.update(extra)
+        ip = build_model("catboost", 7, p, has_val=True)._init_params
+        assert not ("rsm" in ip and "colsample_bylevel" in ip), (
+            f"build_model passed BOTH rsm and colsample_bylevel for {extra}. catboost refuses "
+            f"that -- they are synonyms. send exactly one.")
+        assert "rsm" in ip, f"neither column-sampling knob reached catboost for {extra}"
+
+    # and the value must survive, whichever name it arrived under
+    p = dict(H.defaults("catboost")); p["rsm"] = 0.6; p.pop("colsample_bylevel", None)
+    assert float(build_model("catboost", 7, p, has_val=True)._init_params["rsm"]) == 0.6
+    p = dict(H.defaults("catboost")); p.pop("rsm", None); p["colsample_bylevel"] = 0.6
+    assert float(build_model("catboost", 7, p, has_val=True)._init_params["rsm"]) == 0.6, (
+        "a value given as colsample_bylevel must still reach catboost, as rsm")
