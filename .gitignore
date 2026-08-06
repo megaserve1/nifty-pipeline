@@ -76,3 +76,8 @@ catboost_info/
 # the labels arrive as .csv OR .zip -- both are DATA, both belong in DVC, never in git
 /data/labels/*.zip
 scripts/model_view/
+
+# generated documents. the SCRIPT that makes them is in git; the binary is not --
+# it is 100 KB of churn per rebuild and git cannot diff it.
+#   final_venv/bin/python scripts/make_xgboost_pdf.py
+*.pdf

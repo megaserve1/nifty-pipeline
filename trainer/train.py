@@ -331,7 +331,12 @@ def _build_model_inner(model_type: str, n_classes: int, params, cat_idx=None, ha
             # python short-circuits and never touches the key when has_val is False -- so the
             # _Tracked dict saw it as unread and the passthrough below would have set it anyway,
             # undoing the very guard this line exists to be.
-            early_stopping_rounds=(int(_esr) if has_val and _esr else None),
+            # `and _esr` was the bug: 0 is FALSY, so early_stopping_rounds: 0 in the yaml
+            # meant OFF -- which is right -- but so did any 0 arriving from a cloned task,
+            # and the real reason it never armed is that nobody noticed the yaml said 0.
+            # explicit > 0 keeps the same behaviour and makes the intent readable.
+            early_stopping_rounds=(int(_esr) if has_val and _esr is not None
+                                   and int(float(_esr)) > 0 else None),
             verbosity=0,
         )
 
@@ -527,7 +532,16 @@ def main():
     task = Task.init(project_name=C.CLEARML_PROJECT,
                      task_name=C.base_trainer_name(a.model_type),
                      task_type=Task.TaskTypes.training,
-                     output_uri=C.model_output_uri())  # gcs mode: your bucket; local mode: the self-hosted fileserver
+                     output_uri=C.model_output_uri(),  # gcs mode: your bucket; local mode: the self-hosted fileserver
+                     # EVERY MODEL WAS BEING UPLOADED TWICE. clearml patches xgboost's and
+                     # catboost's save_model(), so the temp file written at the end of this script
+                     # was auto-uploaded as an OutputModel -- and then the joblib bundle containing
+                     # the same bytes was uploaded again. measured on the live bucket: an exact
+                     # pair for all 9 runs, 1.362 GB of tmp*.ubj / tmp*.cbm blobs that nothing in
+                     # this repo ever reads (no get_models / InputModel / OutputModel anywhere).
+                     # ~637 MB less uploaded per pipeline run, and the children stop paying to
+                     # download the duplicate. the joblib bundle stays the single source of truth.
+                     auto_connect_frameworks=False)
     logger = task.get_logger()
 
     # no dataset id -> this is the one-off registration run that creates the base task shape.
@@ -570,6 +584,23 @@ def main():
             raise SystemExit(f"config.CLASS_WEIGHTS has no weight for {unmapped}. every class in "
                              f"the labels needs one, or those rows would train at weight NaN.")
         w = w.astype(float)
+        # THE WEIGHTS MUST MATCH THE LABEL SET THEY ARE APPLIED TO. CLASS_WEIGHTS is the
+        # inverse-frequency formula N/(K*n_i) computed for ONE label file. swap the labels and the
+        # frequencies move but the constants do not: measured on v7.1 (built with L2), the three
+        # ENTRY classes were over-weighted 28-37% against the rule config.py claims to follow.
+        # y_raw.map() only raises when a class NAME is missing, never when the counts drift.
+        _cnt = y_raw.value_counts()
+        _exact = {c: len(y_raw) / (len(_cnt) * n) for c, n in _cnt.items()}
+        _off = {c: C.CLASS_WEIGHTS[c] / _exact[c] for c in _cnt.index if _exact[c]}
+        _bad = {c: r for c, r in _off.items() if abs(r - 1) > 0.15}
+        if _bad:
+            print(f"      !! CLASS_WEIGHTS do not match this label set "
+                  f"({(man or {}).get('labels_name', '?')}). they were computed for a different "
+                  f"one, so the loss is not balanced the way config.py says it is:")
+            for c, r in sorted(_bad.items(), key=lambda kv: -abs(kv[1] - 1)):
+                print(f"           {c:<13} config {C.CLASS_WEIGHTS[c]:<6} "
+                      f"exact {_exact[c]:.2f}  ->  {r:.2f}x")
+            print(f"         recompute: weight_i = len(labels) / (n_classes * rows_in_class_i)")
         print(f"[2/6] weights <- config.CLASS_WEIGHTS (per class, by name): {C.CLASS_WEIGHTS}")
     else:
         w = (df[C.WEIGHT_COL].fillna(0.0) if C.WEIGHT_COL in df.columns
@@ -663,6 +694,10 @@ def main():
     yva = le.transform(y_raw[va])
     yte = le.transform(y_raw[te])
     wtr = w[tr].to_numpy()
+    # the val weights, for sample_weight_eval_set. the loss early stopping watches has to
+    # be the SAME loss being minimised -- an unweighted val curve on 74%-NO_TRADE rows is a
+    # different objective, and stopping on it stops at the wrong round.
+    wva = w[va].to_numpy()
 
     # the defaults come from configs/hyperparams.yaml. anything the CLI or ClearML's optimiser
     # actually set overrides them, cast to the type the YAML says it is. no number lives in code.
@@ -707,6 +742,25 @@ def main():
     # trials are already marked 'optimization' + 'opt:<id>' by clearml, so tag them 'hpo' and drop
     # the misleading version label.
     is_hpo_trial = "(base)" in (task.name or "")
+    # A TUNED RUN IS NOT h8. configs/tuned/<model>.json overlays the yaml inside defaults(), and
+    # hyperparams.version() only ever reads the yaml's `hyperparams_version:` line -- it cannot see
+    # the overlay. measured 2026-08-05: 8 of 16 xgboost knobs and 5 of 14 catboost knobs differed
+    # from h8 while every task was tagged h8. say so in the tag, and print the diff, so nobody has
+    # to open two files to find out what a run actually trained on.
+    if not is_hpo_trial:
+        try:
+            import yaml as _y
+            _base = (_y.safe_load(hyperparams.HP_FILE.read_text()) or {}) \
+                        .get(a.model_type, {}).get("default") or {}
+            _diff = {k: (_base.get(k), v) for k, v in params.items()
+                     if k in _base and str(_base[k]) != str(v)}
+        except Exception:
+            _diff = {}
+        if _diff:
+            hp_version = f"{hp_version}+tuned"
+            print(f"      !! {len(_diff)} value(s) differ from {hyperparams.HP_FILE.name}:")
+            for k, (was, now) in sorted(_diff.items()):
+                print(f"           {k}: yaml {was!r} -> trained with {now!r}")
     version_tag = "hpo" if is_hpo_trial else hp_version
     # THE LABEL SET IS PART OF WHAT THIS RUN IS. same features + a different label = a different
     # model, and with v7/v7.1/v7.2 differing ONLY by label, a run tagged just
@@ -720,7 +774,11 @@ def main():
     model = build_model(a.model_type, len(classes), params, cat_idx, has_val=bool(len(Xva)))
     # boosters early-stop on the val split; the forest fits all trees at once (no early stopping).
     if len(Xva) and a.model_type == "xgboost":
-        model.fit(Xtr, ytr, sample_weight=wtr, eval_set=[(Xva, yva)], verbose=False)
+        # WEIGHT THE EVAL SET TOO. without this the curve early stopping watches is
+        # computed on raw 74%-NO_TRADE rows -- a different objective from the weighted
+        # one being minimised, so it would stop on the wrong signal.
+        model.fit(Xtr, ytr, sample_weight=wtr, eval_set=[(Xva, yva)],
+                  sample_weight_eval_set=[wva], verbose=False)
     elif len(Xva) and a.model_type == "catboost":
         model.fit(Xtr, ytr, sample_weight=wtr, eval_set=(Xva, yva))
     else:

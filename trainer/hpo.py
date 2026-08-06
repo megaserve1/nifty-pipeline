@@ -270,9 +270,23 @@ def main():
     # those entering the search space (and thus never the trial name). the trainer base's own
     # Args/dataset_id is "" (train.py exits early on empty), so it MUST be set here or trials no-op.
     pinned = Task.clone(source_task=base, name=f"{base_name} [pinned]", project=task.project)
-    pinned.set_parameters({"Args/dataset_id": a.dataset_id,
+    # MODEL_TYPE MUST BE IN THIS DICT. set_parameters is a full REPLACE, not a merge -- clearml
+    # 2.1.10 backend_interface/task/task.py:1314 does `parameters = dict()` when no prefix is
+    # given, then writes the whole hyperparams field. so the Args/model_type='catboost' the clone
+    # inherited from the base was WIPED by this very call, train.py's argparse fell back to its own
+    # default ('xgboost'), and every catboost search trained xgboost instead. 82 trials across
+    # 2026-07-28 / 08-01 / 08-03 -- all green, all named train_catboost, all xgboost. it never
+    # surfaced because xgboost IS the argparse default, so the xgboost searches were correct.
+    pinned.set_parameters({"Args/model_type": a.model_type,
+                           "Args/dataset_id": a.dataset_id,
                            "Args/dataset_version": a.dataset_version or "",
                            "Args/seed": 42})
+    # and prove it took, rather than trusting the write. a search that silently tunes the wrong
+    # model costs a day of agent time and produces a winner filed under the wrong name.
+    _got = (pinned.get_parameters() or {}).get("Args/model_type")
+    if _got != a.model_type:
+        raise SystemExit(f"the pinned task says model_type={_got!r}, not {a.model_type!r}. "
+                         f"every trial would train the wrong model -- refusing to start.")
 
     opt = HyperParameterOptimizer(
         base_task_id=pinned.id,

@@ -57,7 +57,12 @@ from na_policy import encode_categoricals
 # ------------------------------------------------------------------ the three splits
 def split_time(ts):
     """arm A -- the honest one. TRAIN | embargo | VAL | embargo | TEST, by time."""
-    tr, va, te, info = three_way_split(ts, C.VAL_FRACTION, C.TEST_FRACTION, C.EMBARGO_SESSIONS)
+    # strategy="time" EXPLICITLY. without it this inherits config.SPLIT_STRATEGY, which is
+    # "bundle_random" -- so arm A, the honest TIME baseline this whole experiment compares
+    # against, became a second random draw. measured: arm A vs arm C test-set Jaccard 0.1770,
+    # against 0.1765 for two independent 30% draws. the experiment was confirming itself.
+    tr, va, te, info = three_way_split(ts, C.VAL_FRACTION, C.TEST_FRACTION, C.EMBARGO_SESSIONS,
+                                       strategy="time")
     return (np.flatnonzero(tr.to_numpy()),
             np.flatnonzero(va.to_numpy()),
             np.flatnonzero(te.to_numpy()), info)

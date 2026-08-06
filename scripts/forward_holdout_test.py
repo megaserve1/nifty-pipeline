@@ -111,7 +111,12 @@ def main():
     bundle_id = ts.dt.floor(a.bundle_freq)
 
     # ---- 1. reserve the forward referee H (last holdout_frac of time, with an embargo before it) ----
-    dev_m, _, H_m, hinfo = three_way_split(ts, 0.0, a.holdout_frac, C.EMBARGO_SESSIONS)
+    # strategy="time" EXPLICITLY -- H is the FORWARD hold-out, the referee for the whole
+    # experiment. inheriting config.SPLIT_STRATEGY made it a random draw: measured on v7.2, all
+    # 228,828 "forward" rows were EARLIER than dev.max(), and it printed ">= 2015-01-09 09:45"
+    # (the second candle in the file) as if that were a date cut. same mechanism as the SHAP bug.
+    dev_m, _, H_m, hinfo = three_way_split(ts, 0.0, a.holdout_frac, C.EMBARGO_SESSIONS,
+                                           strategy="time")
     dev_pos = _idx(dev_m.to_numpy())
     H_idx = _idx(H_m.to_numpy())
     print(f"\nforward referee H: last {a.holdout_frac:.0%} of time, >= {hinfo['test_start']}  "
@@ -123,7 +128,11 @@ def main():
     bun_dev = bundle_id.iloc[dev_pos].reset_index(drop=True)
 
     # ---- 2a. regime T: bundle + TIME. carve val as the last VAL_FRACTION of dev, with embargo ----
-    trT_m, _, vaT_m, _ = three_way_split(ts_dev, 0.0, C.VAL_FRACTION, C.EMBARGO_SESSIONS)
+    # regime T is labelled "the TIME fallback" -- so it must actually be one. inheriting the
+    # config default made T another bundle_random draw, and the headline "R vs T on the same
+    # forward rows" was random vs random (measured val-row overlap 14.7% = chance).
+    trT_m, _, vaT_m, _ = three_way_split(ts_dev, 0.0, C.VAL_FRACTION, C.EMBARGO_SESSIONS,
+                                         strategy="time")
     trT_idx = dev_pos[_idx(trT_m.to_numpy())]
     vaT_idx = dev_pos[_idx(vaT_m.to_numpy())]
 

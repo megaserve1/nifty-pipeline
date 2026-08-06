@@ -186,14 +186,22 @@ def stable_feature_shares(model, X: pd.DataFrame, features: list, model_type: st
             +/-       how much it wobbled between runs (std). small = trust it.
             top5_hits how many of the runs put it in the top 5. 5/5 = solid. 2/5 = noise.
     """
+    # COMPUTE SHAP ONCE, THEN SLICE IT. a row's shap values do not depend on which other rows
+    # were in the batch -- TreeExplainer walks the trees for that row alone. measured on the real
+    # v7 model: compute_shap(m, X.iloc[idx]) vs compute_shap(m, X)[idx] gave max abs diff 0.0 and
+    # array_equal feature shares. so the old loop called compute_shap n_boot+1 times for
+    # bit-identical numbers, and each call REBUILDS the explainer, which costs ~28s on xgboost and
+    # ~50s on catboost regardless of how many rows you hand it.
+    #   xgboost   6 x 27.8s + row time  =  213.6s  ->  37.1s
+    #   catboost  49.8s + 5 x 36.3s     =  231.0s  ->  49.8s
     rng = np.random.default_rng(seed)
     n = len(X)
     k = max(30, int(n * frac))
+    all_vals, _ = compute_shap(model, X, model_type, cat_features=cat_features)
     runs = []
     for _ in range(n_boot):
         idx = rng.choice(n, size=min(k, n), replace=False)
-        vals, _ = compute_shap(model, X.iloc[idx], model_type, cat_features=cat_features)
-        runs.append(feature_shares(vals, features, cls).set_index("feature")["share_%"])
+        runs.append(feature_shares(all_vals[idx], features, cls).set_index("feature")["share_%"])
 
     mat = pd.concat(runs, axis=1)
     top5 = [set(r.nlargest(5).index) for r in runs]

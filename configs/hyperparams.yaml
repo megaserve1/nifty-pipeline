@@ -87,7 +87,6 @@ catboost:
     l2_leaf_reg: 5.0
     min_data_in_leaf: 15                      # honoured under Lossguide only. not what stops growth here
     rsm: 0.8
-    colsample_bylevel: 0.7
     subsample: 0.7                            # forwarded only because bootstrap_type is not Bayesian
     bootstrap_type: MVS
     random_strength: 3.0

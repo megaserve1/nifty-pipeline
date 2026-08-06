@@ -60,7 +60,20 @@ def _load() -> dict:
     if not HP_FILE.exists():
         raise SystemExit(f"no hyperparameter file at {HP_FILE}\n"
                          f"  every model setting lives in there. it is not optional.")
-    return yaml.safe_load(HP_FILE.read_text()) or {}
+    hp = yaml.safe_load(HP_FILE.read_text()) or {}
+    # EVERY SEARCHED KNOB NEEDS A DEFAULT, or merge() drops it at `k not in params: continue`
+    # and HPO spends its whole budget varying something the model never sees. that is the same
+    # shape as the colsample_bynode bug, arriving through a different door.
+    for _m, _b in hp.items():
+        if not isinstance(_b, dict):
+            continue
+        _orphans = sorted(set(_b.get("search") or {}) - set(_b.get("default") or {}))
+        if _orphans:
+            raise SystemExit(
+                f"{HP_FILE.name}: {_m} searches {_orphans} but has no `default:` for them.\n"
+                f"  merge() only honours a key that exists in default:, so HPO would vary these\n"
+                f"  and the model would never see them. add a default, or drop them from search:.")
+    return hp
 
 
 def _tuned(model_type: str) -> dict:
