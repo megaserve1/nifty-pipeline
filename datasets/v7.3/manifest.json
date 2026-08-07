@@ -1,0 +1,354 @@
+{
+  "manifest_schema_version": 1,
+  "built_at": "2026-08-07T06:15:33+00:00",
+  "version": "v7.3",
+  "recipe_sha256": "ce37e7c3d17a9e060069fe67a157d8f30907b6bd5cd298d3b7f58e25ea6e9f33",
+  "parquet_sha256": "69aff276f24959078430f77725722b1977e3c886bb4379929e4838ce92627ac8",
+  "rows": 915347,
+  "n_features": 22,
+  "schema": [
+    {
+      "col": "unique_index",
+      "dtype": "int64"
+    },
+    {
+      "col": "timestamp",
+      "dtype": "datetime64[us]"
+    },
+    {
+      "col": "primary_label",
+      "dtype": "str"
+    },
+    {
+      "col": "weight",
+      "dtype": "float64"
+    },
+    {
+      "col": "weight_raw",
+      "dtype": "float64"
+    },
+    {
+      "col": "bar_conviction_bar_conviction",
+      "dtype": "str"
+    },
+    {
+      "col": "breakout_state_breakout_state",
+      "dtype": "str"
+    },
+    {
+      "col": "flow_state_bucket_buy_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_bucket_sell_footprints",
+      "dtype": "float64"
+    },
+    {
+      "col": "flow_state_Flow_State_Label",
+      "dtype": "str"
+    },
+    {
+      "col": "gap_state_gap_state",
+      "dtype": "str"
+    },
+    {
+      "col": "intraday_positioning_Intraday_Positioning",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_res_state",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_sup_state",
+      "dtype": "str"
+    },
+    {
+      "col": "level_proximity_range_state",
+      "dtype": "str"
+    },
+    {
+      "col": "momentum_state_state",
+      "dtype": "str"
+    },
+    {
+      "col": "stress_signal_label_combined",
+      "dtype": "str"
+    },
+    {
+      "col": "smc_structure_smc_state",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_structural_position_60m",
+      "dtype": "str"
+    },
+    {
+      "col": "structural_position_structural_position_1d",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_direction_trend_direction",
+      "dtype": "str"
+    },
+    {
+      "col": "trend_maturity_maturity_name",
+      "dtype": "str"
+    },
+    {
+      "col": "volume_quality_Volume_Quality",
+      "dtype": "str"
+    },
+    {
+      "col": "vol_level_vol_level_pct60d_ord",
+      "dtype": "float32"
+    },
+    {
+      "col": "vol_level_vol_level_ord",
+      "dtype": "float32"
+    },
+    {
+      "col": "fade_risk_fade_risk",
+      "dtype": "float64"
+    },
+    {
+      "col": "nifty_context_features__Expiry_Flag",
+      "dtype": "float64"
+    }
+  ],
+  "feature_columns": [
+    "bar_conviction_bar_conviction",
+    "breakout_state_breakout_state",
+    "flow_state_bucket_buy_footprints",
+    "flow_state_bucket_sell_footprints",
+    "flow_state_Flow_State_Label",
+    "gap_state_gap_state",
+    "intraday_positioning_Intraday_Positioning",
+    "level_proximity_res_state",
+    "level_proximity_sup_state",
+    "level_proximity_range_state",
+    "momentum_state_state",
+    "stress_signal_label_combined",
+    "smc_structure_smc_state",
+    "structural_position_structural_position_60m",
+    "structural_position_structural_position_1d",
+    "trend_direction_trend_direction",
+    "trend_maturity_maturity_name",
+    "volume_quality_Volume_Quality",
+    "vol_level_vol_level_pct60d_ord",
+    "vol_level_vol_level_ord",
+    "fade_risk_fade_risk",
+    "nifty_context_features__Expiry_Flag"
+  ],
+  "categorical_columns": [
+    "bar_conviction_bar_conviction",
+    "breakout_state_breakout_state",
+    "flow_state_Flow_State_Label",
+    "gap_state_gap_state",
+    "intraday_positioning_Intraday_Positioning",
+    "level_proximity_res_state",
+    "level_proximity_sup_state",
+    "level_proximity_range_state",
+    "momentum_state_state",
+    "stress_signal_label_combined",
+    "smc_structure_smc_state",
+    "structural_position_structural_position_60m",
+    "structural_position_structural_position_1d",
+    "trend_direction_trend_direction",
+    "trend_maturity_maturity_name",
+    "volume_quality_Volume_Quality"
+  ],
+  "label_col": "primary_label",
+  "weight_cols": [
+    "weight",
+    "weight_raw"
+  ],
+  "per_feature": [
+    {
+      "name": "v7_train",
+      "file": "bucket/V7_TRAIN.parquet",
+      "column_clocks": {},
+      "clock_minutes": 1,
+      "clock_source": "measured",
+      "clock_measured": {},
+      "clock_overrides": {},
+      "na_policy": "sentinel",
+      "na_treatment": {
+        "policy": "sentinel",
+        "for_model": "native",
+        "columns": {
+          "bar_conviction_bar_conviction": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "candle_pattern_live_label": {
+            "filled": "MISSING",
+            "n": 1
+          },
+          "level_proximity_range_state": {
+            "filled": "MISSING",
+            "n": 375
+          },
+          "momentum_state_state": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "pullback_severity_pullback_severity": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "structural_position_structural_position_120m": {
+            "filled": "MISSING",
+            "n": 156
+          },
+          "structural_position_structural_position_60m": {
+            "filled": "MISSING",
+            "n": 157
+          },
+          "structural_position_structural_position_1d": {
+            "filled": "MISSING",
+            "n": 375
+          },
+          "trend_direction_trend_direction": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "trend_maturity_maturity_name": {
+            "filled": "MISSING",
+            "n": 5
+          },
+          "volume_quality_Volume_Quality": {
+            "filled": "MISSING",
+            "n": 7500
+          },
+          "vol_level_vol_level_pct60d_ord": {
+            "kept_nan": true,
+            "n": 4059
+          },
+          "vol_level_vol_level_ord": {
+            "kept_nan": true,
+            "n": 7500
+          },
+          "candle_pattern_vote_sum": {
+            "kept_nan": true,
+            "n": 1
+          },
+          "dc_pos_275_bucket_features__dc_pos_275_bucket": {
+            "kept_nan": true,
+            "n": 275
+          }
+        },
+        "na_in_built_output": {
+          "bar_conviction_bar_conviction": 106500,
+          "breakout_state_breakout_state": 106500,
+          "candle_pattern_live_label": 106500,
+          "flow_state_bucket_buy_footprints": 106500,
+          "flow_state_bucket_sell_footprints": 106500,
+          "flow_state_acc_share60": 106500,
+          "flow_state_is_distribution": 106500,
+          "flow_state_Flow_State_Label": 106500,
+          "gap_state_gap_state": 106500,
+          "intraday_positioning_Intraday_Positioning": 106500,
+          "level_proximity_res_state": 106500,
+          "level_proximity_sup_state": 106500,
+          "level_proximity_range_state": 106500,
+          "momentum_state_state": 106500,
+          "pullback_severity_pullback_severity": 106500,
+          "stress_signal_label_combined": 106500,
+          "smc_structure_smc_state": 106500,
+          "structural_position_structural_position_120m": 106500,
+          "structural_position_structural_position_60m": 106500,
+          "structural_position_structural_position_1d": 106500,
+          "trend_direction_trend_direction": 106500,
+          "trend_maturity_maturity_name": 106500,
+          "volume_quality_Volume_Quality": 106500,
+          "vwap_microstructure_vwap_microstructure": 106500,
+          "vol_level_vol_level_pct60d_ord": 110559,
+          "vol_level_vol_level_ord": 114000,
+          "fade_risk_fade_risk": 106500,
+          "nifty_context_features__Expiry_Flag": 106500,
+          "candle_pattern_vote_sum": 106501,
+          "dc_pos_275_bucket_features__dc_pos_275_bucket": 106775
+        }
+      },
+      "categorical": [
+        "bar_conviction_bar_conviction",
+        "breakout_state_breakout_state",
+        "candle_pattern_live_label",
+        "flow_state_Flow_State_Label",
+        "gap_state_gap_state",
+        "intraday_positioning_Intraday_Positioning",
+        "level_proximity_res_state",
+        "level_proximity_sup_state",
+        "level_proximity_range_state",
+        "momentum_state_state",
+        "pullback_severity_pullback_severity",
+        "stress_signal_label_combined",
+        "smc_structure_smc_state",
+        "structural_position_structural_position_120m",
+        "structural_position_structural_position_60m",
+        "structural_position_structural_position_1d",
+        "trend_direction_trend_direction",
+        "trend_maturity_maturity_name",
+        "volume_quality_Volume_Quality",
+        "vwap_microstructure_vwap_microstructure"
+      ],
+      "parquet_sha256": "c1e7498ad2dd3609756957d4cd2f90e3f8d184bb276279da15382be61ce70dda",
+      "columns": [
+        "bar_conviction_bar_conviction",
+        "breakout_state_breakout_state",
+        "candle_pattern_live_label",
+        "flow_state_bucket_buy_footprints",
+        "flow_state_bucket_sell_footprints",
+        "flow_state_acc_share60",
+        "flow_state_is_distribution",
+        "flow_state_Flow_State_Label",
+        "gap_state_gap_state",
+        "intraday_positioning_Intraday_Positioning",
+        "level_proximity_res_state",
+        "level_proximity_sup_state",
+        "level_proximity_range_state",
+        "momentum_state_state",
+        "pullback_severity_pullback_severity",
+        "stress_signal_label_combined",
+        "smc_structure_smc_state",
+        "structural_position_structural_position_120m",
+        "structural_position_structural_position_60m",
+        "structural_position_structural_position_1d",
+        "trend_direction_trend_direction",
+        "trend_maturity_maturity_name",
+        "volume_quality_Volume_Quality",
+        "vwap_microstructure_vwap_microstructure",
+        "vol_level_vol_level_pct60d_ord",
+        "vol_level_vol_level_ord",
+        "fade_risk_fade_risk",
+        "nifty_context_features__Expiry_Flag",
+        "candle_pattern_vote_sum",
+        "dc_pos_275_bucket_features__dc_pos_275_bucket"
+      ]
+    }
+  ],
+  "labels_name": "L1",
+  "labels_sha256": "2261cc74765f60534b69f1aba86c76d551375bbf68c5b0c99b7d8e3a46383c0c",
+  "class_distribution": {
+    "NO_TRADE": 678530,
+    "EXIT_SUPER": 110369,
+    "EXIT_SUB": 60733,
+    "ENTRY_SUPER": 31665,
+    "EXIT_SMALL": 16620,
+    "ENTRY_SMALL": 10035,
+    "ENTRY_SUB": 7395
+  },
+  "zero_weight_classes": [],
+  "no_peek": {
+    "applied": "by feature team (pre_aligned -- plain reindex, NOT verified here)",
+    "rule": "bar_close",
+    "verified": false,
+    "pre_aligned_features": [
+      "v7_train"
+    ],
+    "tolerance_bars": 3
+  },
+  "built_by": "megaserve",
+  "status": "ready"
+}
