@@ -492,13 +492,13 @@ INDEX_COL       = "unique_index"
 # learning. only ENTRY_SUB and ENTRY_SMALL still gain more by firing than they lose by being
 # wrong, and they are 0.3% and 0.2% of rows, which bounds the damage.
 CLASS_WEIGHTS = {
-    "ENTRY_SUB":    18.113,   # rarest        (  2,324 rows,  0.3%)
-    "ENTRY_SMALL":  12.355,   #               (  1,563 rows,  0.2%)
-    "EXIT_SMALL":    3.927,   #               (  7,268 rows,  0.8%)
-    "ENTRY_SUPER":   2.796,   #               ( 19,031 rows,  2.1%)
-    "EXIT_SUB":      1.032,   #               ( 33,856 rows,  3.7%)
-    "EXIT_SUPER":    0.660,   #               ( 56,439 rows,  6.2%)
-    "NO_TRADE":      0.243,   # most common   (794,866 rows, 86.8%)
+    "ENTRY_SUB":    55.03,   # rarest        (  2,324 rows,  0.3%)
+    "ENTRY_SMALL":  15.01,   #               (  1,563 rows,  0.2%)
+    "EXIT_SMALL":    4.77,   #               (  7,268 rows,  0.8%)
+    "ENTRY_SUPER":   16.99,   #               ( 19,031 rows,  2.1%)
+    "EXIT_SUB":      3.13,   #               ( 33,856 rows,  3.7%)
+    "EXIT_SUPER":    4.01,   #               ( 56,439 rows,  6.2%)
+    "NO_TRADE":      0.10,   # most common   (794,866 rows, 86.8%)
                               # ^ STAYS DECIMAL ON PURPOSE (see above).
 }
 
