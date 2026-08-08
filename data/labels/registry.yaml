@@ -14,15 +14,24 @@
 
 L1:
   file: L1.csv
-  note: "20-bar forward window, exit z=2, entry z=none, 7 classes. the baseline."
+  # REPLACED 2026-08-08 -- the file changed under the same handle. same 1,021,847 rows, same span,
+  # still 7 classes, but the rules were TIGHTENED: NO_TRADE 74.5% -> 87.0% and every trade class
+  # roughly halved (ENTRY_SMALL 1.04% -> 0.17%, a sixth). versions v7, v7.3, v8 and v9 were built
+  # on the OLD file (sha 2261cc74...) and mean something different from anything built from now on.
+  # their manifests carry the old sha, so they stay distinguishable -- read labels_sha256, not the
+  # handle. CLASS_WEIGHTS were tuned for the old shares; they were recomputed for these.
+  note: "20-bar forward window, TIGHTENED 2026-08-08: NO_TRADE 87%, entries roughly halved vs the
+    original L1. 7 classes. the baseline."
   rows: 1021847
   n_classes: 7
   span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
   # NO_TRADE carries real weight, not 0 -- a zero-weight class contributes nothing to the loss and
   # the model could never learn to stay out of the market.
-  no_trade_weight: 0.0638
-  class_share: {NO_TRADE: 0.7454, EXIT_SUPER: 0.1209, EXIT_SUB: 0.0642, ENTRY_SUPER: 0.0336, EXIT_SMALL: 0.0177, ENTRY_SMALL: 0.0104, ENTRY_SUB: 0.0077}
-  sha256: "2261cc74765f60534b69f1aba86c76d551375bbf68c5b0c99b7d8e3a46383c0c"
+  no_trade_weight: 0.0689
+  class_share: {NO_TRADE: 0.8695, EXIT_SUPER: 0.0622, EXIT_SUB: 0.0358, ENTRY_SUPER: 0.0205, EXIT_SMALL: 0.0078, ENTRY_SUB: 0.0025, ENTRY_SMALL: 0.0017}
+  sha256: "14d620a605eaf4fc3b72b500c5c89d5d982f6c86806fd7b14b5a70a42ef90671"
+  # the file this replaced, so the old versions can still be traced by hash
+  previous_sha256: "2261cc74765f60534b69f1aba86c76d551375bbf68c5b0c99b7d8e3a46383c0c"
 
 L2:
   file: L2.csv

@@ -59,6 +59,50 @@ def load_registry() -> dict:
     return yaml.safe_load(C.REGISTRY.read_text()) or {}
 
 
+def _check_labels_match_registry(labels_name: str, labels_path) -> None:
+    """the file behind a handle must be the file the registry describes. refuse if it is not.
+
+    WHY. the handle is a NAME, not an identity. L1.csv was replaced on 2026-08-07 -- same name,
+    same row count, same span, but NO_TRADE went 74.5% -> 87.0% and ENTRY_SMALL 1.04% -> 0.17%.
+    the manifest records the real sha, so nothing lies, and v7 and v10 ARE distinguishable. but
+    NOTHING SAID SO at build time: both manifests read `labels_name: L1`, and you only find out
+    by diffing two hashes months later. config.py:33 records the same thing happening between
+    v1 and v2 -- "a lineage record that lies is worse than none".
+
+    so: a swapped file stops the build until someone re-registers it. that is the moment to look
+    at what changed, decide whether the weights still make sense, and write it down.
+    """
+    if not labels_name:
+        return
+    reg_file = C.LABELS_DIR / "registry.yaml"
+    if not reg_file.exists():
+        return
+    import yaml as _y
+    entry = (_y.safe_load(reg_file.read_text()) or {}).get(labels_name)
+    if not entry or not entry.get("sha256"):
+        return                                   # nothing claimed, nothing to contradict
+    on_disk = hashes.sha256_file(labels_path)
+    if on_disk == str(entry["sha256"]):
+        print(f"      sha256 {on_disk[:16]}  matches registry.yaml")
+        return
+    lab = pd.read_csv(labels_path, usecols=[C.LABEL_COL])
+    share = lab[C.LABEL_COL].astype(str).str.strip().value_counts(normalize=True)
+    old = entry.get("class_share") or {}
+    lines = [f"     {k:<14}{old.get(k, 0) * 100:>8.2f}%  ->{share.get(k, 0) * 100:>8.2f}%"
+             for k in sorted(set(old) | set(share.index))]
+    raise SystemExit(
+        f"\n{labels_path.name} is NOT the file registry.yaml describes for '{labels_name}'.\n"
+        f"  on disk  {on_disk}\n"
+        f"  registry {entry['sha256']}\n\n"
+        f"  the label policy changed under the same handle. class shares now:\n"
+        + "\n".join(lines) +
+        f"\n\n  building on this would produce a version reading 'labels_name: {labels_name}' that\n"
+        f"  means something different from every earlier version with that handle.\n\n"
+        f"  update data/labels/registry.yaml for {labels_name} (sha256, class_share,\n"
+        f"  no_trade_weight, note) and re-run. CLASS_WEIGHTS were tuned for the OLD shares --\n"
+        f"  check them against the new ones before you train.")
+
+
 def load_labels(labels_path) -> pd.DataFrame:
     """the spine. one row per minute. every feature gets bent to fit THIS.
 
@@ -211,6 +255,7 @@ def main():
     labels_name = recipe.get("labels_name")
     labels_path = C.labels_csv_for(labels_name) or C.labels_csv()
     print(f"[1/5] labels  <- {labels_path.name}   (label set: {labels_name or 'default'})")
+    _check_labels_match_registry(labels_name, labels_path)
     lab = load_labels(labels_path)
     label_ts = lab[C.LABEL_TS_COL]
     print(f"      {len(lab):,} minutes  ({label_ts.min()} -> {label_ts.max()})")

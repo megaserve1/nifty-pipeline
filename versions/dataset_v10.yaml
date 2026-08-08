@@ -1,0 +1,35 @@
+# recipe written by the selection UI. immutable -- make a new version instead.
+name: dataset_v10
+kind: selection
+parent: null
+created: '2026-08-08T15:58:48'
+author: ui
+selected_by: ui
+labels_name: L1
+date_range: full
+features:
+- v7_train
+feature_clocks: {}
+columns:
+- bar_conviction_bar_conviction
+- breakout_state_breakout_state
+- dc_pos_275_bucket_features__dc_pos_275_bucket
+- flow_state_bucket_buy_footprints
+- flow_state_bucket_sell_footprints
+- flow_state_is_distribution
+- gap_state_gap_state
+- intraday_positioning_Intraday_Positioning
+- level_proximity_sup_state
+- momentum_state_state
+- nifty_context_features__Expiry_Flag
+- pullback_severity_pullback_severity
+- smc_structure_smc_state
+- stress_signal_label_combined
+- structural_position_structural_position_1d
+- structural_position_structural_position_60m
+- trend_direction_trend_direction
+- trend_maturity_maturity_name
+- vol_level_vol_level_ord
+- vol_level_vol_level_pct60d_ord
+- volume_quality_Volume_Quality
+- vwap_microstructure_vwap_microstructure
