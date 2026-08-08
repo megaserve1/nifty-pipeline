@@ -69,49 +69,57 @@ xgboost:
     early_stopping_rounds: 0                  # 0 = off. only ARMED when a val split exists
     tree_method: hist                         # xgboost's own default. listed so merge() accepts it
   search:
-    learning_rate: [0.01, 0.02, 0.05, 0.002]
-    n_estimators: [2000, 4000, 6000]
+    learning_rate: [0.02, 0.05]
+    n_estimators: [4000, 6000]
     subsample: [0.6, 0.8, 1.0]
     colsample_bynode: [0.3, 0.5, 0.7, 1.0]
     max_delta_step: [0.0, 1.0, 5.0]
     max_bin: [128, 256, 512]
     min_child_weight: [20.0, 15.0, 5.0]
-    reg_lambda: [20.0, 5.0, 1.0, 0.1]
-    reg_alpha: [5.0, 1.0, 0.2, 0.0]
+    reg_lambda: [20.0, 5.0, 1.0]
+    reg_alpha: [5.0, 1.0, 0.2]
     gamma: [1.0, 0.5, 0.3]
 
 catboost:
   default:
+    # NO colsample_bytree HERE. catboost has no such parameter -- rsm below IS that knob
+    # (its alias is colsample_bylevel, not bytree). declaring it made every run refuse to start.
     n_estimators: 6000
     max_depth: 16                             # catboost's hard max. pinned so max_leaves decides the shape
     learning_rate: 0.02
     l2_leaf_reg: 5.0
     min_data_in_leaf: 15                      # honoured under Lossguide only. not what stops growth here
-    rsm: 0.8
-    subsample: 0.7                            # forwarded only because bootstrap_type is not Bayesian
+    rsm: 0.6
+    subsample: 1.0                            # forwarded only because bootstrap_type is not Bayesian
     bootstrap_type: MVS
-    random_strength: 3.0
+    random_strength: 4.0
     seed: 42
     grow_policy: Lossguide
-    max_leaves: 256                           # THE capacity knob. real rungs 64/128/256; >=360 does nothing
+    max_leaves: 256      # THE capacity knob. real rungs 64/128/256; >=360 does nothing
     early_stopping_rounds: 0                  # 0 = off, so all n_estimators are built
     # these four are catboost's OWN defaults, so adding them changes nothing on their own.
     # they are here so merge() will ACCEPT them -- a knob not listed in this block is dropped
     # without a word, which is why prateek's langevin/max_bin/feature_border_type never arrived.
     # NOT adding reg_lambda: it is a synonym of l2_leaf_reg above and catboost refuses both.
-    max_bin: 254                              # = border_count. bins per feature. catboost cpu default
-    feature_border_type: GreedyLogSum         # how those bins are chosen
-    langevin: false                           # lowercase. 'Langevin' is not a catboost parameter
-    diffusion_temperature: 10000              # does NOTHING unless langevin is true
+    max_bin: 128      # = border_count. bins per feature. catboost cpu default
+    has_time: true  
+    feature_border_type: UniformAndQuantiles         # how those bins are chosen
+    langevin: true                           # lowercase. 'Langevin' is not a catboost parameter
+    diffusion_temperature: 40000              # does NOTHING unless langevin is true
     # (xgboost's tree_method is listed in its own block below, same reason: merge() only accepts
     #  knobs named in this file, so an unlisted one is dropped without a word.)
   search:
-    max_leaves: [128, 256, 512]
-    max_depth: [6, 11, 15]
-    learning_rate: [0.02, 0.001, 0.05]
-    n_estimators: [2000, 4000, 6000]
-    l2_leaf_reg: [30.0, 10.0, 5.0, 15.0]
-    min_data_in_leaf: [50, 25, 15, 100]
-    rsm: [0.5, 0.6, 0.8, 1.0]
-    subsample: [0.5, 0.6, 0.8, 1.0]
-    random_strength: [5.0, 1.0, 0.5, 0.0]
+    max_leaves: [128, 256]
+    max_depth: [8, 10, 11, 12, 13, 15]
+    learning_rate: [0.5, 0.001, 0.01, 0.1]
+    n_estimators: [4000, 6000]
+    # reg_lambda is NOT a second knob -- it is catboost's alias for l2_leaf_reg, so searching both
+    # hands catboost two names for one setting and it refuses. the wider range is folded in here.
+    # reg_alpha is gone too: catboost has no L1 knob by that name, it is an xgboost parameter.
+    l2_leaf_reg: [30.0, 15.0, 10.0]
+    min_data_in_leaf: [50, 30]
+    subsample: [0.7, 0.9]
+    rsm: [0.5, 0.7]
+    random_strength: [5.0, 3.0]
+    grow_policy: [Lossguide, SymmetricTree, Depthwise]
+
