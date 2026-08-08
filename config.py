@@ -481,15 +481,25 @@ INDEX_COL       = "unique_index"
 #   NO_TRADE the top weight and the entries the bottom, silently.
 # NO_TRADE STAYS DECIMAL: round it to 0 and 74.5% of rows stop contributing to the loss, and the
 #   model can never learn "don't trade".
+# RECOMPUTED 2026-08-08 for v10 / the new L1. the old set was built on the OLD L1 (74.5%
+# NO_TRADE); the file was tightened to 86.8% and every trade class roughly halved, so the old
+# numbers were aimed at shares that no longer exist. row counts below are v10's manifest.
+#
+# THE OLD SET FLATTENED EVERY CLASS TO ~EQUAL MASS. that is what produced the over-trading:
+# measured on the OOS backtest, 2,629 of 3,290 trades were on minutes whose true label was
+# NO_TRADE -- 80% of every rupee of charges, Rs 5,258,000 of churn on a Rs 390,000 gross profit.
+# these weights leave NO_TRADE holding ~48% of the loss instead of 14%, so "sit out" stays worth
+# learning. only ENTRY_SUB and ENTRY_SMALL still gain more by firing than they lose by being
+# wrong, and they are 0.3% and 0.2% of rows, which bounds the damage.
 CLASS_WEIGHTS = {
-    "ENTRY_SUB":    4.31,     # rarest        (  7,845 rows,  0.8%)  exact 18.6078
-    "ENTRY_SMALL":  3.70,     #               ( 10,665 rows,  1.0%)  exact 13.6876
-    "EXIT_SMALL":    2.84,     #               ( 18,135 rows,  1.8%)  exact  8.0495
-    "ENTRY_SUPER":   2.06,     #               ( 34,380 rows,  3.4%)  exact  4.2460
-    "EXIT_SUB":      1.49,     #               ( 65,578 rows,  6.4%)  exact  2.2260
-    "EXIT_SUPER":    1.09,     #               (123,509 rows, 12.1%)  exact  1.1819
-    "NO_TRADE":      0.44,  # most common  (761,735 rows, 74.5%)  exact  0.1916
-                            # ^ STAYS DECIMAL ON PURPOSE (see above).
+    "ENTRY_SUB":    18.113,   # rarest        (  2,324 rows,  0.3%)
+    "ENTRY_SMALL":  12.355,   #               (  1,563 rows,  0.2%)
+    "EXIT_SMALL":    3.927,   #               (  7,268 rows,  0.8%)
+    "ENTRY_SUPER":   2.796,   #               ( 19,031 rows,  2.1%)
+    "EXIT_SUB":      1.032,   #               ( 33,856 rows,  3.7%)
+    "EXIT_SUPER":    0.660,   #               ( 56,439 rows,  6.2%)
+    "NO_TRADE":      0.243,   # most common   (794,866 rows, 86.8%)
+                              # ^ STAYS DECIMAL ON PURPOSE (see above).
 }
 
 # ---- what a feature's NaN MEANS ------------------------------------------------
