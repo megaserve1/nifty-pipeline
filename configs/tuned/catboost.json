@@ -1,17 +1,22 @@
 {
   "model_type": "catboost",
-  "source": "configs/hparams_catboost_braked.yaml",
+  "source": "uploaded params_prateek.yaml",
   "applied_by": "ui",
   "params": {
+    "n_estimators": 6000,
+    "max_depth": 15,
+    "learning_rate": 0.02,
+    "l2_leaf_reg": 30.0,
+    "min_data_in_leaf": 30,
+    "rsm": 0.6,
+    "subsample": 1.0,
+    "random_strength": 4.0,
+    "seed": 42,
     "grow_policy": "Lossguide",
     "max_leaves": 256,
-    "max_depth": 8,
-    "learning_rate": 0.02,
-    "l2_leaf_reg": 10.0,
-    "min_data_in_leaf": 50,
-    "rsm": 0.6,
-    "subsample": 0.6,
-    "random_strength": 1.0,
-    "early_stopping_rounds": 200
+    "early_stopping_rounds": 0,
+    "feature_border_type": "UniformAndQuantiles",
+    "langevin": true,
+    "diffusion_temperature": 30000.0
   }
 }

@@ -482,13 +482,13 @@ INDEX_COL       = "unique_index"
 # NO_TRADE STAYS DECIMAL: round it to 0 and 74.5% of rows stop contributing to the loss, and the
 #   model can never learn "don't trade".
 CLASS_WEIGHTS = {
-    "ENTRY_SUB":    19,     # rarest        (  7,845 rows,  0.8%)  exact 18.6078
-    "ENTRY_SMALL":  14,     #               ( 10,665 rows,  1.0%)  exact 13.6876
-    "EXIT_SMALL":    8,     #               ( 18,135 rows,  1.8%)  exact  8.0495
-    "ENTRY_SUPER":   4,     #               ( 34,380 rows,  3.4%)  exact  4.2460
-    "EXIT_SUB":      2,     #               ( 65,578 rows,  6.4%)  exact  2.2260
-    "EXIT_SUPER":    1,     #               (123,509 rows, 12.1%)  exact  1.1819
-    "NO_TRADE":      0.192,  # most common  (761,735 rows, 74.5%)  exact  0.1916
+    "ENTRY_SUB":    4.31,     # rarest        (  7,845 rows,  0.8%)  exact 18.6078
+    "ENTRY_SMALL":  3.70,     #               ( 10,665 rows,  1.0%)  exact 13.6876
+    "EXIT_SMALL":    2.84,     #               ( 18,135 rows,  1.8%)  exact  8.0495
+    "ENTRY_SUPER":   2.06,     #               ( 34,380 rows,  3.4%)  exact  4.2460
+    "EXIT_SUB":      1.49,     #               ( 65,578 rows,  6.4%)  exact  2.2260
+    "EXIT_SUPER":    1.09,     #               (123,509 rows, 12.1%)  exact  1.1819
+    "NO_TRADE":      0.44,  # most common  (761,735 rows, 74.5%)  exact  0.1916
                             # ^ STAYS DECIMAL ON PURPOSE (see above).
 }
 

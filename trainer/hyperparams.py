@@ -99,6 +99,109 @@ def tuned_sha(model_type: str) -> str | None:
     return json.loads(p.read_text()).get("dataset_sha256")
 
 
+def _infer_type(v):
+    """the type of a value the yaml has never seen. everything arrives as a STRING from argparse
+    and ClearML, so "true" must become a bool and "128" an int -- or the library gets a string
+    where it wants a number and either raises or, worse, silently misreads it."""
+    if isinstance(v, bool):
+        return bool
+    if isinstance(v, (int, float)):
+        return type(v)
+    s = str(v).strip()
+    if s.lower() in ("true", "false"):
+        return bool
+    try:
+        f = float(s)
+    except (TypeError, ValueError):
+        return str
+    return int if (f.is_integer() and "." not in s and "e" not in s.lower()) else float
+
+
+def _synonym_groups(model_type: str) -> list:
+    """knobs that are TWO NAMES FOR ONE SETTING. catboost RAISES if both are passed:
+    'only one of the parameters border_count, max_bin should be initialized.'
+
+    read out of catboost's own source so it cannot drift from the library we actually run.
+    """
+    if model_type != "catboost":
+        return []
+    try:
+        import inspect
+        import re
+        import catboost.core as core
+        src = inspect.getsource(core._process_synonyms_groups)
+        return [[n.strip().strip("'\"") for n in g.split(",")]
+                for g in re.findall(r"_process_synonyms_group\(\[([^\]]+)\]", src)]
+    except Exception:
+        # if catboost changes its internals, fall back to the pairs we have hit for real
+        return [["border_count", "max_bin"], ["l2_leaf_reg", "reg_lambda"],
+                ["rsm", "colsample_bylevel"], ["depth", "max_depth"],
+                ["od_wait", "early_stopping_rounds"], ["max_leaves", "num_leaves"],
+                ["min_data_in_leaf", "min_child_samples"], ["learning_rate", "eta"],
+                ["random_seed", "random_state"],
+                ["iterations", "n_estimators", "num_boost_round", "num_trees"]]
+
+
+def canonical_names(model_type: str, given: dict, quiet: bool = True) -> dict:
+    """rename a user's knob to the spelling the yaml uses, so their VALUE survives.
+
+    border_count and max_bin are one setting. if the yaml says max_bin: 254 and the user says
+    border_count: 128, dropping either name loses something: drop theirs and you train on 254
+    (which is what happened on 2026-08-07), drop the yaml's and catboost gets an unknown default.
+    so we KEEP THEIR VALUE UNDER THE YAML'S NAME -> max_bin: 128.
+    """
+    groups = _synonym_groups(model_type)
+    if not groups:
+        return dict(given)
+    try:
+        yaml_names = set(_load().get(model_type, {}).get("default") or {})
+    except Exception:
+        yaml_names = set()
+    out = dict(given)
+    for g in groups:
+        here = [n for n in g if n in out]
+        if not here:
+            continue
+        target = next((n for n in g if n in yaml_names), here[0])
+        if len(here) > 1 and len({str(out[n]) for n in here}) > 1:
+            raise SystemExit(
+                f"{model_type}: {' and '.join(here)} are the SAME setting under different names, "
+                f"and you gave different values: {({n: out[n] for n in here})}. "
+                f"catboost refuses both. pick one.")
+        for n in here:
+            if n != target:
+                v = out.pop(n)
+                out[target] = v
+                if not quiet:
+                    print(f"        {n}={v!r} -> {target}={v!r}  (same knob, the name "
+                          f"{HP_FILE.name} uses)")
+    return out
+
+
+def resolve_synonyms(model_type: str, params: dict, quiet: bool = True) -> dict:
+    """last line of defence: never hand the library two names for one setting."""
+    groups = _synonym_groups(model_type)
+    if not groups:
+        return params
+    try:
+        yaml_names = set(_load().get(model_type, {}).get("default") or {})
+    except Exception:
+        yaml_names = set()
+    out = dict(params)
+    for g in groups:
+        present = [n for n in g if n in out]
+        if len(present) < 2:
+            continue
+        keep = next((n for n in present if n in yaml_names), present[0])
+        for n in present:
+            if n != keep:
+                out.pop(n)
+        if not quiet:
+            print(f"        kept {keep}={out[keep]!r} (dropped the duplicate name(s) "
+                  f"{[n for n in present if n != keep]})")
+    return out
+
+
 def defaults(model_type: str, quiet: bool = True) -> dict:
     """the settings this model trains with unless something overrides them.
 
@@ -118,12 +221,22 @@ def defaults(model_type: str, quiet: bool = True) -> dict:
     d = dict(hp[model_type].get("default") or {})
     if not d:
         raise SystemExit(f"'{model_type}' has no `default:` block in {HP_FILE.name}")
-    tuned = {k: v for k, v in _tuned(model_type).items() if k in d}   # only known knobs
+    # EVERY KNOB THE LIBRARY ACCEPTS GETS THROUGH -- this block used to be
+    #     tuned = {k: v for k, v in _tuned(...).items() if k in d}
+    # which silently discarded anything not written in the yaml. border_count=128 was dropped that
+    # way on 2026-08-07 and the run finished 6000 iterations on the wrong value with no warning.
+    # the yaml is the BASELINE, not the whitelist. what a knob IS gets checked against the real
+    # library signature in build_model, which errors on a genuine typo instead of ignoring it.
+    tuned = canonical_names(model_type, _tuned(model_type), quiet=quiet)
     if tuned and not quiet:
+        extra = sorted(set(tuned) - set(d))
         print(f"      hyperparams[{model_type}]: using {len(tuned)} TUNED value(s) from "
               f"configs/tuned/{model_type}.json  ({tuned})")
-    d.update(tuned)
-    return d
+        if extra:
+            print(f"        {len(extra)} not in {HP_FILE.name}, passed to the library as given: "
+                  f"{extra}")
+    d.update(tuned)                          # the user's value wins, under the yaml's spelling
+    return resolve_synonyms(model_type, d, quiet=quiet)
 
 
 def merge(model_type: str, overrides: dict) -> dict:
@@ -146,9 +259,16 @@ def merge(model_type: str, overrides: dict) -> dict:
         # STRING -- so a cloned task hands the un-overridden knobs back as ''. treating '' as a
         # value meant int('') -> SystemExit on EVERY agent run the moment the base task was
         # registered with generated defaults. '' is silence, not a zero.
-        if v is None or (isinstance(v, str) and v.strip() == "") or k not in params:
+        if v is None or (isinstance(v, str) and v.strip() == ""):
             continue
-        want = type(params[k])
+        # A KNOB NOT IN THE YAML IS STILL A KNOB. this used to be `or k not in params: continue`,
+        # which silently threw away anything the yaml did not happen to list. the yaml gives us
+        # the TYPE when it knows the knob; when it does not, work the type out from the value
+        # itself. whether the name is real is settled against the library in build_model.
+        if k in params:
+            want = type(params[k])
+        else:
+            want = _infer_type(v)
         try:
             if want is bool:
                 params[k] = str(v).strip().lower() in ("1", "true", "yes")
@@ -167,10 +287,13 @@ def merge(model_type: str, overrides: dict) -> dict:
             else:
                 params[k] = str(v)
         except (TypeError, ValueError):
-            raise SystemExit(f"--{k}={v!r} is not a valid {want.__name__} "
-                             f"(configs/hyperparams.yaml has {model_type}.default.{k} = "
-                             f"{params[k]!r})")
-    return params
+            known = (f"configs/hyperparams.yaml has {model_type}.default.{k} = {params[k]!r}"
+                     if k in params else f"{k} is not in configs/hyperparams.yaml; "
+                                         f"its type was read from the value you gave")
+            raise SystemExit(f"--{k}={v!r} is not a valid {want.__name__}  ({known})")
+    # AFTER the overrides, not before -- an override can introduce the second name of a pair
+    # (yaml says max_bin, someone passes border_count) and catboost refuses both.
+    return resolve_synonyms(model_type, params, quiet=False)
 
 
 def all_param_names() -> list:

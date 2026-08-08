@@ -67,6 +67,7 @@ xgboost:
     gamma: 0.3
     seed: 42
     early_stopping_rounds: 0                  # 0 = off. only ARMED when a val split exists
+    tree_method: hist                         # xgboost's own default. listed so merge() accepts it
   search:
     learning_rate: [0.01, 0.02, 0.05, 0.002]
     n_estimators: [2000, 4000, 6000]
@@ -94,6 +95,16 @@ catboost:
     grow_policy: Lossguide
     max_leaves: 256                           # THE capacity knob. real rungs 64/128/256; >=360 does nothing
     early_stopping_rounds: 0                  # 0 = off, so all n_estimators are built
+    # these four are catboost's OWN defaults, so adding them changes nothing on their own.
+    # they are here so merge() will ACCEPT them -- a knob not listed in this block is dropped
+    # without a word, which is why prateek's langevin/max_bin/feature_border_type never arrived.
+    # NOT adding reg_lambda: it is a synonym of l2_leaf_reg above and catboost refuses both.
+    max_bin: 254                              # = border_count. bins per feature. catboost cpu default
+    feature_border_type: GreedyLogSum         # how those bins are chosen
+    langevin: false                           # lowercase. 'Langevin' is not a catboost parameter
+    diffusion_temperature: 10000              # does NOTHING unless langevin is true
+    # (xgboost's tree_method is listed in its own block below, same reason: merge() only accepts
+    #  knobs named in this file, so an unlisted one is dropped without a word.)
   search:
     max_leaves: [128, 256, 512]
     max_depth: [6, 11, 15]

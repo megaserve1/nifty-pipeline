@@ -1,20 +1,21 @@
 {
   "model_type": "xgboost",
-  "source": "configs/hparams_catboost_braked.yaml",
+  "source": "uploaded params_prateek.yaml",
   "applied_by": "ui",
   "params": {
-    "grow_policy": "lossguide",
-    "max_leaves": 256,
-    "max_depth": 8,
+    "n_estimators": 6000,
     "learning_rate": 0.02,
+    "max_depth": 7,
+    "min_child_weight": 50,
     "reg_lambda": 10.0,
-    "reg_alpha": 0.2,
-    "min_child_weight": 48.0,
-    "colsample_bytree": 0.6,
-    "colsample_bynode": 0.5,
-    "subsample": 0.6,
-    "gamma": 0.3,
-    "max_delta_step": 1.0,
-    "early_stopping_rounds": 200
+    "reg_alpha": 0.5,
+    "gamma": 2.0,
+    "colsample_bytree": 0.8,
+    "subsample": 0.8,
+    "max_delta_step": 3,
+    "tree_method": "hist",
+    "max_bin": 128,
+    "seed": 42,
+    "early_stopping_rounds": 0
   }
 }

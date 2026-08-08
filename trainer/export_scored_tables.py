@@ -521,6 +521,19 @@ def main():
     # argparse at import; parsing first means a cloned task's Args/ overrides are silently lost.
     _base_name = (getattr(C, "BASE_OOS_NAME", "score_oos (base)") if a.mode == "oos"
                   else getattr(C, "BASE_EXPORT_NAME", "export_scored_tables (base)"))
+
+    # THE AGENT INSTALLS THE TASK'S RECORDED PACKAGES, NOT requirements.txt. clearml builds that
+    # list by scanning what THIS SCRIPT IMPORTS -- and the backtest runs in a SUBPROCESS, so
+    # nothing here ever imports its excel writer and clearml never recorded it. result on
+    # 2026-08-06: the backtest computed every number, printed the whole report, then died on
+    # "No module named 'openpyxl'" -- on two different agents, twice, while requirements.txt had
+    # carried both since that morning. declaring them here is the only thing that reaches an agent.
+    # MUST be before Task.init.
+    for _pkg in ("openpyxl", "xlsxwriter"):
+        try:
+            Task.add_requirements(_pkg)
+        except Exception:
+            pass                            # older clearml, or a local run with no task
     task = Task.init(project_name=C.CLEARML_PROJECT,
                      task_name=_base_name,
                      task_type=Task.TaskTypes.qc,

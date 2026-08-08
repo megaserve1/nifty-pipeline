@@ -1,15 +1,15 @@
 # LOCK -- written by core/publish_version.py after a successful publish.
 # This is what makes 'which exact data did model X train on?' answerable.
-version: v7
-clearml_dataset_id: b4055e2398724cc397dab3d7ec0e662b
-clearml_version: '7.0'
-gcs_url: gs://live-nifty-pipeline/final_pipeline/dvc/files/md5/8f/840364fa3487ebee79421647e59f05
-git_sha: 862fe53351590454af0c1e6e8a3f5a8b7c79d50c
-parquet_sha256: 34d1a9da906bd508cf01f5bf710c63cf4838a72a3a290cf29d005c12e28b8f94
-recipe_sha256: 576cbdd4dacf2a5cc9dded89e058d4b3706fe91a7138fc5c2dc80039fdb9f51d
+version: v7.3
+clearml_dataset_id: e32bcc496ae64fdba4f73c0109139285
+clearml_version: '7.3'
+gcs_url: gs://live-nifty-pipeline/final_pipeline/dvc/files/md5/00/2c40710674df51d95168db3b83d76f
+git_sha: ec0fd2689560b29c2229ecd50eec0ba10f33a229
+parquet_sha256: 69aff276f24959078430f77725722b1977e3c886bb4379929e4838ce92627ac8
+recipe_sha256: ce37e7c3d17a9e060069fe67a157d8f30907b6bd5cd298d3b7f58e25ea6e9f33
 labels_sha256: 2261cc74765f60534b69f1aba86c76d551375bbf68c5b0c99b7d8e3a46383c0c
 rows: 915347
-n_features: 30
+n_features: 22
 per_feature:
 - name: v7_train
   file: bucket/V7_TRAIN.parquet
@@ -152,4 +152,4 @@ per_feature:
   - nifty_context_features__Expiry_Flag
   - candle_pattern_vote_sum
   - dc_pos_275_bucket_features__dc_pos_275_bucket
-published_at: '2026-08-06T12:10:23+00:00'
+published_at: '2026-08-07T06:16:50+00:00'

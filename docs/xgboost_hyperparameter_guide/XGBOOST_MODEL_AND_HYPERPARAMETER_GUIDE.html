@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>XGBoost Model and Hyperparameter Guide — NIFTY 7-Class Pipeline</title>
+  <style>
+    :root {
+      --ink: #172536;
+      --muted: #536575;
+      --line: #d7e0e7;
+      --soft: #f5f8fa;
+      --blue: #1769aa;
+      --blue-soft: #eaf4fb;
+      --orange: #e87524;
+      --orange-soft: #fff3e9;
+      --green: #157347;
+      --green-soft: #eaf7f0;
+      --red: #a93636;
+      --red-soft: #fff0f0;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      font-size: 10.2pt;
+      line-height: 1.5;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    @page { size: A4; margin: 14mm 14mm 15mm; }
+    main { max-width: 930px; margin: 0 auto; padding: 28px 34px 54px; }
+    h1, h2, h3 { color: #102a43; line-height: 1.18; break-after: avoid-page; }
+    h1 { margin: 0 0 12px; font-size: 29pt; letter-spacing: -.6px; }
+    h2 {
+      margin: 32px 0 13px;
+      padding-bottom: 7px;
+      border-bottom: 2px solid #d7e9f5;
+      font-size: 18.5pt;
+      letter-spacing: -.2px;
+    }
+    h3 { margin: 20px 0 8px; font-size: 13pt; }
+    p { margin: 7px 0 10px; }
+    ul, ol { margin: 7px 0 12px; padding-left: 22px; }
+    li { margin: 3px 0; }
+    strong { color: #102a43; }
+    a { color: var(--blue); text-decoration: none; overflow-wrap: anywhere; }
+    code {
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #eef3f6;
+      color: #163a59;
+      font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+      font-size: .92em;
+    }
+    .cover {
+      min-height: 255mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8mm 4mm 4mm;
+      break-after: page;
+    }
+    .cover-rule {
+      width: 88px;
+      height: 8px;
+      margin-bottom: 28px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--orange), #ffb36b);
+    }
+    .kicker {
+      margin-bottom: 15px;
+      color: var(--orange);
+      font-size: 10.5pt;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      max-width: 690px;
+      margin: 0 0 26px;
+      color: var(--muted);
+      font-size: 15pt;
+      line-height: 1.45;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .pill {
+      padding: 6px 10px;
+      border: 1px solid #cddce7;
+      border-radius: 999px;
+      background: #f6fafc;
+      color: #334e68;
+      font-size: 9pt;
+      font-weight: 600;
+    }
+    .cover-note {
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9.2pt;
+    }
+    .summary-grid, .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+    .card {
+      padding: 13px 14px;
+      border: 1px solid #dce6ed;
+      border-radius: 10px;
+      background: #fbfdfe;
+      break-inside: avoid;
+    }
+    .card b { display: block; margin-bottom: 4px; color: var(--blue); }
+    .callout {
+      margin: 14px 0;
+      padding: 13px 15px;
+      border-left: 4px solid var(--blue);
+      border-radius: 7px;
+      background: var(--blue-soft);
+      break-inside: avoid;
+    }
+    .callout.orange { border-left-color: var(--orange); background: var(--orange-soft); }
+    .callout.green { border-left-color: var(--green); background: var(--green-soft); }
+    .callout.red { border-left-color: var(--red); background: var(--red-soft); }
+    .callout > :first-child { margin-top: 0; }
+    .callout > :last-child { margin-bottom: 0; }
+    .formula {
+      margin: 12px 0;
+      padding: 12px 14px;
+      border: 1px solid #d7e0e7;
+      border-radius: 8px;
+      background: #f7f9fb;
+      color: #17324d;
+      font-family: "DejaVu Sans Mono", "Liberation Mono", monospace;
+      font-size: 9.1pt;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      break-inside: avoid;
+    }
+    .flow {
+      margin: 16px 0;
+      padding: 15px;
+      border: 1px solid #d8e3eb;
+      border-radius: 10px;
+      background: #fbfdff;
+      break-inside: avoid;
+    }
+    .flow-row {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 9px;
+      padding: 6px 0;
+    }
+    .num {
+      display: inline-flex;
+      width: 25px;
+      height: 25px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 8.7pt;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      margin: 12px 0 18px;
+      border-collapse: collapse;
+      font-size: 8.8pt;
+    }
+    thead { display: table-header-group; }
+    tr { break-inside: avoid; }
+    th, td {
+      padding: 7px 8px;
+      border: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: #edf4f8; color: #243b53; font-weight: 700; }
+    tbody tr:nth-child(even) { background: #fafcfd; }
+    .compact-table { font-size: 8.1pt; line-height: 1.35; }
+    .compact-table th, .compact-table td { padding: 3px 6px; }
+    .tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #e9f3fa;
+      color: #155a8a;
+      font-size: 8pt;
+      font-weight: 700;
+    }
+    .tag.keep { background: #eaf7f0; color: #16633f; }
+    .tag.advanced { background: #fff3e9; color: #9b4d16; }
+    .tag.ignore { background: #f2f3f5; color: #59636e; }
+    .page-break { break-before: page; }
+    .muted { color: var(--muted); }
+    .small { font-size: 8.7pt; }
+    .toc { columns: 2; column-gap: 32px; }
+    @media print {
+      main { max-width: none; padding: 0; }
+      h2 { margin-top: 26px; }
+    }
+    @media screen and (max-width: 720px) {
+      main { padding: 22px 18px 42px; }
+      .summary-grid, .two-col { grid-template-columns: 1fr; }
+      .toc { columns: 1; }
+      .cover { min-height: auto; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="cover">
+    <div>
+      <div class="cover-rule"></div>
+      <div class="kicker">Technical Code-Review Study Guide</div>
+      <h1>XGBoost Model &amp;<br>Hyperparameter Guide</h1>
+      <p class="subtitle">
+        A plain-language but technically correct explanation of how XGBoost builds trees,
+        what every useful parameter controls, and how those controls apply to the NIFTY
+        seven-class training pipeline.
+      </p>
+      <div class="pill-row">
+        <span class="pill">7-class multi:softprob</span>
+        <span class="pill">hist tree method</span>
+        <span class="pill">lossguide growth</span>
+        <span class="pill">weighted training</span>
+        <span class="pill">Optuna HPO</span>
+      </div>
+    </div>
+    <div class="cover-note">
+      <p><strong>Prepared for:</strong> NIFTY Final Pipeline code review</p>
+      <p><strong>Generated:</strong> 6 August 2026</p>
+      <p><strong>Evidence:</strong> official XGBoost documentation plus the current local pipeline configuration.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Technical summary</h2>
+    <p>
+      XGBoost repeatedly adds small tree-based corrections to seven class scores. Each proposed
+      split must pass two separate tests: <strong>enough statistical evidence</strong>
+      (<code>min_child_weight</code>) and <strong>enough reduction in the internal training
+      objective</strong> (<code>gamma</code>). L1, L2 and <code>max_delta_step</code> control
+      the leaf correction; <code>learning_rate</code> controls how much of that correction is added.
+    </p>
+    <div class="summary-grid">
+      <div class="card"><b>min_child_weight</b>Does each new child contain enough accumulated Hessian? It is not generally a row count.</div>
+      <div class="card"><b>gamma</b>Does this split reduce the regularized training objective enough? It is not accuracy or trading profit.</div>
+      <div class="card"><b>L2 / reg_lambda</b>Smoothly shrinks every leaf correction by increasing its denominator.</div>
+      <div class="card"><b>L1 / reg_alpha</b>Soft-thresholds weak leaf corrections and can make a weak leaf output exactly zero.</div>
+      <div class="card"><b>subsample</b>Uses a fresh random fraction of training rows in each boosting round. It is not a train/test split.</div>
+      <div class="card"><b>learning_rate</b>Multiplies each new tree contribution. Smaller steps normally require more boosting rounds.</div>
+      <div class="card"><b>max_delta_step</b>Caps a single raw leaf correction before learning-rate shrinkage.</div>
+      <div class="card"><b>max_bin</b>Controls histogram split resolution, not tree count, depth, classes or SHAP precision.</div>
+    </div>
+    <div class="callout orange">
+      <strong>Three meanings of “improvement” exist in this pipeline.</strong>
+      Tree construction improves weighted training log-loss plus regularization. Early stopping
+      watches weighted validation <code>mlogloss</code>. Optuna ranks completed trials using
+      validation <code>trading_cost</code>. These are related, but not identical.
+    </div>
+  </section>
+
+  <section>
+    <h2>Reading path</h2>
+    <ol class="toc">
+      <li>How the seven-class model works</li>
+      <li>Objective, gradient and Hessian</li>
+      <li><code>min_child_weight</code></li>
+      <li><code>gamma</code> and split gain</li>
+      <li>L1 and L2 regularization</li>
+      <li>Learning rate and tree count</li>
+      <li>Row and feature sampling</li>
+      <li>Tree shape controls</li>
+      <li><code>max_delta_step</code></li>
+      <li><code>max_bin</code> and histograms</li>
+      <li>Current effective configuration</li>
+      <li>Complete parameter catalog</li>
+      <li>Recommended staged HPO</li>
+      <li>Diagnostics and review questions</li>
+    </ol>
+  </section>
+
+  <section class="page-break">
+    <h2>1. How the seven-class XGBoost model works</h2>
+    <p>
+      Each dataset row is one independent training example containing selected feature values
+      and one label such as <code>ENTRY_SUB</code>, <code>EXIT_SUPER</code> or
+      <code>NO_TRADE</code>. The model keeps <strong>seven raw class scores</strong> for that row.
+      Softmax converts those scores into seven probabilities that add to one.
+    </p>
+    <div class="flow">
+      <div class="flow-row"><span class="num">1</span><div><strong>Start from current class scores.</strong> Early in training, scores are close to a common baseline.</div></div>
+      <div class="flow-row"><span class="num">2</span><div><strong>Measure current mistakes.</strong> Weighted multiclass log-loss produces gradients and Hessians.</div></div>
+      <div class="flow-row"><span class="num">3</span><div><strong>Build correction trees.</strong> Candidate feature splits are scored from accumulated gradients and Hessians.</div></div>
+      <div class="flow-row"><span class="num">4</span><div><strong>Reject weak structure.</strong> Child weight, gamma, depth, leaf limits, L1 and L2 act as brakes.</div></div>
+      <div class="flow-row"><span class="num">5</span><div><strong>Limit and shrink the correction.</strong> Delta step caps it; learning rate scales it.</div></div>
+      <div class="flow-row"><span class="num">6</span><div><strong>Repeat.</strong> The next round recalculates gradients and Hessians from updated probabilities.</div></div>
+    </div>
+    <div class="callout">
+      <strong>Tree-count meaning:</strong> <code>n_estimators=6000</code> means at most 6,000
+      boosting rounds—not simply 6,000 physical trees. With one output tree per class and seven
+      classes, the ceiling is approximately <strong>42,000 physical trees</strong>. Early stopping
+      normally reduces the number used for prediction.
+    </div>
+  </section>
+
+  <section>
+    <h2>2. What the model is actually optimizing</h2>
+    <p>XGBoost balances predictive fit against tree complexity:</p>
+    <div class="formula">Objective = weighted multiclass log-loss
+          + gamma × number_of_leaves
+          + 0.5 × reg_lambda × Σ(leaf_score²)
+          + reg_alpha × Σ|leaf_score|</div>
+    <table>
+      <thead><tr><th>Part</th><th>Plain meaning</th><th>Controlled by</th></tr></thead>
+      <tbody>
+        <tr><td>Weighted multiclass log-loss</td><td>How strongly seven probabilities disagree with the true class after row/class weights.</td><td><code>objective</code>, data and sample weights</td></tr>
+        <tr><td>Tree-size cost</td><td>A fixed price for additional terminal leaves.</td><td><code>gamma</code></td></tr>
+        <tr><td>Squared leaf penalty</td><td>Continuous pressure against large leaf corrections.</td><td><code>reg_lambda</code> / L2</td></tr>
+        <tr><td>Absolute leaf penalty</td><td>Threshold pressure that can zero a weak leaf correction.</td><td><code>reg_alpha</code> / L1</td></tr>
+      </tbody>
+    </table>
+    <div class="callout red">
+      <strong>The model does not directly optimize trading cost.</strong> Trading cost is calculated
+      after prediction and is used by Optuna to compare completed trials. Inside each tree, split gain
+      comes from weighted multiclass logistic loss plus regularization.
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Gradient and Hessian: the two statistics used everywhere</h2>
+    <table>
+      <thead><tr><th>Statistic</th><th>Easy meaning</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Gradient, g</strong></td><td>Direction and strength of the correction needed for a class score.</td><td>Pushes a leaf score up or down.</td></tr>
+        <tr><td><strong>Hessian, h</strong></td><td>Curvature of the loss around the current prediction.</td><td>Acts as second-order statistical mass in leaf values, split gain and <code>min_child_weight</code>.</td></tr>
+      </tbody>
+    </table>
+    <div class="formula">gradient(i,c) = sample_weight(i)
+              × [ probability(i,c) − indicator(true_class = c) ]
+
+hessian(i,c) ≈ 2 × sample_weight(i)
+              × probability(i,c) × [1 − probability(i,c)]</div>
+    <p>
+      The class-based sample weight multiplies both statistics. High-weight rare-class rows therefore
+      influence split eligibility and leaf corrections more strongly than low-weight rows.
+    </p>
+    <div class="callout orange">
+      <strong>Hessian is not row count and not simply raw sample-weight sum.</strong>
+      It depends on both the weight and the current class probability, so it changes throughout training.
+    </div>
+  </section>
+
+  <section class="page-break">
+    <h2>4. min_child_weight: “Is there enough evidence?”</h2>
+    <p>
+      A proposed left and right child must both contain enough accumulated Hessian:
+    </p>
+    <div class="formula">H_left  = Σ hessian values in proposed left child
+H_right = Σ hessian values in proposed right child
+
+Required:
+H_left  ≥ min_child_weight
+H_right ≥ min_child_weight</div>
+    <p>Your effective value is <code>min_child_weight=48</code>.</p>
+    <div class="two-col">
+      <div class="card">
+        <b>Rejected example</b>
+        <div class="formula">H_left  = 70
+H_right = 30
+minimum = 48</div>
+        <p>The right child fails, so the split is rejected even if it contains many physical rows.</p>
+      </div>
+      <div class="card">
+        <b>Eligible example</b>
+        <div class="formula">H_left  = 70
+H_right = 55
+minimum = 48</div>
+        <p>Both pass this gate. The split must still pass the separate <code>gamma</code> gain test.</p>
+      </div>
+    </div>
+    <h3>Why there is no fixed row equivalent</h3>
+    <p>
+      At the initial seven-class probability of approximately 1/7, the Hessian is roughly
+      <code>0.245 × sample_weight</code>. At that moment only, reaching H=48 could require:
+    </p>
+    <table>
+      <thead><tr><th>Illustrative row type</th><th>Sample weight</th><th>Approximate rows</th></tr></thead>
+      <tbody>
+        <tr><td>Unit-weight row</td><td>1</td><td>196</td></tr>
+        <tr><td><code>ENTRY_SUB</code></td><td>19</td><td>11</td></tr>
+        <tr><td><code>NO_TRADE</code></td><td>0.192</td><td>1,021</td></tr>
+      </tbody>
+    </table>
+    <p class="small muted">
+      These are illustrations, not permanent conversions. Probabilities change after every round;
+      real leaves mix classes; each class has a separate correction tree.
+    </p>
+    <div class="callout green">
+      Higher values block small or low-information branches and reduce overfitting. A value that is
+      too high can stop genuine rare-class structure.
+    </div>
+  </section>
+
+  <section>
+    <h2>5. gamma: “Is the split beneficial enough?”</h2>
+    <p>
+      After a candidate passes the Hessian gate, XGBoost compares two new children with the original
+      parent. Without showing L1 in the notation, the official gain formula is:
+    </p>
+    <div class="formula">Gain = 0.5 × [ G_left² /(H_left + lambda)
+             + G_right²/(H_right + lambda)
+             − (G_left + G_right)²/(H_left + H_right + lambda) ]
+       − gamma</div>
+    <p>Your effective value is <code>gamma=0.3</code>. A split is accepted only when final gain is positive.</p>
+    <table>
+      <thead><tr><th>Raw objective reduction</th><th>gamma</th><th>Final gain</th><th>Decision</th></tr></thead>
+      <tbody>
+        <tr><td>0.80</td><td>0.30</td><td>+0.50</td><td>Accept</td></tr>
+        <tr><td>0.20</td><td>0.30</td><td>−0.10</td><td>Reject</td></tr>
+      </tbody>
+    </table>
+    <div class="callout red">
+      <strong>“Improvement” is not a percentage.</strong> It is the estimated reduction in XGBoost’s
+      regularized weighted training objective. It is not accuracy, macro-F1, validation trading cost,
+      SHAP importance or backtest return.
+    </div>
+    <table>
+      <thead><tr><th>Question</th><th>Parameter</th></tr></thead>
+      <tbody>
+        <tr><td>Does each child contain enough accumulated statistical mass?</td><td><code>min_child_weight</code></td></tr>
+        <tr><td>Does the eligible split improve the objective enough after penalties?</td><td><code>gamma</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>6. L1 and L2 regularize leaf scores—not feature columns</h2>
+    <p>For one proposed leaf, let G be summed gradients and H be summed Hessians.</p>
+    <div class="formula">leaf_score = −G / (H + reg_lambda)</div>
+
+    <h3>L2 — reg_lambda</h3>
+    <p>Your effective value is <code>reg_lambda=10</code>. L2 increases the denominator and smoothly shrinks every correction.</p>
+    <div class="formula">Example: G = −20, H = 10
+
+lambda = 0   → leaf_score = 2.0
+lambda = 10  → leaf_score = 1.0</div>
+    <p>
+      L2 is strongest proportionally on low-H leaves. It also lowers split gain. It normally makes
+      leaf values smaller rather than exactly zero.
+    </p>
+
+    <h3>L1 — reg_alpha</h3>
+    <p>Your effective value is <code>reg_alpha=0.2</code>. L1 first soft-thresholds G:</p>
+    <div class="formula">S(G, alpha) = sign(G) × max(|G| − alpha, 0)
+
+leaf_score = −S(G, alpha) / (H + lambda)</div>
+    <div class="formula">Example: G = −20, H = 10, lambda = 0
+
+alpha = 0   → leaf_score = 2.0
+alpha = 5   → leaf_score = 1.5
+alpha = 20  → leaf_score = 0.0</div>
+    <table>
+      <thead><tr><th>Property</th><th>L2 / reg_lambda</th><th>L1 / reg_alpha</th></tr></thead>
+      <tbody>
+        <tr><td>Penalty</td><td>Squared leaf score</td><td>Absolute leaf score</td></tr>
+        <tr><td>Behaviour</td><td>Smooth shrinkage</td><td>Threshold plus shrinkage</td></tr>
+        <tr><td>Can zero a weak leaf?</td><td>Normally no</td><td>Yes</td></tr>
+        <tr><td>Directly removes an input feature?</td><td>No</td><td>No</td></tr>
+      </tbody>
+    </table>
+    <div class="callout orange">
+      The phrase “L1 prunes useless features to zero” is inaccurate for a tree booster. L1 can zero
+      a weak <strong>leaf correction</strong>; it does not assign and remove one global coefficient per feature.
+    </div>
+  </section>
+
+  <section>
+    <h2>7. Learning rate, estimator count and early stopping</h2>
+    <h3>learning_rate / eta</h3>
+    <p>Your effective value is <code>learning_rate=0.02</code>.</p>
+    <div class="formula">new_class_score = old_class_score
+                  + learning_rate × new_tree_correction</div>
+    <div class="formula">Raw correction     = 1.0
+learning_rate     = 0.02
+added contribution = 0.02</div>
+    <p>
+      This does not mean 2% of rows, 2% of features, or 2% better accuracy. It means each new tree
+      contributes only 2% of its calculated raw correction. The next round recalculates errors.
+    </p>
+    <h3>n_estimators</h3>
+    <p>
+      <code>n_estimators=6000</code> is the maximum number of boosting rounds. Lower learning rates
+      normally need more rounds. Searching learning rate and round count independently creates unfair
+      pairs; <code>0.002</code> with only 2,000 rounds may be strongly underpowered.
+    </p>
+    <h3>early_stopping_rounds</h3>
+    <p>
+      Your effective patience is 200. Training stops after 200 consecutive rounds without improvement
+      in weighted validation <code>mlogloss</code>. Normal sklearn prediction uses
+      <code>best_iteration</code>, although the stored booster can retain later patience trees.
+    </p>
+    <div class="callout">
+      Treat estimator count as a high ceiling when early stopping is active. Log
+      <code>best_iteration</code>. If every trial stops below 2,000, comparing ceilings of
+      2,000, 4,000 and 6,000 is mostly wasted search.
+    </div>
+  </section>
+
+  <section class="page-break">
+    <h2>8. Row sampling and feature sampling</h2>
+    <h3>subsample: rows per boosting round</h3>
+    <p>Your effective value is <code>subsample=0.6</code>.</p>
+    <div class="formula">Round 1: draw about 60% of training rows and build correction trees
+Round 2: draw a fresh sample; skipped rows can return
+Round 3: draw again, and continue</div>
+    <p>
+      This adds randomness, reduces dependence on individual rows and can reduce memorisation.
+      It does not permanently discard 40% of the data and is not a train/test split.
+      With uniform sampling, class weight affects the loss after a row is selected—not its chance of selection.
+    </p>
+    <h3>Column sampling: which features can compete</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>When sampling occurs</th><th>Current</th></tr></thead>
+      <tbody>
+        <tr><td><code>colsample_bytree</code></td><td>Once for each physical tree</td><td>0.6</td></tr>
+        <tr><td><code>colsample_bylevel</code></td><td>Again at each depth level</td><td>1.0</td></tr>
+        <tr><td><code>colsample_bynode</code></td><td>Again at every split</td><td>0.5</td></tr>
+      </tbody>
+    </table>
+    <div class="formula">Effective availability per split
+≈ 0.6 × 1.0 × 0.5
+≈ 0.30, or 30% of all features</div>
+    <p>
+      With 16 features, roughly five can compete at one split. Sampling helps stop a single feature
+      from monopolizing every node, but it cannot repair leakage or several duplicated proxy features.
+    </p>
+    <div class="callout green">
+      <code>subsample</code> randomizes training rows. <code>colsample_*</code> randomizes available
+      features. Neither changes the label definition or repairs a leaking validation design.
+    </div>
+  </section>
+
+  <section>
+    <h2>9. Tree shape: grow_policy, max_depth and max_leaves</h2>
+    <table>
+      <thead><tr><th>Control</th><th>Meaning</th><th>Current</th></tr></thead>
+      <tbody>
+        <tr><td><code>grow_policy</code></td><td><code>lossguide</code> grows the available leaf with greatest loss reduction; <code>depthwise</code> grows near-root levels.</td><td><code>lossguide</code></td></tr>
+        <tr><td><code>max_depth</code></td><td>Maximum decisions on one root-to-leaf path.</td><td>8</td></tr>
+        <tr><td><code>max_leaves</code></td><td>Maximum terminal regions in one tree.</td><td>256</td></tr>
+      </tbody>
+    </table>
+    <p>
+      Loss-guided growth can be irregular because it repeatedly follows the current highest-gain leaf.
+      Depth prevents a very long rule chain; leaf count prevents too many terminal regions overall.
+    </p>
+    <div class="formula">A full balanced binary tree of depth 8 can contain:
+2⁸ = 256 leaves</div>
+    <p>
+      The current depth cap already creates a theoretical 256-leaf ceiling. The two limits are still
+      conceptually different: an uneven tree may hit depth 8 with far fewer than 256 leaves.
+    </p>
+    <div class="callout orange">
+      These are the most direct capacity controls, but the current HPO space searches neither.
+      HPO therefore optimizes brakes around a fixed tree shape.
+    </div>
+  </section>
+
+  <section>
+    <h2>10. max_delta_step: maximum steering movement</h2>
+    <p>Your effective value is <code>max_delta_step=1</code>.</p>
+    <div class="formula">Calculated raw leaf correction = 4.5
+max_delta_step                 = 1.0
+capped raw correction         = 1.0
+learning_rate                 = 0.02
+added class-score contribution ≈ 0.02</div>
+    <p>
+      It is useful when class imbalance or heavy sample weights could create a violent update.
+      It caps one raw leaf correction; it does not cap cumulative prediction over thousands of trees.
+      A value of zero means no cap.
+    </p>
+    <div class="callout">
+      Softmax converts all seven raw scores together. A +0.02 raw class-score change is not necessarily
+      a +2 percentage-point probability change.
+    </div>
+  </section>
+
+  <section>
+    <h2>11. max_bin: histogram split resolution</h2>
+    <p>
+      Your model uses <code>tree_method="hist"</code> and <code>max_bin=256</code>. Continuous values
+      are grouped into numeric histogram bins, and split search tests bin boundaries rather than every
+      raw value repeatedly.
+    </p>
+    <table>
+      <thead><tr><th>Setting direction</th><th>Effect</th><th>Trade-off</th></tr></thead>
+      <tbody>
+        <tr><td>Smaller <code>max_bin</code></td><td>Coarser candidate thresholds</td><td>Faster, lower memory, sometimes regularizing</td></tr>
+        <tr><td>Larger <code>max_bin</code></td><td>Finer candidate thresholds</td><td>More memory/compute; may find a more precise split</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      It does not mean 256 leaves, classes or rows. It means at most 256 histogram buckets for a
+      continuous feature.
+    </div>
+    <p>
+      If a feature has only 16 distinct ordered bucket values, increasing 128 to 256 or 512 normally
+      creates no extra unique boundaries for that feature. Higher values do not automatically overfit;
+      the primary documented trade-off is split resolution versus computation.
+    </p>
+    <table>
+      <thead><tr><th>Tree method</th><th>Search behaviour</th><th>Use here?</th></tr></thead>
+      <tbody>
+        <tr><td><code>exact</code></td><td>Enumerates all candidate values; slow and less scalable.</td><td>No</td></tr>
+        <tr><td><code>approx</code></td><td>Uses approximate sketches, generally per tree.</td><td>Optional diagnostic</td></tr>
+        <tr><td><code>hist</code></td><td>Uses reusable histograms; fast for large tabular data.</td><td><strong>Yes</strong></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>12. Current effective XGBoost specification</h2>
+    <p>The runtime merge order is:</p>
+    <div class="formula">configs/hyperparams.yaml defaults
+        ↓ overridden by
+configs/tuned/xgboost.json
+        ↓ overridden by
+CLI / ClearML task parameters</div>
+    <p>With no later runtime override, the current tuned configuration is:</p>
+    <table class="compact-table">
+      <thead><tr><th>#</th><th>Parameter</th><th>Value</th><th>Job</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>objective</code></td><td><code>multi:softprob</code></td><td>Seven-class probability objective</td></tr>
+        <tr><td>2</td><td><code>num_class</code></td><td>7</td><td>Number of class scores</td></tr>
+        <tr><td>3</td><td><code>tree_method</code></td><td><code>hist</code></td><td>Histogram tree building</td></tr>
+        <tr><td>4</td><td><code>grow_policy</code></td><td><code>lossguide</code></td><td>Grow highest-gain leaf first</td></tr>
+        <tr><td>5</td><td><code>max_depth</code></td><td>8</td><td>Longest decision path</td></tr>
+        <tr><td>6</td><td><code>max_leaves</code></td><td>256</td><td>Terminal-region ceiling</td></tr>
+        <tr><td>7</td><td><code>n_estimators</code></td><td>6000</td><td>Maximum boosting rounds</td></tr>
+        <tr><td>8</td><td><code>learning_rate</code></td><td>0.02</td><td>New-tree shrinkage</td></tr>
+        <tr><td>9</td><td><code>early_stopping_rounds</code></td><td>200</td><td>Validation patience</td></tr>
+        <tr><td>10</td><td><code>subsample</code></td><td>0.6</td><td>Rows used per round</td></tr>
+        <tr><td>11</td><td><code>colsample_bytree</code></td><td>0.6</td><td>Features per tree</td></tr>
+        <tr><td>12</td><td><code>colsample_bylevel</code></td><td>1.0</td><td>Features retained per level</td></tr>
+        <tr><td>13</td><td><code>colsample_bynode</code></td><td>0.5</td><td>Features per split</td></tr>
+        <tr><td>14</td><td><code>min_child_weight</code></td><td>48</td><td>Minimum child Hessian</td></tr>
+        <tr><td>15</td><td><code>gamma</code></td><td>0.3</td><td>Minimum split-objective reduction</td></tr>
+        <tr><td>16</td><td><code>reg_lambda</code></td><td>10</td><td>L2 leaf shrinkage</td></tr>
+        <tr><td>17</td><td><code>reg_alpha</code></td><td>0.2</td><td>L1 leaf thresholding</td></tr>
+        <tr><td>18</td><td><code>max_delta_step</code></td><td>1</td><td>Raw leaf-update cap</td></tr>
+        <tr><td>19</td><td><code>max_bin</code></td><td>256</td><td>Histogram resolution</td></tr>
+        <tr><td>20</td><td><code>eval_metric</code></td><td><code>mlogloss</code></td><td>Early-stop metric</td></tr>
+        <tr><td>21</td><td><code>random_state</code></td><td>42</td><td>Reproducible randomness</td></tr>
+        <tr><td>22</td><td><code>n_jobs</code></td><td>−1</td><td>Use available CPU threads</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>13. Complete catalog of relevant parameters</h2>
+    <p>
+      This covers the useful controls for the current <code>gbtree + hist + multiclass</code> model.
+      Regression, ranking, survival and linear-booster loss settings are outside this task.
+    </p>
+    <h3>Learning, capacity and split controls</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>Meaning</th><th>Treatment</th></tr></thead>
+      <tbody>
+        <tr><td><code>learning_rate</code> / <code>eta</code></td><td>Scales every new tree contribution.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>n_estimators</code></td><td>Maximum boosting rounds.</td><td><span class="tag keep">High ceiling</span></td></tr>
+        <tr><td><code>early_stopping_rounds</code></td><td>Validation patience.</td><td><span class="tag keep">Keep enabled</span></td></tr>
+        <tr><td><code>grow_policy</code></td><td>Level-wise versus highest-gain-leaf growth.</td><td><span class="tag keep">Fix first</span></td></tr>
+        <tr><td><code>max_depth</code></td><td>Longest decision path.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>max_leaves</code></td><td>Maximum terminal regions.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>min_child_weight</code></td><td>Minimum summed Hessian in each child.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>gamma</code></td><td>Minimum regularized split improvement.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>reg_lambda</code></td><td>L2 leaf-score penalty.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>reg_alpha</code></td><td>L1 leaf-score penalty.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>max_delta_step</code></td><td>Maximum raw leaf correction.</td><td><span class="tag">HPO later</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Row and feature randomness</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>Meaning</th><th>Treatment</th></tr></thead>
+      <tbody>
+        <tr><td><code>subsample</code></td><td>Fraction of training rows sampled each round.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>sampling_method</code></td><td>Uniform or gradient-based row selection.</td><td><span class="tag keep">Keep uniform first</span></td></tr>
+        <tr><td><code>colsample_bytree</code></td><td>Feature fraction sampled per tree.</td><td><span class="tag">HPO carefully</span></td></tr>
+        <tr><td><code>colsample_bylevel</code></td><td>Additional fraction sampled per level.</td><td><span class="tag keep">Keep 1 first</span></td></tr>
+        <tr><td><code>colsample_bynode</code></td><td>Additional fraction sampled per split.</td><td><span class="tag">HPO</span></td></tr>
+        <tr><td><code>feature_weights</code></td><td>Changes each feature selection probability during column sampling.</td><td><span class="tag advanced">Advanced</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Task, histogram and runtime controls</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>Meaning</th><th>Treatment</th></tr></thead>
+      <tbody>
+        <tr><td><code>booster</code></td><td>Tree, DART or linear booster.</td><td><span class="tag keep">Keep gbtree</span></td></tr>
+        <tr><td><code>tree_method</code></td><td>Split-search implementation.</td><td><span class="tag keep">Keep hist</span></td></tr>
+        <tr><td><code>max_bin</code></td><td>Continuous-feature histogram resolution.</td><td><span class="tag keep">Fix 256 first</span></td></tr>
+        <tr><td><code>max_cached_hist_node</code></td><td>Histogram cache/memory limit.</td><td><span class="tag ignore">Default</span></td></tr>
+        <tr><td><code>objective</code></td><td>Training loss and prediction form.</td><td><span class="tag keep">multi:softprob</span></td></tr>
+        <tr><td><code>num_class</code></td><td>Number of mutually exclusive classes.</td><td><span class="tag keep">7</span></td></tr>
+        <tr><td><code>eval_metric</code></td><td>Validation metric used for early stopping.</td><td><span class="tag keep">mlogloss</span></td></tr>
+        <tr><td><code>base_score</code></td><td>Initial global class-score intercept.</td><td><span class="tag ignore">Auto</span></td></tr>
+        <tr><td><code>device</code></td><td>CPU or CUDA.</td><td><span class="tag advanced">Runtime</span></td></tr>
+        <tr><td><code>n_jobs</code></td><td>CPU thread count.</td><td><span class="tag ignore">Runtime</span></td></tr>
+        <tr><td><code>random_state</code></td><td>Random seed.</td><td><span class="tag keep">Fix for comparison</span></td></tr>
+        <tr><td><code>verbosity</code></td><td>Logging level.</td><td><span class="tag ignore">Debug only</span></td></tr>
+        <tr><td><code>validate_parameters</code></td><td>Warn about unknown/unused parameter names.</td><td><span class="tag keep">Enable</span></td></tr>
+        <tr><td><code>missing</code></td><td>Missing sentinel; trees learn a default branch.</td><td><span class="tag keep">NaN</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>14. Optional and currently irrelevant controls</h2>
+    <table>
+      <thead><tr><th>Parameter group</th><th>What it does</th><th>Why not normal HPO now</th></tr></thead>
+      <tbody>
+        <tr><td><code>monotone_constraints</code></td><td>Forces a known feature direction.</td><td>Requires strong domain truth.</td></tr>
+        <tr><td><code>interaction_constraints</code></td><td>Restricts allowed feature interactions.</td><td>Must be domain-designed.</td></tr>
+        <tr><td><code>enable_categorical</code>, <code>max_cat_to_onehot</code>, <code>max_cat_threshold</code></td><td>Native categorical splitting.</td><td>Only after rebuilding the data path with correct categorical types.</td></tr>
+        <tr><td><code>scale_pos_weight</code></td><td>Positive-versus-negative balancing.</td><td>Mainly binary; your seven classes use per-row weights.</td></tr>
+        <tr><td><code>num_parallel_tree</code></td><td>Boosted random-forest trees per round.</td><td>Keep 1 for standard boosting.</td></tr>
+        <tr><td><code>multi_strategy=multi_output_tree</code></td><td>One experimental tree with multiple outputs.</td><td>Still work-in-progress.</td></tr>
+        <tr><td><code>updater</code>, <code>process_type</code>, <code>refresh_leaf</code></td><td>Low-level update/prune/refresh operations.</td><td>Not needed for fresh training.</td></tr>
+        <tr><td>DART: <code>rate_drop</code>, <code>skip_drop</code>, <code>one_drop</code></td><td>Tree dropout.</td><td>Inactive with <code>gbtree</code>.</td></tr>
+        <tr><td><code>importance_type</code></td><td>Changes reported feature importance calculation.</td><td>Does not change training.</td></tr>
+        <tr><td><code>shap_calc_type</code></td><td>Not an XGBoost training parameter.</td><td>Do not put it in XGBoost HPO.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>15. Feature dominance: which controls actually help?</h2>
+    <table>
+      <thead><tr><th>Control</th><th>How it affects dominance</th><th>What it cannot prove</th></tr></thead>
+      <tbody>
+        <tr><td><code>colsample_bytree</code></td><td>Makes a feature unavailable to some entire trees.</td><td>Whether the feature is leakage.</td></tr>
+        <tr><td><code>colsample_bynode</code></td><td>Makes a feature unavailable at some split decisions.</td><td>Whether correlated copies carry the same signal.</td></tr>
+        <tr><td><code>feature_weights</code></td><td>Can lower a named feature selection probability.</td><td>Whether down-weighting is scientifically justified.</td></tr>
+        <tr><td>Depth and leaf caps</td><td>Limit increasingly specific repeated rules.</td><td>Whether the original feature is valid.</td></tr>
+        <tr><td>Child weight and gamma</td><td>Require evidence and gain for niche splits.</td><td>Whether a feature encodes future information.</td></tr>
+        <tr><td>L1, L2 and delta step</td><td>Shrink or cap leaf effects after a feature is used.</td><td>Feature causality.</td></tr>
+      </tbody>
+    </table>
+    <p>A dominant feature is not automatically wrong. Validate it with:</p>
+    <ol>
+      <li>Split count, gain, total gain, cover and total cover.</li>
+      <li>SHAP share and top-five frequency across samples and seeds.</li>
+      <li>Performance after removing that feature.</li>
+      <li>Performance after removing its correlated feature family.</li>
+      <li>Exact and near-duplicate-column checks.</li>
+      <li>Forward out-of-sample performance.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>16. Recommended staged HPO</h2>
+    <p>
+      The current search has 10 dimensions and 186,624 discrete combinations, while normal budgets
+      are only 15 trials through publishing or 30 through direct HPO. Optuna need not enumerate the
+      grid, but this budget cannot reliably learn all ten interactions at once.
+    </p>
+    <div class="callout red">
+      The current baseline is absent from its own search: <code>min_child_weight=48</code> is missing
+      from <code>[5,15,20]</code>, and <code>reg_lambda=10</code> is missing from
+      <code>[0.1,1,5,20]</code>.
+    </div>
+    <table>
+      <thead><tr><th>Stage</th><th>Search</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>0. Baseline</td><td>Exact active settings</td><td>Create a fair control trial.</td></tr>
+        <tr><td>1. Capacity</td><td><code>max_leaves=[32,64,128,256]</code><br><code>max_depth=[6,8,10]</code></td><td>Choose useful tree size first.</td></tr>
+        <tr><td>2. Randomness</td><td><code>subsample=[0.6,0.8,1]</code><br><code>colsample_bynode=[0.3,0.5,0.7,1]</code></td><td>Balance stability and feature diversity.</td></tr>
+        <tr><td>3. Brakes</td><td><code>min_child=[5,15,48,100]</code><br><code>gamma=[0,0.3,1]</code><br><code>lambda=[1,5,10,20]</code><br><code>alpha=[0,0.2,1]</code><br><code>delta=[0,1,3]</code></td><td>Control weak leaves and extreme corrections.</td></tr>
+        <tr><td>4. Schedule</td><td><code>learning_rate=[0.01,0.02,0.05]</code><br>high estimator ceiling + early stop</td><td>Choose correction speed and best round.</td></tr>
+        <tr><td>5. Confirmation</td><td>Multiple seeds + forward OOS</td><td>Reject unstable or optimistic winners.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      Keep <code>max_bin=256</code> fixed initially. Record <code>best_iteration</code>. If every
+      model stops below 2,000 rounds, estimator-ceiling search is wasted.
+    </div>
+  </section>
+
+  <section>
+    <h2>17. What to inspect after every finalist</h2>
+    <table>
+      <thead><tr><th>Area</th><th>Inspect</th><th>Warning sign</th></tr></thead>
+      <tbody>
+        <tr><td>Learning length</td><td><code>best_iteration</code>, rounds and physical trees</td><td>Always hits ceiling or stops immediately</td></tr>
+        <tr><td>Tree structure</td><td>Median, p95, p99 and maximum leaves/depth; one-leaf-tree rate</td><td>Rare enormous trees or mostly empty corrections</td></tr>
+        <tr><td>Feature use</td><td>Split count, total gain and total cover</td><td>One feature family controls every view</td></tr>
+        <tr><td>SHAP</td><td>Share, top-five hits and wobble across runs</td><td>Importance changes dramatically</td></tr>
+        <tr><td>Classification</td><td>Per-class precision, recall, F1 and confusion pairs</td><td>Cost improves by sacrificing an essential class</td></tr>
+        <tr><td>Business objective</td><td>Validation trading cost plus OOS/backtest behaviour</td><td>Validation improves while forward result collapses</td></tr>
+        <tr><td>Robustness</td><td>Several bundle seeds and forward date blocks</td><td>Winner exists for only one assignment</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green">
+      A winner should beat the exact baseline, remain stable across seeds, avoid suspicious feature
+      monopoly and survive a forward out-of-sample check. The lowest single validation cost is not enough.
+    </div>
+  </section>
+
+  <section>
+    <h2>18. Important limitations and review warnings</h2>
+    <ol>
+      <li><strong>Objective mismatch:</strong> early stopping chooses a round using weighted validation <code>mlogloss</code>; Optuna chooses a trial using validation <code>trading_cost</code>.</li>
+      <li><strong>Test exposure:</strong> Optuna reads validation cost, but the trainer still calculates and displays test metrics for each trial. The test is therefore visible before final selection.</li>
+      <li><strong>Categorical meaning:</strong> ordered buckets can be numeric codes. Unordered categories encoded as integers create a false order that HPO cannot repair.</li>
+      <li><strong>Stale comments:</strong> descriptions of child weight as raw weight sum and L1 as direct feature pruning are inaccurate.</li>
+      <li><strong>Base-task freshness:</strong> ClearML trials clone a registered code/configuration snapshot. Re-register after fixed code or configuration changes.</li>
+      <li><strong>Validation design:</strong> bundle-random assignment keeps a 15-minute bundle together but does not create an embargo around scattered validation/test bundles. Confirm finalists on forward OOS data.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>19. Common code-review questions</h2>
+    <table>
+      <thead><tr><th>Question</th><th>Short correct answer</th></tr></thead>
+      <tbody>
+        <tr><td>What improvement does gamma measure?</td><td>Reduction in the approximate regularized training objective—not accuracy or profit.</td></tr>
+        <tr><td>Is min_child_weight a row count?</td><td>No. It is minimum summed Hessian; probability and sample weight change its row-equivalent.</td></tr>
+        <tr><td>Difference between child weight and gamma?</td><td>Child weight asks “enough evidence?”; gamma asks “enough benefit?”</td></tr>
+        <tr><td>Does L1 remove features?</td><td>No. It soft-thresholds leaf scores and can zero weak leaf corrections.</td></tr>
+        <tr><td>What does learning_rate=0.02 mean?</td><td>Each new tree contributes 2% of its raw correction.</td></tr>
+        <tr><td>Why can 6,000 estimators become 42,000 trees?</td><td>Seven-class one-output-per-tree boosting creates about seven physical trees per round.</td></tr>
+        <tr><td>Does subsample=0.6 discard 40% permanently?</td><td>No. A fresh 60% sample is drawn each boosting round.</td></tr>
+        <tr><td>What does max_delta_step=1 cap?</td><td>One raw leaf correction—not the total prediction or tree count.</td></tr>
+        <tr><td>What does max_bin=256 control?</td><td>Histogram resolution for continuous split candidates.</td></tr>
+        <tr><td>Why is max_bin low-priority?</td><td>If features have only about 16 values, all searched bin counts already exceed available thresholds.</td></tr>
+        <tr><td>Main lossguide capacity knob?</td><td><code>max_leaves</code>, with <code>max_depth</code> as a safety cap.</td></tr>
+        <tr><td>Which knob controls a dominant feature?</td><td>Column sampling reduces opportunity; feature weights change sampling probability. Neither validates the feature.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>20. Recommended next steps</h2>
+    <ol>
+      <li>Add the exact active settings as the baseline trial.</li>
+      <li>Search tree capacity before ten secondary parameters together.</li>
+      <li>Include active values <code>min_child_weight=48</code> and <code>reg_lambda=10</code>.</li>
+      <li>Fix <code>max_bin=256</code> until evidence shows threshold resolution matters.</li>
+      <li>Record best iteration, leaf/depth distributions and gain/SHAP stability.</li>
+      <li>Keep test results hidden during HPO; use them only after freezing configuration.</li>
+      <li>Confirm finalists across multiple seeds and a forward OOS period.</li>
+    </ol>
+    <h3>Further questions</h3>
+    <ul>
+      <li>Are all bucket codes genuinely ordered, or are some nominal categories?</li>
+      <li>At which round does trading cost reach its minimum relative to validation mlogloss?</li>
+      <li>Do current trees commonly hit depth 8, leaf count 256, or neither?</li>
+      <li>Does removing the dominant feature family preserve forward performance?</li>
+      <li>Does the HPO winner remain best across several bundle assignments?</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Official references and pipeline sources</h2>
+    <ol>
+      <li><strong>Introduction to Boosted Trees:</strong> objective, additive training, gradient/Hessian derivation, complexity and split gain.<br><a href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html">https://xgboost.readthedocs.io/en/stable/tutorials/model.html</a></li>
+      <li><strong>XGBoost parameter reference:</strong> definitions and ranges for tree, histogram, categorical and task controls.<br><a href="https://xgboost.readthedocs.io/en/stable/parameter.html">https://xgboost.readthedocs.io/en/stable/parameter.html</a></li>
+      <li><strong>Multiclass softmax example:</strong> gradient and diagonal Hessian upper-bound.<br><a href="https://xgboost.readthedocs.io/en/stable/python/examples/custom_softmax.html">https://xgboost.readthedocs.io/en/stable/python/examples/custom_softmax.html</a></li>
+      <li><strong>Tree methods:</strong> exact, approximate and histogram algorithms.<br><a href="https://xgboost.readthedocs.io/en/stable/treemethod.html">https://xgboost.readthedocs.io/en/stable/treemethod.html</a></li>
+      <li><strong>Parameter-tuning notes:</strong> complexity, sampling, learning rate and imbalance guidance.<br><a href="https://xgboost.readthedocs.io/en/stable/tutorials/param_tuning.html">https://xgboost.readthedocs.io/en/stable/tutorials/param_tuning.html</a></li>
+      <li><strong>Current pipeline:</strong> <code>configs/tuned/xgboost.json</code>, <code>configs/hyperparams.yaml</code>, <code>trainer/hyperparams.py</code>, <code>trainer/train.py</code> and <code>trainer/hpo.py</code>.</li>
+    </ol>
+    <p class="small muted">
+      This guide explains the current seven-class tree-booster pipeline and its useful controls.
+      It is not a performance claim and does not replace forward out-of-sample validation.
+    </p>
+  </section>
+</main>
+</body>
+</html>
