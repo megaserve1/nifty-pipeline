@@ -166,6 +166,24 @@ DEEPCHECKS_QUEUE   = "training"     # runs on the same queue by default
 # checks and their conditions are unchanged, only the runtime is. 0 = use every row.
 DEEPCHECKS_SAMPLE  = 50_000
 
+BASE_FEATURE_ANALYSIS_NAME = "feature_analysis (base)"
+FEATURE_ANALYSIS_QUEUE     = "training"     # runs on the same queue by default
+# 0 = SHAP ON EVERY TEST ROW. this is deliberate and it is expensive: measured 17h+ on catboost
+# v7.3 across all 274,605 test rows, and about 8h on v10 at 150,000.
+# sampling was rejected. shap is exact per row, so a sample costs only the PRECISION of each
+# cell's mean -- but the cells that matter are the rare expensive mistakes, and those are exactly
+# the ones a sample empties out. ENTRY_SUB is 1.2% of rows before you split it across 7 predicted
+# classes, so a 50k sample can leave a cell with a handful of rows and a meaningless average.
+# the two STREAK sheets are unaffected either way -- they run on the whole OOS set, no shap.
+FEATURE_ANALYSIS_MAX_ROWS  = 0
+# this step is the run's SUMMARY, so it waits for the other four to finish before it starts.
+# the cap is the backstop for a sibling that never runs at all (no agent listening, a base task
+# never registered). it expires into doing the work, not into an error.
+FEATURE_ANALYSIS_WAIT_MIN  = 360
+# the artifact the workbook lands on. one name, so a reader never has to guess which run's file
+# is which -- the task name already carries the model and the version.
+FEATURE_ANALYSIS_ARTIFACT  = "summary_file"
+
 # ---- backtest ------------------------------------------------------------------
 # set BOTH and every finished model automatically gets a backtest on its TEST table, printed into
 # that task's ClearML console. leave either blank and you just get the tables (no backtest).
@@ -241,6 +259,12 @@ def deepchecks_output_uri():
     """where the deepchecks HTML reports are written -> gs://<bucket>/artifacts/deepchecks .
     they land as task artifacts, so anyone can download and open them from the ClearML UI."""
     return None if STORAGE_MODE == "local" else f"{GCS_ARTIFACTS_URI}/deepchecks"
+
+
+def feature_analysis_output_uri():
+    """where the feature-analysis workbook is written -> gs://<bucket>/artifacts/feature_analysis .
+    it lands as the 'summary_file' artifact, so it downloads straight from the ClearML UI."""
+    return None if STORAGE_MODE == "local" else f"{GCS_ARTIFACTS_URI}/feature_analysis"
 
 
 # ---- DVC (only used in "gcs" mode) --------------------------------------------

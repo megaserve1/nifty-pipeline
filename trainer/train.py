@@ -941,6 +941,12 @@ def main():
         # (shap, scored tables, deepchecks) has the bundle but NOT the manifest, and a model is
         # not identified by its features alone -- v7/v7.1/v7.2 differ only by this.
         "labels_name": (man or {}).get("labels_name"),
+        # THE WEIGHTS TRAVEL WITH THE MODEL, for the same reason as `split` below. config's
+        # CLASS_WEIGHTS are recomputed whenever the label shares move -- they were rewritten on
+        # 2026-08-08 when L1 went from 74.5% NO_TRADE to 86.8%. a consumer that reads TODAY's
+        # config to report what a model trained under would state numbers the model never saw.
+        # what was actually applied is a fact of the run, so it is recorded here.
+        "class_weights": dict(getattr(C, "CLASS_WEIGHTS", {}) or {}),
         "metrics": metrics,
         # THE SPLIT TRAVELS WITH THE MODEL. shap_explain used to rebuild the test mask from
         # CURRENT config -- so a config edit between training and explaining (it happened the
@@ -996,6 +1002,7 @@ def main():
         queue_export_for_me(task.id, a.model_type, a.dataset_version or ds.version)
         queue_deepchecks_for_me(task.id, a.model_type, a.dataset_version or ds.version)
         queue_oos_for_me(task.id, a.model_type, a.dataset_version or ds.version)
+        queue_feature_analysis_for_me(task.id, a.model_type, a.dataset_version or ds.version)
 
     task.close()
 
@@ -1176,6 +1183,60 @@ def queue_deepchecks_for_me(model_task_id: str, model_type: str, version: str):
     })
     Task.enqueue(run, queue_name=getattr(C, "DEEPCHECKS_QUEUE", C.TRAIN_QUEUE))
     print(f"  queued deepchecks_{model_type} v{version}  (checks THIS model)")
+
+
+def queue_feature_analysis_for_me(model_task_id: str, model_type: str, version: str):
+    """ask ClearML to build the FEATURE ANALYSIS workbook for THIS model.
+
+    SAME pattern and SAME reason as the other four: queued from inside the FINISHED trainer, so
+    the model provably exists.
+
+    IT RUNS LAST, ON PURPOSE. this workbook is the run's summary, so it waits for shap, the scored
+    tables, deepchecks and the OOS backtest to finish before it starts -- when it appears, the run
+    is over. without the wait someone opens it while the backtest is still going and reads a
+    half-finished picture as the final one.
+
+    it does not read any sibling's OUTPUT, though. it fetches the model and the dataset and
+    predicts for itself, so the wait is about ordering, not a dependency that could break.
+
+    queued LAST of the five, so a single agent reaches it last anyway and the wait costs nothing.
+
+    the workbook lands on the run as the 'summary_file' artifact. five sheets, and TWO populations
+    on purpose:
+        the 2 shap sheets + the confusion matrix -> the TEST slice
+        drawdowns + losing streaks               -> the OOS block
+    the streak sheets have to be OOS. under bundle_random the test rows are scattered through
+    2015-2024 with training rows in between, so a run of consecutive wrong calls counted there
+    describes an order that never existed.
+
+    REPORT ONLY. it never fails the training run.
+    """
+    from clearml import Task
+    base = Task.get_task(project_name=my_project(),
+                         task_name=getattr(C, "BASE_FEATURE_ANALYSIS_NAME",
+                                           "feature_analysis (base)"))
+    if base is None:
+        print("  (no feature_analysis base task registered -- skipping. "
+              "run: python trainer/register_base_trainer.py --force)")
+        return
+    # it is the LAST thing the trainer does. an exception escaping here would skip task.close()
+    # and leave a finished training run stuck showing "running" forever -- so the promise in the
+    # docstring is enforced, not just written down.
+    try:
+        run = Task.clone(source_task=base, name=f"feature_analysis_{model_type} v{version}")
+        run.set_parameters({
+            "Args/model_task_id": model_task_id,
+            # 0 = every test row. see the note in config -- a sample empties the rare cells,
+            # which are the ones worth reading.
+            "Args/max_rows": str(getattr(C, "FEATURE_ANALYSIS_MAX_ROWS", 0)),
+            "Args/wait_for_siblings": "1",
+        })
+        Task.enqueue(run, queue_name=getattr(C, "FEATURE_ANALYSIS_QUEUE", C.TRAIN_QUEUE))
+        print(f"  queued feature_analysis_{model_type} v{version}  "
+              f"(workbook -> artifact "
+              f"'{getattr(C, 'FEATURE_ANALYSIS_ARTIFACT', 'summary_file')}')")
+    except Exception as exc:
+        print(f"  !! could not queue feature_analysis: {exc}  (training itself is unaffected)")
 
 
 if __name__ == "__main__":
