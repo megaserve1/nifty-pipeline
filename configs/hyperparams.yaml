@@ -52,33 +52,50 @@ random_forest:
 xgboost:
   default:
     grow_policy: lossguide                    # LOSS-BASED: split whichever leaf cuts loss most
-    max_leaves: 0                             # 0 = unlimited. under lossguide THIS is the capacity knob
-    n_estimators: 6000
-    max_depth: 0                              # 0 = unlimited; passed through only in lossguide mode
+    # CAPPED AT 256, MATCHING CATBOOST. it was 0 (unlimited), and that is not just a modelling
+    # choice -- it broke SHAP outright on v10. shap.TreeExplainer allocates EIGHT dense
+    # (num_trees x max_nodes) arrays up front, and 7 classes x 6000 rounds = 42,000 trees. one
+    # unlimited tree reached 14,069 nodes, so the allocation came to 54 GB and the step died.
+    # 256 leaves -> at most 511 nodes -> about 2 GB, which fits.
+    # it also stops a single tree memorising the training set at 6000 rounds.
+    max_leaves: 128                           # under lossguide THIS is the capacity knob
+    n_estimators: 5000
+    max_depth: 0                              # 0 = unlimited; max_leaves is doing the capping
     max_bin: 256                              # histogram resolution. 128 coarser/faster, 512 more overfit room
     learning_rate: 0.02
-    subsample: 0.6
+    subsample: 1.0
     colsample_bytree: 1.0                     # off -- redundant with bynode (the model feels the product)
-    colsample_bynode: 0.5                     # feature subset RE-DEALT at every split. the key regulariser
-    max_delta_step: 1.0                       # caps one leaf's update per round. guards weighted rare classes
-    min_child_weight: 15.0                    # a floor on the SUM OF WEIGHTS, not a row count -- NO_TRADE weighs 0.192, so keep it low or xgboost will not split near the rare classes
-    reg_lambda: 5.0
-    reg_alpha: 0.2
-    gamma: 0.3
+    colsample_bylevel: 0.6                    # feature subset re-dealt once per DEPTH
+    colsample_bynode: 0.8                     # feature subset RE-DEALT at every split. the key regulariser
+    max_delta_step: 0.0                       # off, by decision 2026-08-13
+    # A FLOOR ON THE SUM OF WEIGHTS, NOT A ROW COUNT, and our weights span 550x. measured at the
+    # softmax start (h = 2p(1-p) = 0.245 per row of weight 1), min_child_weight 100 needs:
+    #     ENTRY_SUB  7 rows   EXIT_SUPER  102 rows   NO_TRADE  4,083 rows
+    # so it bites NO_TRADE hardest -- which is where the over-trading is.
+    min_child_weight: 100.0
+    # MEASURED AGAINST THIS MODEL, NOT COPIED. on v7.3 the median LEAF cover is 196, so
+    # reg_lambda 100 shrinks a typical leaf by 34%. at the old 5 it shrank it by 2% -- switched
+    # on and doing nothing. (scripts/tree_scales.py prints these for any trained model.)
+    reg_lambda: 100.0
+    reg_alpha: 2.0                            # compared against |G|, median 42.7 -> zeroes ~3% of leaves
+    # compared against GAIN, median 11.3. v7.3 ran gamma 2.0 and its LOWEST surviving gain was
+    # 2.0016 -- the wall sat below the floor and rejected nothing. 1.0 is a deliberate low anchor
+    # for the search; the range below is what actually gets tested.
+    gamma: 1.0
     seed: 42
-    early_stopping_rounds: 0                  # 0 = off. only ARMED when a val split exists
+    early_stopping_rounds: 400                # was 0 = off. armed only when a val split exists
     tree_method: hist                         # xgboost's own default. listed so merge() accepts it
+  # THE SEARCH SPACE, 2026-08-13. gamma carries an extra 10 beyond the agreed [0,1,3]: measured on
+  # v7.3, gamma 0/1/2 cut 0.0% of splits and 3 cut 6.5%, so without a value that bites the sweep
+  # would only confirm what we already ran. 10 cuts 45% -- that is the one that tells us something.
   search:
-    learning_rate: [0.02, 0.05]
-    n_estimators: [4000, 6000]
-    subsample: [0.6, 0.8, 1.0]
-    colsample_bynode: [0.3, 0.5, 0.7, 1.0]
-    max_delta_step: [0.0, 1.0, 5.0]
-    max_bin: [128, 256, 512]
-    min_child_weight: [20.0, 15.0, 5.0]
-    reg_lambda: [20.0, 5.0, 1.0]
-    reg_alpha: [5.0, 1.0, 0.2]
-    gamma: [1.0, 0.5, 0.3]
+    learning_rate: [0.02, 0.03, 0.05]
+    subsample: [0.8, 1.0]
+    reg_lambda: [50.0, 100.0, 250.0]
+    reg_alpha: [0.0, 2.0, 4.0]
+    gamma: [0.0, 1.0, 3.0, 10.0]
+    max_leaves: [64, 128]
+    min_child_weight: [50.0, 100.0, 200.0, 500.0]
 
 catboost:
   default:
