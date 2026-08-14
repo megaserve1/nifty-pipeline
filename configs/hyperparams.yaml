@@ -89,13 +89,13 @@ xgboost:
   # v7.3, gamma 0/1/2 cut 0.0% of splits and 3 cut 6.5%, so without a value that bites the sweep
   # would only confirm what we already ran. 10 cuts 45% -- that is the one that tells us something.
   search:
-    learning_rate: [0.02, 0.03, 0.05]
-    subsample: [0.8, 1.0]
-    reg_lambda: [50.0, 100.0, 250.0]
-    reg_alpha: [0.0, 2.0, 4.0]
-    gamma: [0.0, 1.0, 3.0, 10.0]
-    max_leaves: [64, 128]
-    min_child_weight: [50.0, 100.0, 200.0, 500.0]
+    learning_rate: [0.02, 0.03]
+    subsample: [0.6, 0.8]
+    reg_lambda: [20.0, 30.0, 50.0, 70.0]
+    reg_alpha: [0.0, 3.0, 5.0]
+    gamma: [0.0, 3.0, 10.0]
+    max_leaves: [128, 256]
+    min_child_weight: [50.0, 80.0, 150.0]
 
 catboost:
   default:
