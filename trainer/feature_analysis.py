@@ -458,6 +458,9 @@ def oos_stream(b: dict, dataset_id: str = "", data_path: str = ""):
     # the SAME footer-only preflight the scoring step uses. it catches a missing feature and the
     # silent one -- a column that was text in training arriving as numbers -- before any rows load.
     preflight(src, b)
+    # and the labels themselves. the streak sheets are only as true as the truth column.
+    from trainer.label_guard import check as _check_labels
+    _check_labels(src, str(b.get("labels_name") or ""))
     df = normalise_time_column(pd.read_parquet(src))
 
     # WHICH truth column. attach_oos_labels writes one per label set (primary_label_L1/_L2/_L3)

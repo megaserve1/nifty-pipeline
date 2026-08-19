@@ -562,6 +562,11 @@ def main():
 
         print("[3/5] preflight -- do the OOS columns match what the model trained on?")
         preflight(oos_parquet, bundle)          # cheap footer read; refuses on a mismatch
+        # AND are its LABELS the ones this model trained under? the columns matching is not
+        # enough -- a replaced label file keeps the same column name and the same seven class
+        # words, so a stale truth column looks perfect. see trainer/label_guard.
+        from trainer.label_guard import check as _check_labels
+        _check_labels(oos_parquet, str(bundle.get("labels_name") or ""))
         df = normalise_time_column(pd.read_parquet(oos_parquet))
         print(f"      {len(df):,} OOS rows   model trained on v{version}")
 

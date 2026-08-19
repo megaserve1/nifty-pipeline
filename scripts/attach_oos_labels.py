@@ -33,6 +33,7 @@ then, to actually write:
 """
 import argparse
 import hashlib
+import json
 import pathlib
 import sys
 
@@ -104,6 +105,7 @@ def main():
 
     out = df.copy()
     ok = True
+    used_shas = {}                 # handle -> sha256, stamped into the output. see label_guard.
     for h in handles:
         meta = reg[h]
         lf = C.LABELS_DIR / meta["file"]
@@ -118,6 +120,7 @@ def main():
             raise SystemExit(f"{h}: {lf.name} sha256 {got[:12]} != registry {wantsha[:12]} -- the "
                              f"file on disk is NOT the label set the registry describes. stop.")
 
+        used_shas[h] = got
         lab = pd.read_csv(lf, usecols=["timestamp", C.LABEL_COL])
         lab["timestamp"] = label_time(lab["timestamp"])
         # 6 of the 7 class strings carry a trailing space in the raw csv. strip once, here.
@@ -146,7 +149,17 @@ def main():
 
     dst = pathlib.Path(a.out).expanduser()
     dst.parent.mkdir(parents=True, exist_ok=True)
-    out.to_parquet(dst, index=False)
+    # STAMP THE SHAS INTO THE FILE. a label column is just words -- there is no way to look at
+    # "EXIT_SUPER" and tell which L1 wrote it. without this the file cannot be checked later, and
+    # that is exactly how a replaced L1 went unnoticed for ten days (2026-08-18).
+    import datetime as _dt
+    import pyarrow as _pa, pyarrow.parquet as _pq
+    from trainer.label_guard import STAMP_KEY, BUILT_KEY
+    _t = _pa.Table.from_pandas(out, preserve_index=False)
+    _md = dict(_t.schema.metadata or {})
+    _md[STAMP_KEY] = json.dumps(used_shas).encode()
+    _md[BUILT_KEY] = _dt.datetime.now().isoformat(timespec="seconds").encode()
+    _pq.write_table(_t.replace_schema_metadata(_md), dst)
     grew = (dst.stat().st_size - src.stat().st_size) / 1e6
     print(f"\nwrote {dst}")
     print(f"      {len(out):,} rows, {len(out.columns)} cols, "

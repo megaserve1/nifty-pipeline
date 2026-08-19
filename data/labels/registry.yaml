@@ -35,24 +35,39 @@ L1:
 
 L2:
   file: L2.csv
-  note: "same window as L1 but a LOOSER entry rule -- ENTRY_SUPER 3.4% -> 4.4%, ENTRY_SUB 0.77% -> 0.99%, ENTRY_SMALL 1.04% -> 1.24%, all taken out of NO_TRADE (74.5% -> 73.1%). more trades offered; exits are identical to L1."
+  # REPLACED 2026-08-19 -- regenerated on the same TIGHTENED basis L1 received on 08 Aug.
+  # NO_TRADE 73.1% -> 86.6% and every trade class roughly halved. it remains the LOOSER-entry
+  # twin of L1: ENTRY_SUPER 2.33% vs L1's 2.05%, ENTRY_SUB 0.29% vs 0.25%, ENTRY_SMALL 0.19%
+  # vs 0.17%. exits are identical to L1, as before.
+  # VERSIONS v7.1 AND v7.2 WERE BUILT ON THE OLD FILE (sha c601cf5f...) and mean something
+  # different from anything built from now on. their manifests carry the old sha, so they stay
+  # distinguishable -- read labels_sha256, never the handle.
+  note: "same window as L1 but a LOOSER entry rule. TIGHTENED 2026-08-19 to match L1: NO_TRADE
+    86.6%, entries roughly halved. exits identical to L1."
   rows: 1021847
   n_classes: 7
   span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
   # NO_TRADE carries real weight, not 0 -- a zero-weight class contributes nothing to the loss and
   # the model could never learn to stay out of the market.
-  no_trade_weight: 0.0638
-  class_share: {NO_TRADE: 0.7308, EXIT_SUPER: 0.1209, EXIT_SUB: 0.0641, ENTRY_SUPER: 0.0443, EXIT_SMALL: 0.0176, ENTRY_SMALL: 0.0124, ENTRY_SUB: 0.0099}
-  sha256: "c601cf5fe1440abd866a9ae76d02df651fc4031669191443ba1d395985042e1e"
+  no_trade_weight: 0.0689
+  class_share: {NO_TRADE: 0.8661, EXIT_SUPER: 0.0622, EXIT_SUB: 0.0358, ENTRY_SUPER: 0.0233, EXIT_SMALL: 0.0078, ENTRY_SUB: 0.0029, ENTRY_SMALL: 0.0019}
+  sha256: "c4628ddbe060816ce870dfa452ed6469c384bac4b7c6f0ab3df8db7770d89ca7"
+  # the file this replaced, so v7.1 and v7.2 can still be traced by hash
+  previous_sha256: "c601cf5fe1440abd866a9ae76d02df651fc4031669191443ba1d395985042e1e"
 
 L3:
   file: L3.csv
-  note: "SIX classes, NOT seven -- ENTRY_SMALL and EXIT_SMALL are merged into one SMALL class (28,800 = 10,665 + 18,135). everything else matches L1 exactly. the trainer's class count and CLASS_WEIGHTS both change with this one, so do not mix it with L1/L2 runs."
+  # REPLACED 2026-08-19 -- same tightening as L1 and L2. NO_TRADE 74.5% -> 87.0%.
+  # NOTHING was ever built on the old file, so there is no version to re-read.
+  note: "SIX classes, NOT seven -- ENTRY_SMALL and EXIT_SMALL are merged into one SMALL class.
+    everything else matches L1. TIGHTENED 2026-08-19: NO_TRADE 87.0%. the trainer's class count,
+    CLASS_WEIGHTS and the severity file all change with this one, so do not mix it with L1/L2 runs."
   rows: 1021847
   n_classes: 6
   span: ["2015-01-09 09:15:00", "2026-02-24 15:29:00"]
   # NO_TRADE carries real weight, not 0 -- a zero-weight class contributes nothing to the loss and
   # the model could never learn to stay out of the market.
-  no_trade_weight: 0.0638
-  class_share: {NO_TRADE: 0.7454, EXIT_SUPER: 0.1209, EXIT_SUB: 0.0642, ENTRY_SUPER: 0.0336, SMALL: 0.0282, ENTRY_SUB: 0.0077}
-  sha256: "cc53968ddcef79cfe9dfea62aa43dcd68ee5468251ea0a0fcd79b349fd615860"
+  no_trade_weight: 0.0689
+  class_share: {NO_TRADE: 0.8695, EXIT_SUPER: 0.0622, EXIT_SUB: 0.0358, ENTRY_SUPER: 0.0205, SMALL: 0.0095, ENTRY_SUB: 0.0025}
+  sha256: "c15e2c1829bb93a6f6311ce9f5ce795b81e6d2de45e2154f33916f96689b8435"
+  previous_sha256: "cc53968ddcef79cfe9dfea62aa43dcd68ee5468251ea0a0fcd79b349fd615860"
