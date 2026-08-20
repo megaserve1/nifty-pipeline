@@ -90,7 +90,13 @@ def labels_name() -> str:
 #                 minutes apart while the features look back 20 sessions. that is the open risk.
 # chosen 2026-07-31 on the forward hold-out: macro_f1 0.139 vs time's 0.135, and NO inflation
 # (dev 0.115 < forward 0.139; a leaking split shows the opposite). scripts/forward_holdout_test.py
-SPLIT_STRATEGY = "bundle_random"
+# =============================================================================
+# !! TEMPORARY -- ONE-OFF 6-CLASS RUN FOR A TEAMMATE, set 2026-08-19 !!
+# NO_TRADE is dropped, the split is chronological, and the weights below are HIS, not ours.
+# REVERT BEFORE THE NEXT v11/v12 RUN:   git checkout config.py
+# (or restore config.py.v11_backup, which is the settings v11 actually trained under)
+# =============================================================================
+SPLIT_STRATEGY = "bundle_time"   # was "bundle_random" -- see banner above
 BUNDLE_MINUTES = 15        # one bundle = one candle. only used by bundle_random.
 SPLIT_SEED     = 42        # recorded in the model bundle: a different seed = a DIFFERENT split.
 
@@ -322,7 +328,7 @@ LABEL_HORIZON_SESSIONS = 1
 SESSION_ANCHOR_MINUTES = 9 * 60 + 15     # 555
 
 # The severity matrix: what each kind of mistake actually COSTS in trading terms.
-SEVERITY_FILE = CONFIGS_DIR / "severity_7class.json"
+SEVERITY_FILE = CONFIGS_DIR / "severity_6class.json"   # was 7class -- see banner
 
 
 # =============================================================================
@@ -515,15 +521,21 @@ INDEX_COL       = "unique_index"
 # these weights leave NO_TRADE holding ~48% of the loss instead of 14%, so "sit out" stays worth
 # learning. only ENTRY_SUB and ENTRY_SMALL still gain more by firing than they lose by being
 # wrong, and they are 0.3% and 0.2% of rows, which bounds the damage.
+# DROPPED ENTIRELY, not down-weighted. a zero-weight row still sits in the split and in every
+# count; a dropped one does not, so the class list, the encoder and the confusion matrix all
+# shrink together. train.py applies this before the weights and before the split.
+DROP_CLASSES = ["NO_TRADE"]
+
+# SIX classes. supplied by the teammate for this run -- not derived from the class shares the way
+# the 7-class set was, so the usual "does this match the label set" check will report a drift and
+# that is expected here.
 CLASS_WEIGHTS = {
-    "ENTRY_SUB":    55.03,   # rarest        (  2,324 rows,  0.3%)
-    "ENTRY_SMALL":  15.01,   #               (  1,563 rows,  0.2%)
-    "EXIT_SMALL":    4.77,   #               (  7,268 rows,  0.8%)
-    "ENTRY_SUPER":   16.99,   #               ( 19,031 rows,  2.1%)
-    "EXIT_SUB":      3.13,   #               ( 33,856 rows,  3.7%)
-    "EXIT_SUPER":    4.01,   #               ( 56,439 rows,  6.2%)
-    "NO_TRADE":      0.10,   # most common   (794,866 rows, 86.8%)
-                              # ^ STAYS DECIMAL ON PURPOSE (see above).
+    "EXIT_SUPER":   0.59,
+    "EXIT_SUB":     0.78,
+    "ENTRY_SUPER":  1.03,
+    "EXIT_SMALL":   1.67,
+    "ENTRY_SUB":    2.96,
+    "ENTRY_SMALL":  3.62,
 }
 
 # ---- what a feature's NaN MEANS ------------------------------------------------

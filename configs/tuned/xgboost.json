@@ -1,21 +1,15 @@
 {
   "model_type": "xgboost",
-  "source": "uploaded params_prateek.yaml",
-  "applied_by": "ui",
+  "from_dataset": "7.4",
+  "dataset_sha256": "SET-BY-HAND-FOR-A-ONE-OFF-6-CLASS-RUN",
   "params": {
-    "n_estimators": 6000,
     "learning_rate": 0.02,
-    "max_depth": 7,
-    "min_child_weight": 50,
-    "reg_lambda": 10.0,
-    "reg_alpha": 0.5,
-    "gamma": 2.0,
-    "colsample_bytree": 0.8,
-    "subsample": 0.8,
-    "max_delta_step": 3,
-    "tree_method": "hist",
-    "max_bin": 128,
-    "seed": 42,
-    "early_stopping_rounds": 0
-  }
+    "subsample": 1.0,
+    "reg_lambda": 50.0,
+    "reg_alpha": 4.0,
+    "gamma": 1.0,
+    "max_leaves": 128,
+    "min_child_weight": 50
+  },
+  "_note": "v7.4's WINNING PARAMS, restored by hand on 2026-08-19 for the teammate's 6-class run. v11's winners are saved beside this as xgboost.v11_backup.json -- restore that file before the next v11/v12 run or the wrong parameters ship."
 }

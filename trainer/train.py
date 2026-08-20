@@ -628,6 +628,25 @@ def main():
     feat_cols = man["feature_columns"] if man else [c for c in df.columns if "__" in c]
     cat_cols = (man or {}).get("categorical_columns", [])
     y_raw = df[C.LABEL_COL].astype(str).str.strip()   # 6 of 7 raw labels carry a trailing space
+
+    # ---- DROP CLASSES, if config says to -------------------------------------
+    # removes those rows ENTIRELY -- they are not reweighted to zero, they are gone. a zero-weight
+    # row still sits in the split and in every count; a dropped one does not, so the class list,
+    # the label encoder and the confusion matrix all shrink together and nothing downstream has to
+    # know. done HERE, before the weights and before the split, so the fractions are taken on what
+    # actually trains.
+    _drop = [c for c in (getattr(C, "DROP_CLASSES", None) or [])]
+    if _drop:
+        _keep = ~y_raw.isin(_drop)
+        _before, _cls = len(df), sorted(y_raw.unique())
+        df = df[_keep.to_numpy()].reset_index(drop=True)
+        y_raw = y_raw[_keep].reset_index(drop=True)
+        print(f"      DROP_CLASSES {_drop}: {_before:,} rows -> {len(df):,} "
+              f"({(1-len(df)/_before)*100:.1f}% removed)")
+        print(f"      classes {len(_cls)} -> {len(sorted(y_raw.unique()))}: {sorted(y_raw.unique())}")
+        if df.empty:
+            raise SystemExit(f"DROP_CLASSES {_drop} removed every row.")
+        task.add_tags([f"dropped_{c}" for c in _drop])
     # THE ROW WEIGHTS. two sources, config decides which:
     #   config.CLASS_WEIGHTS set -> a fixed weight per CLASS, mapped BY NAME (never by class index:
     #                               LabelEncoder sorts alphabetically, so an index-keyed dict would

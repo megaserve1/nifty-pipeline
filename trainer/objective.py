@@ -103,6 +103,96 @@ def bundle_random_split(ts: pd.Series, val_fraction: float, test_fraction: float
     return train, val, test, info
 
 
+def bundle_time_split(ts: pd.Series, val_fraction: float, test_fraction: float,
+                      bundle_minutes: int, embargo_sessions: int):
+    """BUNDLES, BUT IN TIME ORDER -- the middle ground between the other two.
+
+    bundle_random keeps whole candles together but scatters them, so a test minute can sit two
+    minutes from a training minute and no embargo is possible. the plain time split has a clean
+    forward cut but slices through candles at the boundary.
+
+    this takes bundle_random's candles and assigns them CHRONOLOGICALLY: oldest bundles train,
+    then val, then the newest test. no candle is split, the cut is forward-only, and an embargo
+    becomes possible again -- which it is not under random assignment.
+
+    THE EMBARGO IS IN TRADING SESSIONS, NOT CALENDAR DAYS. it drops the last N sessions before
+    each boundary, because the features look back 20 sessions and a row inside that window has
+    already seen part of the next slice.
+    """
+    import numpy as np
+
+    ts = pd.to_datetime(ts)
+    if not 0 < test_fraction < 1:
+        raise ValueError("test_fraction must be between 0 and 1")
+    if not 0 <= val_fraction < 1:
+        raise ValueError("val_fraction must be 0 (off) or between 0 and 1")
+
+    bundle = ts.dt.floor(f"{bundle_minutes}min")
+    keys = pd.Index(bundle.unique()).sort_values()          # CHRONOLOGICAL, not shuffled
+    n = len(keys)
+    n_test = int(round(n * test_fraction))
+    n_val = int(round(n * val_fraction))
+    if n_test == 0 or (val_fraction and n_val == 0):
+        raise ValueError(f"only {n} bundles -- val_fraction={val_fraction} "
+                         f"test_fraction={test_fraction} rounds a slice to zero")
+
+    test_keys = set(keys[n - n_test:])
+    val_keys = set(keys[n - n_test - n_val: n - n_test]) if n_val else set()
+    test = bundle.isin(test_keys)
+    val = bundle.isin(val_keys)
+    train = ~test & ~val
+
+    day = ts.dt.normalize()
+
+    def embargo_before(mask, boundary):
+        """drop the last `embargo_sessions` trading sessions of `mask` before `boundary`."""
+        if embargo_sessions <= 0 or boundary is None:
+            return mask, 0
+        days = sorted(day[mask & (ts < boundary)].unique())
+        if len(days) <= embargo_sessions:
+            return mask, 0
+        cut = days[-embargo_sessions]
+        keep = mask & (day < cut)
+        return keep, int((mask & ~keep).sum())
+
+    n_emb = 0
+    if n_val:
+        val_start = ts[val].min()
+        train, d1 = embargo_before(train, val_start)
+        test_start = ts[test].min()
+        val, d2 = embargo_before(val, test_start)
+        n_emb = d1 + d2
+    else:
+        test_start = ts[test].min()
+        train, n_emb = embargo_before(train, test_start)
+
+    for name, m in (("train", train), ("test", test)) + ((("val", val),) if val_fraction else ()):
+        if int(m.sum()) == 0:
+            raise ValueError(f"the {name} slice is EMPTY -- {n:,} bundles, "
+                             f"val_fraction={val_fraction} test_fraction={test_fraction}, "
+                             f"embargo {embargo_sessions} sessions")
+    overlap = int((train & val).sum() + (val & test).sum() + (train & test).sum())
+    if overlap:
+        raise AssertionError(f"{overlap} rows are in two slices at once -- that is a leak")
+
+    info = {
+        "strategy": "bundle_time",
+        "bundle_minutes": bundle_minutes,
+        "seed": None,
+        "n_bundles": int(n),
+        "embargo_sessions": int(embargo_sessions),
+        "embargo_note": "sessions dropped before each boundary; possible here, unlike bundle_random",
+        "n_train": int(train.sum()), "n_val": int(val.sum()), "n_test": int(test.sum()),
+        "n_embargoed": int(n_emb),
+        "train_end": str(ts[train].max()),
+        "val_start": str(ts[val].min()) if int(val.sum()) else None,
+        "val_end": str(ts[val].max()) if int(val.sum()) else None,
+        "test_start": str(ts[test].min()),
+        "val_enabled": bool(int(val.sum())),
+    }
+    return train, val, test, info
+
+
 def three_way_split(ts: pd.Series, val_fraction: float, test_fraction: float,
                     embargo_sessions: int, strategy: str = None,
                     bundle_minutes: int = None, seed: int = None):
@@ -124,8 +214,14 @@ def three_way_split(ts: pd.Series, val_fraction: float, test_fraction: float,
             ts, val_fraction, test_fraction,
             bundle_minutes=bundle_minutes or getattr(_C, "BUNDLE_MINUTES", 15),
             seed=seed if seed is not None else getattr(_C, "SPLIT_SEED", 42))
+    if strategy == "bundle_time":
+        return bundle_time_split(
+            ts, val_fraction, test_fraction,
+            bundle_minutes=bundle_minutes or getattr(_C, "BUNDLE_MINUTES", 15),
+            embargo_sessions=embargo_sessions)
     if strategy != "time":
-        raise ValueError(f"unknown SPLIT_STRATEGY {strategy!r} -- use 'time' or 'bundle_random'")
+        raise ValueError(f"unknown SPLIT_STRATEGY {strategy!r} -- use 'time', "
+                         f"'bundle_random' or 'bundle_time'")
 
     if not 0 < test_fraction < 1:
         raise ValueError("test_fraction must be between 0 and 1")
