@@ -328,7 +328,7 @@ LABEL_HORIZON_SESSIONS = 1
 SESSION_ANCHOR_MINUTES = 9 * 60 + 15     # 555
 
 # The severity matrix: what each kind of mistake actually COSTS in trading terms.
-SEVERITY_FILE = CONFIGS_DIR / "severity_6class.json"   # was 7class -- see banner
+SEVERITY_FILE = CONFIGS_DIR / "severity_7class.json"
 
 
 # =============================================================================
@@ -524,18 +524,19 @@ INDEX_COL       = "unique_index"
 # DROPPED ENTIRELY, not down-weighted. a zero-weight row still sits in the split and in every
 # count; a dropped one does not, so the class list, the encoder and the confusion matrix all
 # shrink together. train.py applies this before the weights and before the split.
-DROP_CLASSES = ["NO_TRADE"]
+#DROP_CLASSES = ["NO_TRADE"]
 
 # SIX classes. supplied by the teammate for this run -- not derived from the class shares the way
 # the 7-class set was, so the usual "does this match the label set" check will report a drift and
 # that is expected here.
 CLASS_WEIGHTS = {
-    "EXIT_SUPER":   0.59,
-    "EXIT_SUB":     0.78,
-    "ENTRY_SUPER":  1.03,
-    "EXIT_SMALL":   1.67,
-    "ENTRY_SUB":    2.96,
-    "ENTRY_SMALL":  3.62,
+    "NO_TRADE":     0.40,
+    "EXIT_SUPER":   1.52,
+    "EXIT_SUB":     2.00,
+    "ENTRY_SUPER":  2.64,
+    "EXIT_SMALL":   4.27,
+    "ENTRY_SUB":    7.57,
+    "ENTRY_SMALL":  9.28,
 }
 
 # ---- what a feature's NaN MEANS ------------------------------------------------
