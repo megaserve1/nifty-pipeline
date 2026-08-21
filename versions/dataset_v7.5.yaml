@@ -1,0 +1,51 @@
+# recipe written by hand -- the CLI's --drop removes a whole SOURCE, not columns, and v7's
+# recipe names one source (v7_train). same schema the selection UI writes.
+#
+# v7 minus 5 columns, chosen 2026-08-21:
+#     candle_pattern_live_label
+#     candle_pattern_vote_sum
+#     flow_state_acc_share60
+#     level_proximity_res_state
+#     vol_level_vol_level_pct60d_ord
+#
+# THE LABEL IS THE POINT OF THIS VERSION. v7 was built on the OLD L1 (sha 2261cc74...).
+# L1 was replaced on 2026-08-08 and today's file is 14d620a6... -- the one v7.4, v10 and v11
+# used. so v7.5 is v7's feature idea re-cut on the CURRENT labels. read labels_sha256 in the
+# manifest, never the handle: both say 'L1' and they are different files.
+name: dataset_v7.5
+kind: variation
+parent: v7
+created: '2026-08-21T17:27:01'
+author: megaserve
+selected_by: manual (drop 5 from v7)
+labels_name: L1
+date_range: full
+features:
+- v7_train
+feature_clocks: {}
+columns:
+- bar_conviction_bar_conviction
+- breakout_state_breakout_state
+- flow_state_bucket_buy_footprints
+- flow_state_bucket_sell_footprints
+- flow_state_is_distribution
+- flow_state_Flow_State_Label
+- gap_state_gap_state
+- intraday_positioning_Intraday_Positioning
+- level_proximity_sup_state
+- level_proximity_range_state
+- momentum_state_state
+- pullback_severity_pullback_severity
+- stress_signal_label_combined
+- smc_structure_smc_state
+- structural_position_structural_position_120m
+- structural_position_structural_position_60m
+- structural_position_structural_position_1d
+- trend_direction_trend_direction
+- trend_maturity_maturity_name
+- volume_quality_Volume_Quality
+- vwap_microstructure_vwap_microstructure
+- vol_level_vol_level_ord
+- fade_risk_fade_risk
+- nifty_context_features__Expiry_Flag
+- dc_pos_275_bucket_features__dc_pos_275_bucket

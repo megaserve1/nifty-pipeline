@@ -305,7 +305,9 @@ VAL_FRACTION  = 0.15
 # The gap thrown away between two slices. a row just before a cut and one just after share almost
 # all of their rolling-window history -- near-duplicates. without a gap the later slice is partly
 # a copy of the earlier one and the score is flattered. must be >= the longest feature lookback.
-EMBARGO_SESSIONS = 25    # >= the longest feature lookback (20 sessions) + 5 sessions of margin
+EMBARGO_SESSIONS = 15    # set 2026-08-21 by decision (was 25). NOTE: this is TRADING SESSIONS,
+                         # not bundles. the "longest feature lookback is 20 sessions" note above is
+                         # a comment, never measured -- no source declares a lookback in registry.yaml.
 
 # The label's own horizon: how far FORWARD a label at time t has to look before it knows its
 # own answer. It sets the purge on the OTHER side -- the last training rows must not have
@@ -530,13 +532,13 @@ INDEX_COL       = "unique_index"
 # the 7-class set was, so the usual "does this match the label set" check will report a drift and
 # that is expected here.
 CLASS_WEIGHTS = {
-    "NO_TRADE":     0.40,
-    "EXIT_SUPER":   1.52,
-    "EXIT_SUB":     2.00,
-    "ENTRY_SUPER":  2.64,
-    "EXIT_SMALL":   4.27,
-    "ENTRY_SUB":    7.57,
-    "ENTRY_SMALL":  9.28,
+    "NO_TRADE":     1,
+    "EXIT_SUPER":   1,
+    "EXIT_SUB":     1,
+    "ENTRY_SUPER":  1,
+    "EXIT_SMALL":   1,
+    "ENTRY_SUB":    1,
+    "ENTRY_SMALL":  1,
 }
 
 # ---- what a feature's NaN MEANS ------------------------------------------------
