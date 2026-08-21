@@ -468,7 +468,8 @@ def free_agents(queue_name: str) -> int:
 
 
 def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo: bool = False,
-             trials: int = 15, queue: str = None, concurrent: int = 0) -> None:
+             trials: int = 15, queue: str = None, concurrent: int = 0,
+             job_minutes: float = 0, total_minutes: float = 0) -> None:
     """for each model: search hyperparameters, then promote the winner. THE CACHE LIVES HERE.
 
     it calls trainer/hpo.py and trainer/apply_hpo.py as SUBPROCESSES -- the exact commands you
@@ -511,6 +512,14 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
                             # publish knows how many agents are listening; passing it means the
                             # search finishes in wall-clock/agents instead of wall-clock.
                             "--concurrent", str(conc),
+                            # THE TWO TIME LIMITS. publish used to pass NEITHER, so hpo.py's own
+                            # defaults applied: time_limit_per_job=90 min (a slower dataset has
+                            # its trials KILLED mid-run) and no overall budget at all (the search
+                            # runs until every trial finishes, whatever that costs in wall clock).
+                            # on 23 features a trial took ~5 min and neither mattered. on 403 it
+                            # does. 0 keeps hpo.py's default.
+                            *(["--job_minutes", str(job_minutes)] if job_minutes else []),
+                            *(["--total_minutes", str(total_minutes)] if total_minutes else []),
                             "--queue", queue],       # or the trials ignore publish's --queue
                            cwd=str(C.ROOT))
         if r.returncode != 0 or not winner.exists():
@@ -528,7 +537,7 @@ def run_tune(models: list, dataset_id: str, version: str, parquet_sha256, re_hpo
 
 def publish(version: str, models: list, do_train: bool = True,
             tune: bool = False, re_hpo: bool = False, hpo_trials: int = 15,
-            hpo_concurrent: int = 0,
+            hpo_concurrent: int = 0, hpo_job_minutes: float = 0, hpo_total_minutes: float = 0,
             queue: str = None, no_champion: bool = False) -> str:
     queue = queue or C.TRAIN_QUEUE
     from clearml import Dataset
@@ -715,7 +724,8 @@ def publish(version: str, models: list, do_train: bool = True,
     # publishing the same dataset does NOT burn hours re-searching.
     if tune:
         run_tune(models, ds_id, version, man.get("parquet_sha256"), queue=queue, re_hpo=re_hpo,
-                 trials=hpo_trials, concurrent=hpo_concurrent)
+                 trials=hpo_trials, concurrent=hpo_concurrent,
+                 job_minutes=hpo_job_minutes, total_minutes=hpo_total_minutes)
 
     # ---- 5. train ------------------------------------------------------------
     if not do_train:
@@ -755,6 +765,16 @@ def main():
                          "unchanged.")
     ap.add_argument("--hpo-trials", type=int, default=15,
                     help="with --tune: trials per model (default 15).")
+    ap.add_argument("--hpo-job-minutes", type=float, default=0,
+                    help="with --tune: kill any single trial that runs longer than this. "
+                         "hpo.py defaults to 90, which is too tight for a wide dataset -- a "
+                         "403-feature trial can exceed it and be killed mid-run. 0 = leave the "
+                         "default.")
+    ap.add_argument("--hpo-total-minutes", type=float, default=0,
+                    help="with --tune: stop the WHOLE search after this long and promote the best "
+                         "found so far. this is how you fit a search into a deadline: set the "
+                         "trial count high and let time be the real bound. 0 = no limit (the "
+                         "search runs until every trial is done).")
     ap.add_argument("--hpo-concurrent", type=int, default=0,
                     help="with --tune: trials in flight at once. 0 = match the number of agents "
                          "listening on the queue. never set it higher than that -- the extra "
@@ -788,7 +808,8 @@ def main():
         return
     publish(a.version, models, do_train=not a.no_train,
             tune=a.tune, re_hpo=a.re_hpo, hpo_trials=a.hpo_trials,
-            hpo_concurrent=a.hpo_concurrent, queue=a.queue,
+            hpo_concurrent=a.hpo_concurrent, hpo_job_minutes=a.hpo_job_minutes,
+            hpo_total_minutes=a.hpo_total_minutes, queue=a.queue,
             no_champion=a.no_champion)
 
 
